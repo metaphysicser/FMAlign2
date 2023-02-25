@@ -22,21 +22,40 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <iostream>
+#include <string>
 #include <vector>
 
-// Considering that the concatenated input sequence can be too long and to save memory
+#ifndef M64
+	#define M64 0
+#endif
+// Considering that the concatenated input sequence can be too long and to save memory.
 // different data types are defined through conditional compilation for different sizes of data.
-typedef unsigned int joined_data_type;
+// if data is larger than 2GB, M64 should be selected.
+#if M64
+	typedef int64_t	int_t;
+	typedef uint64_t uint_t;
+	#define U_MAX	UINT64_MAX
+	#define I_MAX	INT64_MAX
+	#define I_MIN	INT64_MIN
+#else
+	typedef int32_t int_t;
+	typedef uint32_t uint_t;
+	#define U_MAX	UINT32_MAX
+	#define I_MAX	INT32_MAX
+	#define I_MIN	INT32_MIN
+#endif
 
-// This is the default value of mem minimum length and sequence count min proportion
-// The actual value used depends on user input
-unsigned int mem_minimum_length = 39;
-float sequence_count_min_proportion = 0.5;
+struct sub_string{
+    uint_t sequence_index; // the sequence index that substring in
+    uint_t position; // the begin position in the seqence
+};
 
-// To store large string data more efficiently in memory, choose vector<char> instead of string.
-std::vector<std::vector<char>> data;
+struct mem{
+    uint_t mem_lengh; // substring length
+    std::vector<sub_string> substrings; // the substring set
 
-// Intermediate files are stored in the tmp folder
-const char* tmp_path = "tmp/";
-
+};
 #endif

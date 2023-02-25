@@ -16,22 +16,21 @@
 
 // Author: Pinglu Zhang
 // Contact: zpl010720@gmail.com
-// Created: 2023-02-24
+// Created: 2023-02-25
 
-// This header file defines utility functions for reading and outputting data and so on.
-// These utility functions are designed to be reusable across different parts of the project and can be easily included in other source files.
-#ifndef UTILS_H
-#define UTILS_H
+// The main function is the entry point of the program. It is where the program starts executing. 
+// the program starts executing. 
+#include "include/common.h"
+#include "include/utils.h"
+#include "include/mem_finder.h"
+#include "include/mem_filter.h"
+#include "include/sequence_split_align.h"
 
-#include "common.h"
-#include "kseq.h"
-
-/**
- * @brief: read fasta and fastq format data
- * @param data_path   the path to the target data
- * @return multiple sequence stored in vector 
-*/
-std::vector<std::string> read_data(const char* data_path);
-
-
-#endif
+const char* data_path = "data/mt1x.fasta";
+int main() {
+    std::vector<std::string> data = read_data(data_path);
+    std::vector<mem> mems = find_mem(data);
+    std::vector<mem> filtered_mems = filter_mem(mems);
+    split_sequence(data, filtered_mems);
+    return 0;
+}

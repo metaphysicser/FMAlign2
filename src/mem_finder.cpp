@@ -16,22 +16,12 @@
 
 // Author: Pinglu Zhang
 // Contact: zpl010720@gmail.com
-// Created: 2023-02-24
+// Created: 2023-02-25
 
-// This header file defines utility functions for reading and outputting data and so on.
-// These utility functions are designed to be reusable across different parts of the project and can be easily included in other source files.
-#ifndef UTILS_H
-#define UTILS_H
+#include "../include/mem_finder.h"
 
-#include "common.h"
-#include "kseq.h"
+std::vector<mem> find_mem(std::vector<std::string> data){
+    std::vector<mem> mems;
+    return mems;
+}
 
-/**
- * @brief: read fasta and fastq format data
- * @param data_path   the path to the target data
- * @return multiple sequence stored in vector 
-*/
-std::vector<std::string> read_data(const char* data_path);
-
-
-#endif
