@@ -28,7 +28,9 @@
 
 const char* data_path = "data/mt1x.fasta";
 int main() {
-    std::vector<std::string> data = read_data(data_path);
+    std::vector<std::string> data;
+    std::vector<std::string> name;
+    read_data(data_path, data, name);
     std::vector<mem> mems = find_mem(data);
     std::vector<mem> filtered_mems = filter_mem(mems);
     split_sequence(data, filtered_mems);

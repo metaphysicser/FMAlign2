@@ -25,13 +25,30 @@
 
 #include "common.h"
 #include "kseq.h"
+#include <fstream>
+#include <iomanip>  
+#include <math.h>
+#if (defined(__linux__) || defined(__APPLE__))
+#include <unistd.h>
+#else
+#include <io.h>
+#include <process.h>
+#endif
 
 /**
  * @brief: read fasta and fastq format data
  * @param data_path   the path to the target data
+ * @param data store sequence content
+ * @param name store sequence name
  * @return multiple sequence stored in vector 
 */
-std::vector<std::string> read_data(const char* data_path);
+void read_data(const char* data_path, std::vector<std::string>& data, std::vector<std::string>& name);
 
+/**
+ * @brief: Check whether the file exists in the specified path.
+ * @param data_path   The file path to check.
+ * @return Returns true if the file exists, otherwise false.
+*/
+bool access_file(const char* data_path);
 
 #endif

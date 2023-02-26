@@ -30,6 +30,8 @@
 
 #ifndef M64
 	#define M64 0
+#else
+	#define M64 1
 #endif
 // Considering that the concatenated input sequence can be too long and to save memory.
 // different data types are defined through conditional compilation for different sizes of data.
@@ -46,6 +48,14 @@
 	#define U_MAX	UINT32_MAX
 	#define I_MAX	INT32_MAX
 	#define I_MIN	INT32_MIN
+#endif
+
+#ifdef DEBUG
+#define DEBUG 0
+#define DEBUG_PRINT(msg) std::cerr << "DEBUG: " << msg << std::endl
+#else
+#define DEBUG 1
+#define DEBUG_PRINT(msg)
 #endif
 
 struct sub_string{
