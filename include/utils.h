@@ -26,7 +26,8 @@
 #include "common.h"
 #include "kseq.h"
 #include <fstream>
-#include <iomanip>  
+#include <iomanip> 
+#include <chrono> 
 #include <math.h>
 #if (defined(__linux__) || defined(__APPLE__))
 #include <unistd.h>
@@ -34,6 +35,22 @@
 #include <io.h>
 #include <process.h>
 #endif
+
+/**
+ * @brief A timer class that measures elapsed time. 
+ * This class uses C++11 chrono library to measure elapsed time in seconds with double precision. 
+ * The timer starts at construction and can be reset to zero by calling reset(). 
+ * The elapsed time can be obtained by calling elapsed_time() method. 
+ * The timer is based on std::chrono::steady_clock, which is a monotonic clock that is not subject to system clock adjustments.
+*/
+class Timer{
+public:
+    Timer();
+    void reset();
+    double elapsed_time() const;
+private:
+    std::chrono::time_point<std::chrono::steady_clock> start_time_;
+};
 
 /**
  * @brief: read fasta and fastq format data

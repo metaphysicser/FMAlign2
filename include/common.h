@@ -51,10 +51,8 @@
 #endif
 
 #ifdef DEBUG
-#define DEBUG 0
 #define DEBUG_PRINT(msg) std::cerr << "DEBUG: " << msg << std::endl
 #else
-#define DEBUG 1
 #define DEBUG_PRINT(msg)
 #endif
 

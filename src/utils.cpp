@@ -75,4 +75,15 @@ bool access_file(const char* data_path){
     return true;
 }
 
+Timer::Timer() {
+    start_time_ = std::chrono::steady_clock::now();
+}
+void Timer::reset() {
+    start_time_ = std::chrono::steady_clock::now();
+}
+
+double Timer::elapsed_time() const {
+    std::chrono::duration<double> elapsed = std::chrono::steady_clock::now() - start_time_;
+    return elapsed.count();
+}
 
