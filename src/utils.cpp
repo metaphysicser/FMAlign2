@@ -24,6 +24,25 @@
 KSEQ_INIT(int, read)
 
 /**
+ * @brief A timer class that measures elapsed time. 
+ * This class uses C++11 chrono library to measure elapsed time in seconds with double precision. 
+ * The timer starts at construction and can be reset to zero by calling reset(). 
+ * The elapsed time can be obtained by calling elapsed_time() method. 
+ * The timer is based on std::chrono::steady_clock, which is a monotonic clock that is not subject to system clock adjustments.
+*/
+Timer::Timer() {
+    start_time_ = std::chrono::steady_clock::now();
+}
+void Timer::reset() {
+    start_time_ = std::chrono::steady_clock::now();
+}
+
+double Timer::elapsed_time() const {
+    std::chrono::duration<double> elapsed = std::chrono::steady_clock::now() - start_time_;
+    return elapsed.count();
+}
+
+/**
  * @brief: read fasta and fastq format data
  * @param data_path   the path to the target data
  * @param data store sequence content
@@ -44,7 +63,7 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
     uint32_t bytes_of_sequence = 0;
     while (kseq_read(file_t) >= 0) // Read one sequence in each iteration of the loop
     {
-        std::string tmp_data = file_t -> seq.s;
+        std::string tmp_data = clean_sequence(file_t -> seq.s);
         std::string tmp_name = file_t -> name.s;
         data.push_back(tmp_data);
         name.push_back(tmp_name);
@@ -75,15 +94,22 @@ bool access_file(const char* data_path){
     return true;
 }
 
-Timer::Timer() {
-    start_time_ = std::chrono::steady_clock::now();
-}
-void Timer::reset() {
-    start_time_ = std::chrono::steady_clock::now();
-}
+/**
+ * @brief Cleans the input sequence by removing any non-ATCG characters. 
+ * This function removes any characters from the input sequence that are not A, T, C, or G (case-insensitive). 
+ * The cleaned sequence is then returned as a new string.
+ * @param sequence The input DNA sequence to be cleaned.
+ * @return The cleaned DNA sequence as a new string.
+*/
+std::string clean_sequence(std::string sequence){
+    // Convert lowercase nucleotides to uppercase
+    std::transform(sequence.begin(), sequence.end(), sequence.begin(), ::toupper);
 
-double Timer::elapsed_time() const {
-    std::chrono::duration<double> elapsed = std::chrono::steady_clock::now() - start_time_;
-    return elapsed.count();
+    // Remove any characters that are not A, C, G, or T
+    sequence.erase(std::remove_if(sequence.begin(), sequence.end(),
+                    [](char c) { return c != 'A' && c != 'C' && c != 'G' && c != 'T'; }),
+                    sequence.end());
+
+    return sequence;
 }
 

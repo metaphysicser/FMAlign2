@@ -29,6 +29,7 @@
 #include <iomanip> 
 #include <chrono> 
 #include <math.h>
+#include <algorithm>
 #if (defined(__linux__) || defined(__APPLE__))
 #include <unistd.h>
 #else
@@ -67,5 +68,14 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
  * @return Returns true if the file exists, otherwise false.
 */
 bool access_file(const char* data_path);
+
+/**
+ * @brief Cleans the input sequence by removing any non-ATCG characters. 
+ * This function removes any characters from the input sequence that are not A, T, C, or G (case-insensitive). 
+ * The cleaned sequence is then returned as a new string.
+ * @param sequence The input DNA sequence to be cleaned.
+ * @return The cleaned DNA sequence as a new string.
+*/
+std::string clean_sequence(std::string sequence);
 
 #endif

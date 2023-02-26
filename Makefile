@@ -3,6 +3,8 @@ CXXFLAGS = -Wall -std=c++11
 
 ifdef DEBUG
 	CXXFLAGS += -O0 -g -DDEBUG
+else
+	CXXFLAGS += -O3
 endif
 
 ifdef M64
