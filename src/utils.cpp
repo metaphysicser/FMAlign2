@@ -60,20 +60,28 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
 
     FILE* f_pointer = fopen(data_path, "r");
     kseq_t* file_t = kseq_init(fileno(f_pointer));
-    uint32_t bytes_of_sequence = 0;
-    while (kseq_read(file_t) >= 0) // Read one sequence in each iteration of the loop
+    
+    uint64_t merged_length = 0;
+    int64_t tmp_length = 0; 
+    // stop loop when tmp_length equals -1
+    while ((tmp_length = kseq_read(file_t)) >= 0) // Read one sequence in each iteration of the loop
     {
         std::string tmp_data = clean_sequence(file_t -> seq.s);
         std::string tmp_name = file_t -> name.s;
         data.push_back(tmp_data);
         name.push_back(tmp_name);
-        bytes_of_sequence += tmp_data.capacity();
+        merged_length += tmp_length;
     }
     kseq_destroy(file_t);
+
+    if(merged_length + data.size() > UINT32_MAX && M64 == 0){
+        std::cerr << "The input data is too large and the 32-bit program may not produce correct results. Please compile a 64-bit program using the M64 parameter." << std::endl;
+        exit(1);
+    }
     #if M64
-    std::cout << "The input data occupies approximately "<< std::fixed << std::setprecision(2) << bytes_of_sequence / pow(2, 30) <<" GB of memory" << std::endl;
+    std::cout << "The input data occupies approximately "<< std::fixed << std::setprecision(2) << merged_length / pow(2, 30) <<" GB of memory" << std::endl;
     #else
-    std::cout << "The input data occupies approximately "<< std::fixed << std::setprecision(2) << bytes_of_sequence / pow(2, 20) <<" MB of memory" << std::endl;
+    std::cout << "The input data occupies approximately "<< std::fixed << std::setprecision(2) << merged_length / pow(2, 20) <<" MB of memory" << std::endl;
     #endif
     std::cout << "the number of input sequences is " << data.size() << std::endl;
     return;
@@ -102,14 +110,23 @@ bool access_file(const char* data_path){
  * @return The cleaned DNA sequence as a new string.
 */
 std::string clean_sequence(std::string sequence){
-    // Convert lowercase nucleotides to uppercase
-    std::transform(sequence.begin(), sequence.end(), sequence.begin(), ::toupper);
-
-    // Remove any characters that are not A, C, G, or T
-    sequence.erase(std::remove_if(sequence.begin(), sequence.end(),
-                    [](char c) { return c != 'A' && c != 'C' && c != 'G' && c != 'T'; }),
-                    sequence.end());
-
-    return sequence;
+    std::string result;
+    result.reserve(sequence.size());
+    for (char& c : sequence) {
+        if (c == 'a' || c == 'A') {
+            c = 'A';
+            result.push_back(c);
+        } else if (c == 'c' || c == 'C') {
+            c = 'C';
+            result.push_back(c);
+        } else if (c == 'g' || c == 'G') {
+            c = 'G';
+            result.push_back(c);
+        } else if (c == 't' || c == 'T') {
+            c = 'T';
+            result.push_back(c);
+        }
+    }
+    return result;
 }
 

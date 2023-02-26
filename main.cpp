@@ -26,7 +26,7 @@
 #include "include/mem_filter.h"
 #include "include/sequence_split_align.h"
 
-const char* data_path = "data/mt1x.fasta";
+const char* data_path = "data/mt100x.fasta";
 int main() {
     Timer timer;
     std::vector<std::string> data;
