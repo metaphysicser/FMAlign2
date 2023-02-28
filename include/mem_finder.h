@@ -22,7 +22,25 @@
 #define MEM_FINDER_H
 
 #include "common.h"
+#include "gsacak.h"
+#include <cstdint>
+#include <cstring>
+#include <numeric>
+// extern "C" {
+// #include "../src/gsacak.c"
+// }
+#include <sstream>
+#define DELIMITER '0'
 
 std::vector<mem> find_mem(std::vector<std::string> data);
+
+/**
+ * @brief Concatenates a vector of strings with separator 1 and a terminating 0.
+ * @param strings The vector of strings to concatenate.
+ * @param n A reference to the total length of the concatenated string.
+ * @return A pointer to the concatenated string.
+ * @note The returned string must be deleted by the caller.
+*/
+unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n);
 
 #endif

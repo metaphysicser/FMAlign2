@@ -30,8 +30,6 @@
 
 #ifndef M64
 	#define M64 0
-#else
-	#define M64 1
 #endif
 // Considering that the concatenated input sequence can be too long and to save memory.
 // different data types are defined through conditional compilation for different sizes of data.
@@ -50,11 +48,10 @@
 	#define I_MIN	INT32_MIN
 #endif
 
-#ifdef DEBUG
-#define DEBUG_PRINT(msg) std::cerr << "DEBUG: " << msg << std::endl
-#else
-#define DEBUG_PRINT(msg)
+#ifndef DEBUG
+  #define DEBUG 0
 #endif
+
 
 struct sub_string{
     uint_t sequence_index; // the sequence index that substring in
