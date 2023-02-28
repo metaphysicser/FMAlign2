@@ -25,7 +25,6 @@ std::vector<mem> find_mem(std::vector<std::string> data){
     unsigned char* concat_data = concat_strings(data, n); 
     
     uint_t *SA = NULL;
-    std::cout << U_MAX << std::endl;
     SA = (uint_t*) malloc(n*sizeof(uint_t));
     int_t *LCP = NULL;
     LCP = (int_t*) malloc(n*sizeof(int_t));
@@ -34,6 +33,10 @@ std::vector<mem> find_mem(std::vector<std::string> data){
 
     gsacak((unsigned char *)concat_data, (uint_t*)SA, LCP, DA, n);
 
+    int_t min_mem_length = 30;
+
+    std::vector<std::pair<uint_t, uint_t>> intervals = get_lcp_intervals(LCP, min_mem_length, n);
+    
     std::vector<mem> mems;
     return mems;
 }
@@ -71,4 +74,43 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
     return concat_data;
 
 }
+
+/**
+ * @brief an LCP (Longest Common Prefix) array and a threshold value,
+ * finds all the LCP intervals where each value is greater than or equal to the threshold value,
+ * and at least one value in the interval is equal to the threshold value.
+ * @param lcp_array The input LCP array
+ * @param threshold The threshold value
+ * @return  The output vector of pairs representing the LCP intervals
+*/
+std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t threshold, uint_t n) {
+
+    std::vector<std::pair<uint_t, uint_t>> intervals;
+
+    uint_t left = 0, right = 0;
+    bool found = false;
+
+    while (right < n) {
+        if (lcp_array[right] >= threshold) {
+            if (lcp_array[right] == threshold) {
+                found = true;
+            }
+
+            right++;
+        } else {
+            if (found) {
+                intervals.emplace_back(left, right);
+            }
+
+            left = right = right + 1;
+            found = false;
+        }
+    }
+
+    if (found) {
+        intervals.emplace_back(left, right);
+    }
+    return intervals;
+}
+
 

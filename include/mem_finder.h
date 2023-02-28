@@ -43,4 +43,14 @@ std::vector<mem> find_mem(std::vector<std::string> data);
 */
 unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n);
 
+/**
+ * @brief an LCP (Longest Common Prefix) array and a threshold value,
+ * finds all the LCP intervals where each value is greater than or equal to the threshold value,
+ * and at least one value in the interval is equal to the threshold value.
+ * @param lcp_array The input LCP array
+ * @param threshold The threshold value
+ * @return intervals The output vector of pairs representing the LCP intervals
+*/
+std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t threshold, uint_t n);
+
 #endif
