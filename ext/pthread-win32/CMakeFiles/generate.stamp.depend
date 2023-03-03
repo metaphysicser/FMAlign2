@@ -1,0 +1,33 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.25/Modules/BasicConfigVersion-AnyNewerVersion.cmake.in
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeCInformation.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeCXXInformation.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeCommonLanguageInclude.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeGenericSystem.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeInitializeConfigs.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeLanguageInformation.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakePackageConfigHelpers.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeRCInformation.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeSystemSpecificInformation.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/CMakeSystemSpecificInitialize.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Compiler/CMakeCommonCompilerMacros.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Compiler/MSVC-C.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Compiler/MSVC-CXX.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Compiler/MSVC.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/GNUInstallDirs.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Platform/Windows-MSVC-C.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Platform/Windows-MSVC-CXX.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Platform/Windows-MSVC.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Platform/Windows.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/Platform/WindowsPaths.cmake
+C:/Program Files/CMake/share/cmake-3.25/Modules/WriteBasicConfigVersionFile.cmake
+F:/vs_code/code/FMAlign2/ext/pthread-win32/CMakeFiles/3.25.2/CMakeCCompiler.cmake
+F:/vs_code/code/FMAlign2/ext/pthread-win32/CMakeFiles/3.25.2/CMakeCXXCompiler.cmake
+F:/vs_code/code/FMAlign2/ext/pthread-win32/CMakeFiles/3.25.2/CMakeRCCompiler.cmake
+F:/vs_code/code/FMAlign2/ext/pthread-win32/CMakeFiles/3.25.2/CMakeSystem.cmake
+F:/vs_code/code/FMAlign2/ext/pthread-win32/CMakeLists.txt
+F:/vs_code/code/FMAlign2/ext/pthread-win32/cmake/get_version.cmake
+F:/vs_code/code/FMAlign2/ext/pthread-win32/cmake/target_arch.cmake
+F:/vs_code/code/FMAlign2/ext/pthread-win32/cmake/version.rc.in
+F:/vs_code/code/FMAlign2/ext/pthread-win32/pthreads4w-config.cmake.in
+F:/vs_code/code/FMAlign2/ext/pthread-win32/target_arch_detect.c
