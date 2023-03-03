@@ -25,6 +25,10 @@
 
 /******************************************************************************/
 
+#ifdef __cplusplus
+extern "C" {
+#endif //__cplusplus
+
 #ifndef GSACAK_H
 #define GSACAK_H
 
@@ -121,4 +125,8 @@ int_t gSACA_K_LCP_DA(uint_t *s, uint_t *SA, int_t *LCP, int_da *DA,
   int cs, uint_t separator, int level);
 /******************************************************************************/
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

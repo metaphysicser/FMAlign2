@@ -26,11 +26,16 @@
 #include <cstdint>
 #include <cstring>
 #include <numeric>
-// extern "C" {
-// #include "../src/gsacak.c"
-// }
+#ifdef _OPENMP
+    #include <omp.h>
+#endif
 #include <sstream>
-#define DELIMITER '0'
+#include <fstream>
+#include <cmath>
+#include <algorithm>
+#include <vector>
+#include <unordered_map>
+
 
 std::vector<mem> find_mem(std::vector<std::string> data);
 

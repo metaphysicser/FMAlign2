@@ -1,8 +1,13 @@
 // vim: noai:ts=2:sw=2
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "../include/gsacak.h"
-
+// #if defined(max)
+// #undef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
+// #endif
 // set only the highest bit as 1, i.e. 1000...
 //const unsigned int EMPTY_k=((unsigned int)1)<<(sizeof(unsigned int)*8-1); 
 const uint_t EMPTY_k=((uint_t)1)<<(sizeof(uint_t)*8-1); 
@@ -2534,3 +2539,6 @@ int gsacak_int(int_text *s, uint_t *SA, int_t *LCP, int_da *DA, uint_t n, uint_t
 }
 
 /*****************************************************************************/
+#ifdef __cplusplus
+}
+#endif

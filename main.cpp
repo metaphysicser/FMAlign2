@@ -25,9 +25,26 @@
 #include "include/mem_finder.h"
 #include "include/mem_filter.h"
 #include "include/sequence_split_align.h"
+#include "include/thread_pool.h"
+
+#include <chrono>
+#include <thread>
 
 const char* data_path = "data/mt1x.fasta";
+void* task_func(void* arg) {
+    std::cout << "Task "  << " starts running." << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::cout << "Task " << " finished." << std::endl;
+    return 0;
+}
 int main() {
+    threadpool t;
+    threadpool_init(&t, 4);
+    for (int i = 0; i < 10; ++i) {
+        threadpool_add_task(&t, task_func, (void*)&i);
+    }
+    threadpool_destroy(&t);
+    std::cout << "all compkete" << std::endl;
     Timer timer;
     std::vector<std::string> data;
     std::vector<std::string> name;

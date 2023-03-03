@@ -20,6 +20,7 @@
 
 #include "../include/mem_finder.h"
 
+
 std::vector<mem> find_mem(std::vector<std::string> data){
     uint_t n = 0;
     unsigned char* concat_data = concat_strings(data, n); 
@@ -32,10 +33,12 @@ std::vector<mem> find_mem(std::vector<std::string> data){
     DA = (int32_t*) malloc(n*sizeof(int32_t));
 
     gsacak((unsigned char *)concat_data, (uint_t*)SA, LCP, DA, n);
-
+    
     int_t min_mem_length = 30;
 
+    
     std::vector<std::pair<uint_t, uint_t>> intervals = get_lcp_intervals(LCP, min_mem_length, n);
+    std::cout<< intervals.size() <<std::endl;
     
     std::vector<mem> mems;
     return mems;
@@ -111,6 +114,43 @@ std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t
         intervals.emplace_back(left, right);
     }
     return intervals;
+}
+
+void draw_lcp_curve(int_t *LCP, uint_t n){
+    std::ofstream outfile("tmp/lcp.bin", std::ios::out | std::ios::binary);
+    
+    // Write the number of elements in the array
+    outfile.write(reinterpret_cast<const char*>(&n), sizeof(n));
+
+    // Write the LCP array
+    outfile.write(reinterpret_cast<const char*>(LCP), n * sizeof(int_t));
+
+    outfile.close();
+
+    // corresponding python code
+    // import struct
+    // import numpy as np
+    // import matplotlib.pyplot as plt
+
+    // def read_lcp_array(filename):
+    //     with open(filename, "rb") as f:
+    //         # Read the number of elements in the array
+    //         n_bytes = f.read(4)
+    //         n = struct.unpack("I", n_bytes)[0]
+
+    //         # Read the LCP array
+    //         lcp_bytes = f.read(n * 4)
+    //         lcp_array = np.frombuffer(lcp_bytes, dtype=np.int32)
+
+    //         return lcp_array
+
+    // # Example usage
+    // lcp_array = read_lcp_array("tmp/lcp.bin")
+
+    // # Plot the LCP array histogram
+    // plt.hist(lcp_array, bins=100)
+    // plt.show()
+
 }
 
 
