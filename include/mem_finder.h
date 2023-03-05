@@ -23,6 +23,7 @@
 
 #include "common.h"
 #include "gsacak.h"
+#include "thread_pool.h"
 #include <cstdint>
 #include <cstring>
 #include <numeric>
@@ -36,6 +37,15 @@
 #include <vector>
 #include <unordered_map>
 
+struct IntervalToMemConversionParams {
+    const uint_t* SA;
+    const int_t* LCP;
+    const int32_t* DA;
+    const unsigned char* concat_data;
+    std::vector<mem>::iterator result_store;
+    int_t min_mem_length;
+    std::pair<uint_t, uint_t> interval;
+};
 
 std::vector<mem> find_mem(std::vector<std::string> data);
 
@@ -58,4 +68,6 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
 */
 std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t threshold, uint_t n);
 
+
+void* interval2mem(void* arg);
 #endif

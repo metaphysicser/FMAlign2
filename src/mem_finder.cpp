@@ -27,6 +27,7 @@ std::vector<mem> find_mem(std::vector<std::string> data){
     
     uint_t *SA = NULL;
     SA = (uint_t*) malloc(n*sizeof(uint_t));
+    // LCP[0] = 0, LCP[i] = lcp(concat_data[SA[i]], concat_data[SA[i-1]])
     int_t *LCP = NULL;
     LCP = (int_t*) malloc(n*sizeof(int_t));
     int32_t *DA = NULL;
@@ -34,13 +35,31 @@ std::vector<mem> find_mem(std::vector<std::string> data){
 
     gsacak((unsigned char *)concat_data, (uint_t*)SA, LCP, DA, n);
     
-    int_t min_mem_length = 30;
+    int_t min_mem_length = 2000;
 
     
     std::vector<std::pair<uint_t, uint_t>> intervals = get_lcp_intervals(LCP, min_mem_length, n);
-    std::cout<< intervals.size() <<std::endl;
-    
+    uint_t interval_size = intervals.size();
     std::vector<mem> mems;
+    mems.resize(interval_size);
+    uint_t threads = 8;
+
+    IntervalToMemConversionParams* params = new IntervalToMemConversionParams[interval_size];
+    threadpool pool;
+    threadpool_init(&pool, threads);
+    for (uint_t i = 0; i < interval_size; i++) {
+        params[i].SA = SA;
+        params[i].LCP = LCP;
+        params[i].DA = DA;
+        params[i].interval = intervals[i];
+        params[i].concat_data = concat_data;
+        params[i].result_store = mems.begin() + i;
+        params[i].min_mem_length = min_mem_length;
+
+        threadpool_add_task(&pool, interval2mem, params+i);
+    }
+    threadpool_destroy(&pool);
+
     return mems;
 }
 
@@ -151,6 +170,69 @@ void draw_lcp_curve(int_t *LCP, uint_t n){
     // plt.hist(lcp_array, bins=100)
     // plt.show()
 
+}
+
+void* interval2mem(void* arg) {
+    IntervalToMemConversionParams* ptr = static_cast<IntervalToMemConversionParams*>(arg);
+    const uint_t* SA = ptr->SA;
+    const int_t* LCP = ptr->LCP;
+    const int32_t* DA = ptr->DA;
+    const int_t min_mem_length = ptr->min_mem_length;
+    const unsigned char* concat_data = ptr->concat_data;
+    
+    std::pair<uint_t, uint_t> interval = ptr->interval;
+    mem result;
+    std::vector<sub_string> res_substrings;
+    result.mem_lengh = 0;
+    std::vector<uint_t> mem_position;
+
+    for (uint_t i = interval.first-1; i <= interval.second; i++) {
+        sub_string tmp_substring;
+        tmp_substring.position = SA[i];
+        mem_position.push_back(tmp_substring.position);
+        tmp_substring.sequence_index = DA[SA[i]];
+        result.substrings.push_back(tmp_substring);
+    }
+
+    uint_t offset = 1;
+    bool all_char_same = true;
+    while (true) {
+        char current_char = 0;
+        if (mem_position[0] >= offset) {
+            current_char = concat_data[mem_position[0] - offset];
+        }
+        else {
+            break;
+        }
+        all_char_same = true;
+        for (uint_t i = 1; i < mem_position.size(); i++) {
+            if (mem_position[i] < offset) {
+                all_char_same = false;
+                break;
+            }
+            else {
+                if (current_char != concat_data[mem_position[i] - offset]) {
+                    all_char_same = false;
+                    break;
+                }
+            }
+
+        }
+        if (all_char_same == false) {
+            break;
+        }
+        offset++;
+    }
+    offset -= 1;
+
+    result.mem_lengh = min_mem_length + offset;
+    for (uint_t i = 0; i < result.substrings.size(); i++) {
+        result.substrings[i].position -= offset;
+    }
+    *(ptr->result_store) = result;
+
+   
+    return NULL;
 }
 
 
