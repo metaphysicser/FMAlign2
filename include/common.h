@@ -56,11 +56,13 @@
 struct sub_string{
     int_t sequence_index; // the sequence index that substring in
     uint_t position; // the begin position in the seqence
+	uint_t* mem_index; // the unique index
 };
 
 struct mem{
     int_t mem_length; // substring length
+	uint_t* mem_index; // the unique index
+	float avg_pos = -1; // average position in sequences, initially set to -1
     std::vector<sub_string> substrings; // the substring set
-
 };
 #endif

@@ -44,8 +44,15 @@ struct IntervalToMemConversionParams {
     std::vector<mem>::iterator result_store;
     int_t min_mem_length;
     std::pair<uint_t, uint_t> interval;
+    std::vector<uint_t> joined_sequence_bound;
 };
 
+/**
+ * Find MEMs in a set of sequences.
+ *
+ * @param data A vector of strings representing the sequences.
+ * @return A vector of MEMs found in the sequences.
+ */
 std::vector<mem> find_mem(std::vector<std::string> data);
 
 /**
@@ -74,4 +81,13 @@ std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t
 *@return void* A void pointer to the result, which is stored in the input parameters structure.
 */
 void* interval2mem(void* arg);
+
+/**
+*Sorts the input vector of MEMs by the average position of each MEM's substrings along the sequences.
+*Removes any MEMs that span across multiple sequences.
+*Assigns a unique index to each MEM based on its position in the sorted vector.
+*@param mems The vector of MEMs to be sorted.
+*@param data The vector of sequences used to compute the MEMs.
+*/
+void sort_mem(std::vector<mem>& mems, std::vector<std::string> data);
 #endif

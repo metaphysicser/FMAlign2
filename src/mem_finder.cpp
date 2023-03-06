@@ -20,7 +20,12 @@
 
 #include "../include/mem_finder.h"
 
-
+/**
+ * Find MEMs in a set of sequences.
+ *
+ * @param data A vector of strings representing the sequences.
+ * @return A vector of MEMs found in the sequences.
+ */
 std::vector<mem> find_mem(std::vector<std::string> data){
     uint_t n = 0;
     unsigned char* concat_data = concat_strings(data, n); 
@@ -37,14 +42,19 @@ std::vector<mem> find_mem(std::vector<std::string> data){
     
     int_t min_mem_length = 1000;
     int_t min_cross_sequence = 336;
-
-    
+    std::vector<uint_t> joined_sequence_bound;
+    uint_t total_length = 0;
+    for (uint_t i = 0; i < data.size(); i++) {
+        joined_sequence_bound.push_back(total_length);
+        total_length += data[i].length() + 1;
+    }
+    // Find all intervals with an LCP >= min_mem_length and <= min_cross_sequence
     std::vector<std::pair<uint_t, uint_t>> intervals = get_lcp_intervals(LCP, min_mem_length, min_cross_sequence, n);
     uint_t interval_size = intervals.size();
     std::vector<mem> mems;
     mems.resize(interval_size);
     uint_t threads = 8;
-
+    // Convert each interval to a MEM in parallel
     IntervalToMemConversionParams* params = new IntervalToMemConversionParams[interval_size];
     threadpool pool;
     threadpool_init(&pool, threads);
@@ -55,10 +65,13 @@ std::vector<mem> find_mem(std::vector<std::string> data){
         params[i].concat_data = concat_data;
         params[i].result_store = mems.begin() + i;
         params[i].min_mem_length = min_mem_length;
+        params[i].joined_sequence_bound = joined_sequence_bound;
 
         threadpool_add_task(&pool, interval2mem, params+i);
     }
     threadpool_destroy(&pool);
+    // Sort the MEMs based on their average positions and assign their indices
+    sort_mem(mems, data);
 
     return mems;
 }
@@ -186,18 +199,24 @@ void* interval2mem(void* arg) {
     const int32_t* DA = ptr->DA;
     const int_t min_mem_length = ptr->min_mem_length;
     const unsigned char* concat_data = ptr->concat_data;
+    const std::vector<uint_t> joined_sequence_bound = ptr->joined_sequence_bound;
     // Initialize the result variables
     std::pair<uint_t, uint_t> interval = ptr->interval;
     mem result;
+    uint_t* mem_index = new uint_t;
+    *mem_index = 0;
+    result.mem_index = mem_index;
     std::vector<sub_string> res_substrings;
     result.mem_length = 0;
     std::vector<uint_t> mem_position;
     // Create the MEM from the input LCP interval
-    for (uint_t i = interval.first - 1; i <= interval.second; i++) {
+    for (uint_t i = interval.first - 1; i < interval.second; i++) {
         sub_string tmp_substring;
-        tmp_substring.position = SA[i];
-        mem_position.push_back(tmp_substring.position);
         tmp_substring.sequence_index = DA[i];
+        tmp_substring.position = SA[i] - joined_sequence_bound[tmp_substring.sequence_index];
+        mem_position.push_back(SA[i]);
+        
+        tmp_substring.mem_index = mem_index;
         result.substrings.push_back(tmp_substring);
     }
     // Compute the offset of the MEM and adjust the positions of the substrings accordingly
@@ -238,9 +257,52 @@ void* interval2mem(void* arg) {
     }
     // Store the result in the input parameters structure
     *(ptr->result_store) = result;
-   
-   
+  
     return NULL;
+}
+
+// function to compute average position of a mem in sequences
+void compute_mem_avg_pos(mem& m) {
+    float_t sum_pos = 0;
+    for (auto& s : m.substrings) {
+        sum_pos += s.position;
+    }
+    m.avg_pos = sum_pos / m.substrings.size();
+}
+
+/**
+*Sorts the input vector of MEMs by the average position of each MEM's substrings along the sequences.
+*Removes any MEMs that span across multiple sequences.
+*Assigns a unique index to each MEM based on its position in the sorted vector.
+*@param mems The vector of MEMs to be sorted.
+*@param data The vector of sequences used to compute the MEMs.
+*/
+void sort_mem(std::vector<mem> &mems, std::vector<std::string> data) {
+    
+    auto it = std::remove_if(mems.begin(), mems.end(), [&](const mem& m) {
+        if (m.substrings[0].position + m.mem_length < data[m.substrings[0].sequence_index].length()) {
+            return false;
+        }
+        else {
+            return true;
+        }
+       
+        });
+    mems.erase(it, mems.end());
+
+    // compute average position of each mem
+    for (auto& m : mems) {
+        compute_mem_avg_pos(m);
+    }
+    // sort mems by average position
+    std::sort(mems.begin(), mems.end(), [](const mem& m1, const mem& m2) {
+        return m1.avg_pos < m2.avg_pos;
+        });
+    // assign mem_index based on position in sorted vector
+    for (uint_t i = 0; i < mems.size(); i++) {
+        *mems[i].mem_index = i;
+    }
+    return;
 }
 
 
