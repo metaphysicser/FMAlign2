@@ -35,10 +35,11 @@ std::vector<mem> find_mem(std::vector<std::string> data){
 
     gsacak((unsigned char *)concat_data, (uint_t*)SA, LCP, DA, n);
     
-    int_t min_mem_length = 2000;
+    int_t min_mem_length = 1000;
+    int_t min_cross_sequence = 336;
 
     
-    std::vector<std::pair<uint_t, uint_t>> intervals = get_lcp_intervals(LCP, min_mem_length, n);
+    std::vector<std::pair<uint_t, uint_t>> intervals = get_lcp_intervals(LCP, min_mem_length, min_cross_sequence, n);
     uint_t interval_size = intervals.size();
     std::vector<mem> mems;
     mems.resize(interval_size);
@@ -49,7 +50,6 @@ std::vector<mem> find_mem(std::vector<std::string> data){
     threadpool_init(&pool, threads);
     for (uint_t i = 0; i < interval_size; i++) {
         params[i].SA = SA;
-        params[i].LCP = LCP;
         params[i].DA = DA;
         params[i].interval = intervals[i];
         params[i].concat_data = concat_data;
@@ -103,16 +103,17 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
  * and at least one value in the interval is equal to the threshold value.
  * @param lcp_array The input LCP array
  * @param threshold The threshold value
+ * @param min_cross_sequence the min number of crossed sequence
  * @return  The output vector of pairs representing the LCP intervals
 */
-std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t threshold, uint_t n) {
+std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t threshold, int_t min_cross_sequence, uint_t n) {
 
     std::vector<std::pair<uint_t, uint_t>> intervals;
 
-    uint_t left = 0, right = 0;
+    int_t left = 0, right = 0;
     bool found = false;
 
-    while (right < n) {
+    while (right < (int_t)n) {
         if (lcp_array[right] >= threshold) {
             if (lcp_array[right] == threshold) {
                 found = true;
@@ -120,7 +121,7 @@ std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t
 
             right++;
         } else {
-            if (found) {
+            if (found && right-left+1 >= min_cross_sequence) {
                 intervals.emplace_back(left, right);
             }
 
@@ -129,7 +130,7 @@ std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t
         }
     }
 
-    if (found) {
+    if (found && right - left + 1 >= min_cross_sequence) {
         intervals.emplace_back(left, right);
     }
     return intervals;
@@ -172,28 +173,34 @@ void draw_lcp_curve(int_t *LCP, uint_t n){
 
 }
 
+/**
+*@brief This function converts an LCP interval to a MEM (Maximal Exact Match).
+*@param arg A void pointer to the input parameters.
+*@return void* A void pointer to the result, which is stored in the input parameters structure.
+*/
 void* interval2mem(void* arg) {
+    // Cast the input parameters to the correct struct type
     IntervalToMemConversionParams* ptr = static_cast<IntervalToMemConversionParams*>(arg);
+    // Extract the necessary variables from the struct
     const uint_t* SA = ptr->SA;
-    const int_t* LCP = ptr->LCP;
     const int32_t* DA = ptr->DA;
     const int_t min_mem_length = ptr->min_mem_length;
     const unsigned char* concat_data = ptr->concat_data;
-    
+    // Initialize the result variables
     std::pair<uint_t, uint_t> interval = ptr->interval;
     mem result;
     std::vector<sub_string> res_substrings;
-    result.mem_lengh = 0;
+    result.mem_length = 0;
     std::vector<uint_t> mem_position;
-
-    for (uint_t i = interval.first-1; i <= interval.second; i++) {
+    // Create the MEM from the input LCP interval
+    for (uint_t i = interval.first - 1; i <= interval.second; i++) {
         sub_string tmp_substring;
         tmp_substring.position = SA[i];
         mem_position.push_back(tmp_substring.position);
-        tmp_substring.sequence_index = DA[SA[i]];
+        tmp_substring.sequence_index = DA[i];
         result.substrings.push_back(tmp_substring);
     }
-
+    // Compute the offset of the MEM and adjust the positions of the substrings accordingly
     uint_t offset = 1;
     bool all_char_same = true;
     while (true) {
@@ -225,12 +232,13 @@ void* interval2mem(void* arg) {
     }
     offset -= 1;
 
-    result.mem_lengh = min_mem_length + offset;
+    result.mem_length = min_mem_length + offset;
     for (uint_t i = 0; i < result.substrings.size(); i++) {
         result.substrings[i].position -= offset;
     }
+    // Store the result in the input parameters structure
     *(ptr->result_store) = result;
-
+   
    
     return NULL;
 }

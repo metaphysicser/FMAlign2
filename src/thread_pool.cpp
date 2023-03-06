@@ -117,7 +117,7 @@ void* thread_routine(void* arg)
 #else
             clock_gettime(CLOCK_REALTIME, &abstime);
 #endif
-            abstime.tv_sec += 10;
+            abstime.tv_sec += 20;
             
             int status;
             status = condition_timedwait(&pool->ready, &abstime);  // This function will unlock, allow other threads to access, and when awakened, lock

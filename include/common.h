@@ -54,12 +54,12 @@
 
 
 struct sub_string{
-    uint_t sequence_index; // the sequence index that substring in
+    int_t sequence_index; // the sequence index that substring in
     uint_t position; // the begin position in the seqence
 };
 
 struct mem{
-    uint_t mem_lengh; // substring length
+    int_t mem_length; // substring length
     std::vector<sub_string> substrings; // the substring set
 
 };

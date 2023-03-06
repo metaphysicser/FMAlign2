@@ -39,7 +39,6 @@
 
 struct IntervalToMemConversionParams {
     const uint_t* SA;
-    const int_t* LCP;
     const int32_t* DA;
     const unsigned char* concat_data;
     std::vector<mem>::iterator result_store;
@@ -64,10 +63,15 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
  * and at least one value in the interval is equal to the threshold value.
  * @param lcp_array The input LCP array
  * @param threshold The threshold value
- * @return intervals The output vector of pairs representing the LCP intervals
+ * @param min_cross_sequence the min number of crossed sequence
+ * @return  The output vector of pairs representing the LCP intervals
 */
-std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t threshold, uint_t n);
+std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t threshold, int_t min_cross_sequence, uint_t n);
 
-
+/**
+*@brief This function converts an LCP interval to a MEM (Maximal Exact Match).
+*@param arg A void pointer to the input parameters.
+*@return void* A void pointer to the result, which is stored in the input parameters structure.
+*/
 void* interval2mem(void* arg);
 #endif
