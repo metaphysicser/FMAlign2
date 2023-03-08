@@ -54,6 +54,7 @@
 
 struct GlobalArgs {
 	std::string data_path;
+	int_t thread;
 };
 extern GlobalArgs global_args;
 

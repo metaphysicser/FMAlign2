@@ -25,6 +25,7 @@
 #include "include/mem_finder.h"
 #include "include/sequence_split_align.h"
 #include "include/thread_pool.h"
+#include <thread>
 
 GlobalArgs global_args;
 int main(int argc, char** argv) {
@@ -33,10 +34,21 @@ int main(int argc, char** argv) {
 
     parser.add_argument("input", true, "data/mt1x.fasta");
     parser.add_argument_help("input", "The input file name.");
+    parser.add_argument("thread", false, "cpu_num");
+    parser.add_argument_help("thread", "The maximum number of threads that the program runs, the recommended setting is the number of CPUs");
+
 
     try {
         parser.parse_args(argc, argv);
         global_args.data_path = parser.get("input");
+        std::string tmp_thread = parser.get("thread");
+        if (tmp_thread == "cpu_num") {
+            global_args.thread = std::thread::hardware_concurrency();
+        }
+        else {
+            global_args.thread = std::stoi(tmp_thread);
+        }
+        std::cout << "The number of threads is set to " << global_args.thread << std::endl;
     }
     catch (const std::invalid_argument& e) {
         std::cerr << "Error: " << e.what() << std::endl;

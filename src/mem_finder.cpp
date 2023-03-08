@@ -167,7 +167,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     }
     std::vector<mem> mems;
     mems.resize(interval_size);
-    uint_t threads = 8;
+    int_t threads = global_args.thread;
     // Convert each interval to a MEM in parallel
     IntervalToMemConversionParams* params = new IntervalToMemConversionParams[interval_size];
     threadpool pool;
