@@ -21,12 +21,114 @@
 #include "../include/mem_finder.h"
 
 /**
- * Find MEMs in a set of sequences.
- *
+* @brief Filter out overlapping memory regions and generate split points for each sequence.
+* Given a vector of memory regions and the number of sequences, this function removes any
+* overlapping memory regions and generates split points for each sequence based on the non-overlapping regions.
+* @param mems Vector of memory regions.
+* @param sequence_num Number of sequences.
+* @return Vector of split points for each sequence.
+*/
+std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem> mems, uint_t sequence_num) {
+    // Initialize dynamic programming tables to keep track of size and previous indices
+    uint_t mem_num = mems.size();
+    std::vector<double> dp(mem_num, 0);
+    std::vector<int_t> prev(mem_num, -1);
+    // Iterate over all "mem" objects and calculate their size and update dynamic programming tables
+    for (uint_t i = 0; i < mem_num; i++) {
+        double size = mems[i].mem_length * mems[i].substrings.size();
+        dp[i] += size;
+        for (uint_t j = i + 1; j < mem_num; j++) {
+            if (mems[i].avg_pos + mems[i].mem_length < mems[j].avg_pos && dp[i] > dp[j]) {
+                dp[j] = dp[i];
+                prev[j] = i;
+            }
+        }
+    }
+    // Find the index of the last "mem" object in the longest non-conflicting sequence
+    double max_size = 0;
+    int_t end_index = 0;
+    for (uint_t i = 0; i < mem_num; i++) {
+        if (dp[i] > max_size) {
+            max_size = dp[i];
+            end_index = i;
+        }
+    }
+    // Retrieve the indices of all non-conflicting "mem" objects in the longest sequence
+    std::vector<int_t> mems_without_conflict;
+    while (end_index > 0) {
+        mems_without_conflict.push_back(end_index);
+        end_index = prev[end_index];
+    }
+    reverse(mems_without_conflict.begin(), mems_without_conflict.end());
+    // Initialize a vector of vectors of pairs of integers to represent the split points for each sequence
+    std::vector<std::vector<std::pair<int_t, int_t>>> split_point_on_sequence(sequence_num, std::vector<std::pair<int_t, int_t>>(mems_without_conflict.size(), std::make_pair(-1, -1)));
+
+    // Loop through each non-conflicting MEM in the input
+    for (uint_t i = 0; i < mems_without_conflict.size(); i++) {
+        // Get the current MEM and its substring positions
+        mem tmp_mem = mems[mems_without_conflict[i]];
+        // Loop through each substring of the current MEM
+        for (uint_t j = 0; j < tmp_mem.substrings.size(); j++) {
+            // Create a pair of the substring position and the length of the MEM
+            std::pair<int_t, int_t> p(tmp_mem.substrings[j].position, tmp_mem.mem_length);
+            // If this split point is already set for this sequence and it is farther from the average position,
+            // skip this split point and move to the next one
+            if (split_point_on_sequence[tmp_mem.substrings[j].sequence_index][i].first != -1) {
+                if (abs(p.first - tmp_mem.avg_pos) > abs(split_point_on_sequence[tmp_mem.substrings[j].sequence_index][i].first - tmp_mem.avg_pos)) {
+                    continue;
+                }
+            }
+            // Set this split point for this sequence to the current substring position and MEM length
+            split_point_on_sequence[tmp_mem.substrings[j].sequence_index][i] = p;
+        }
+    }
+
+
+    // Loop through each sequence in the input
+    for (uint_t i = 0; i < sequence_num; i++) {
+        // Initialize the index of the last split point on this sequence to 0
+        int_t last_end_index = 0;
+        // Loop through each pair of split points on this sequence that do not conflict
+        for (uint_t j = 1; j < mems_without_conflict.size(); j++) {
+            // Get the position and length of the current split point
+            int_t cur_pos = split_point_on_sequence[i][j].first;
+            int_t cur_len = split_point_on_sequence[i][j].second;
+            // If the current split point has a negative position, skip it
+            if (cur_pos < 0) {
+                continue;
+            }
+            // If the current split point is after the last split point that was used,
+            // update the index of the last split point used to the current index
+            if (cur_pos >= split_point_on_sequence[i][last_end_index].first + split_point_on_sequence[i][last_end_index].second) {
+                last_end_index = j;
+            }
+            // If the current split point conflicts with the last split point used,
+            // choose the split point with the shortest length and mark the other one as invalid
+            else {
+                if (split_point_on_sequence[i][last_end_index].second > cur_len) {
+                    split_point_on_sequence[i][j].first = -1;
+                    split_point_on_sequence[i][j].second = -1;
+                }
+                else {
+                    split_point_on_sequence[i][last_end_index].first = -1;
+                    split_point_on_sequence[i][last_end_index].second = -1;
+                    last_end_index = j;
+                }
+            }
+        }
+    }
+
+    return split_point_on_sequence;
+}
+
+
+/**
+ * @brief Find MEMs in a set of sequences.
  * @param data A vector of strings representing the sequences.
- * @return A vector of MEMs found in the sequences.
+ * @return Vector of split points for each sequence.
  */
-std::vector<mem> find_mem(std::vector<std::string> data){
+std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::string> data){
+    Timer timer;
     uint_t n = 0;
     unsigned char* concat_data = concat_strings(data, n); 
     
@@ -38,10 +140,14 @@ std::vector<mem> find_mem(std::vector<std::string> data){
     int32_t *DA = NULL;
     DA = (int32_t*) malloc(n*sizeof(int32_t));
 
+    timer.reset();
     gsacak((unsigned char *)concat_data, (uint_t*)SA, LCP, DA, n);
-    
-    int_t min_mem_length = 1000;
-    int_t min_cross_sequence = 336;
+    double suffix_construction_time = timer.elapsed_time();
+    std::cout << "Suffix construction time: " << suffix_construction_time << " seconds." << std::endl;
+
+    timer.reset();
+    int_t min_mem_length = 30;
+    int_t min_cross_sequence = ceil(0.5 * data.size());
     std::vector<uint_t> joined_sequence_bound;
     uint_t total_length = 0;
     for (uint_t i = 0; i < data.size(); i++) {
@@ -50,7 +156,15 @@ std::vector<mem> find_mem(std::vector<std::string> data){
     }
     // Find all intervals with an LCP >= min_mem_length and <= min_cross_sequence
     std::vector<std::pair<uint_t, uint_t>> intervals = get_lcp_intervals(LCP, min_mem_length, min_cross_sequence, n);
+
+    free(LCP);
+
     uint_t interval_size = intervals.size();
+
+    if (interval_size <= 0) {
+        std::cerr << "There is no LCP interval, please adjust your paramters." << std::endl;
+        exit(1);
+    }
     std::vector<mem> mems;
     mems.resize(interval_size);
     uint_t threads = 8;
@@ -70,10 +184,26 @@ std::vector<mem> find_mem(std::vector<std::string> data){
         threadpool_add_task(&pool, interval2mem, params+i);
     }
     threadpool_destroy(&pool);
+
+    if (mems.size() <= 0) {
+        std::cerr << "There is no MEM, please adjust your paramters." << std::endl;
+        exit(1);
+    }
+
     // Sort the MEMs based on their average positions and assign their indices
     sort_mem(mems, data);
 
-    return mems;
+    free(SA);
+    free(DA);
+    free(concat_data);
+    delete[] params;
+
+    uint_t sequence_num = data.size();
+    std::vector<std::vector<std::pair<int_t, int_t>>> split_point_on_sequence =  filter_mem(mems, sequence_num);
+    double mem_process_time = timer.elapsed_time();
+    std::cout << "MEM process time: " << mem_process_time << " seconds." << std::endl;
+
+    return split_point_on_sequence;
 }
 
 /**
@@ -220,9 +350,13 @@ void* interval2mem(void* arg) {
         result.substrings.push_back(tmp_substring);
     }
     // Compute the offset of the MEM and adjust the positions of the substrings accordingly
+    // Set an initial offset value of 1 and a flag indicating whether all characters are the same
     uint_t offset = 1;
     bool all_char_same = true;
+
+    // While loop to iterate through the offset values until a non-matching character is found or the end of the string is reached
     while (true) {
+        // Get the current character by looking back from the first MEM position by the current offset
         char current_char = 0;
         if (mem_position[0] >= offset) {
             current_char = concat_data[mem_position[0] - offset];
@@ -230,26 +364,34 @@ void* interval2mem(void* arg) {
         else {
             break;
         }
+
+        // Check if all characters at the current offset are the same
         all_char_same = true;
         for (uint_t i = 1; i < mem_position.size(); i++) {
+            // If the current MEM position is before the current offset, set the flag to false and break
             if (mem_position[i] < offset) {
                 all_char_same = false;
                 break;
             }
+            // Otherwise, compare the character at the current MEM position to the current character and set the flag accordingly
             else {
                 if (current_char != concat_data[mem_position[i] - offset]) {
                     all_char_same = false;
                     break;
                 }
             }
-
         }
+
+        // If all characters at the current offset are the same, increment the offset and continue
         if (all_char_same == false) {
             break;
         }
         offset++;
     }
+
+    // Decrement the offset by 1 to get the last offset where all characters were the same
     offset -= 1;
+
 
     result.mem_length = min_mem_length + offset;
     for (uint_t i = 0; i < result.substrings.size(); i++) {

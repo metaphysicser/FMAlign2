@@ -52,6 +52,10 @@
   #define DEBUG 0
 #endif
 
+struct GlobalArgs {
+	std::string data_path;
+};
+extern GlobalArgs global_args;
 
 struct sub_string{
     int_t sequence_index; // the sequence index that substring in

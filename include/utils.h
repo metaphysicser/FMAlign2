@@ -36,6 +36,10 @@
 #include <io.h>
 #include <process.h>
 #endif
+#include <string>
+#include <vector>
+#include <map>
+#include <stdexcept>
 
 /**
  * @brief A timer class that measures elapsed time. 
@@ -51,6 +55,81 @@ public:
     double elapsed_time() const;
 private:
     std::chrono::time_point<std::chrono::steady_clock> start_time_;
+};
+
+/**
+ * A command-line argument parser.
+ * Usage:
+ *   1. Create an ArgParser object.
+ *   2. Call add_argument() for each command-line argument you want to parse.
+ *   3. Call parse_args() to parse the command-line arguments.
+ *   4. Use get() or has() to retrieve the values of the parsed arguments.
+ *   5. Call print_help() to print a help message with the list of arguments.
+ */
+class ArgParser {
+public:
+    /**
+     * Adds a command-line argument to the parser.
+     *
+     * @param name          The name of the argument, without the leading dashes.
+     * @param required      Whether the argument is required or optional (default=false).
+     * @param default_value The default value of the argument, if it is optional (default="").
+     * @throws std::invalid_argument If an argument with the same name has already been added.
+     */
+    void add_argument(const std::string& name, bool required, const std::string& default_value);
+
+    /**
+     * Adds a help message for a command-line argument.
+     *
+     * @param name      The name of the argument, without the leading dashes.
+     * @param help_text The help text for the argument.
+     * @throws std::invalid_argument If an argument with the given name has not been added.
+     */
+    void add_argument_help(const std::string& name, const std::string& help_text);
+
+    /**
+     * Parses the command-line arguments.
+     *
+     * @param argc The number of command-line arguments.
+     * @param argv The array of command-line argument strings.
+     * @throws std::invalid_argument If an invalid or missing argument is encountered.
+     */
+    void parse_args(int argc, char** argv);
+
+    /**
+     * Returns the value of a parsed argument.
+     *
+     * @param name The name of the argument, without the leading dashes.
+     * @return The value of the argument.
+     * @throws std::invalid_argument If the argument is invalid or missing.
+     */
+    std::string get(const std::string& name) const;
+
+    /**
+     * Checks whether a parsed argument has been provided.
+     *
+     * @param name The name of the argument, without the leading dashes.
+     * @return Whether the argument has been provided.
+     */
+    bool has(const std::string& name) const;
+
+    /**
+     * Prints a help message with the list of command-line arguments.
+     */
+    void print_help() const;
+
+private:
+    /**
+     * A struct representing a command-line argument.
+     */
+    struct Arg {
+        bool required;              // Whether the argument is required.
+        std::string default_value;  // The default value of the argument, if it is optional.
+        std::string value;          // The value of the argument, if it has been parsed.
+        std::string help_text;      // The help text for the argument.
+    };
+
+    std::map<std::string, Arg> args_;  // The map of argument names to argument objects.
 };
 
 /**

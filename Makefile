@@ -20,7 +20,7 @@ else
 endif
 
 
-SRCS = main.cpp src/utils.cpp src/mem_finder.cpp src/mem_filter.cpp src/sequence_split_align.cpp src/thread_pool.cpp src/thread_condition.cpp
+SRCS = main.cpp src/utils.cpp src/mem_finder.cpp src/sequence_split_align.cpp src/thread_pool.cpp src/thread_condition.cpp
 OBJS = $(SRCS:.cpp=.o)
 OBJS += src/gsacak.o
 
@@ -39,9 +39,6 @@ utils.o: src/utils.cpp include/utils.h include/common.h include/kseq.h
 mem_finder.o: src/mem_finder.cpp include/common.h include/gsacak.h
 	$(CXX) $(CXXFLAGS) -c src/mem_finder.cpp -o $@
 
-mem_filter.o: src/mem_filter.cpp include/common.h
-	$(CXX) $(CXXFLAGS) -c src/mem_filter.cpp -o $@
-
 sequence_split_align.o: src/sequence_split_align.cpp include/common.h
 	$(CXX) $(CXXFLAGS) -c src/sequence_split_align.cpp -o $@
 
@@ -54,7 +51,7 @@ thread_pool.o: src/thread_pool.cpp include/thread_pool.h include/thread_conditio
 thread_condition.o: src/thread_condition.cpp include/thread_condition.h
 	$(CXX) $(CXXFLAGS) -c src/thread_conition.cpp -o $@
 	
-main.o: main.cpp include/utils.h include/common.h include/mem_finder.h include/mem_filter.h include/sequence_split_align.h
+main.o: main.cpp include/utils.h include/common.h include/mem_finder.h include/sequence_split_align.h
 	$(CXX) $(CXXFLAGS) -c main.cpp -o $@
 
 clean:

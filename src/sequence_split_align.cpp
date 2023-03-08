@@ -20,6 +20,6 @@
 
 #include "../include/sequence_split_align.h"
 
-void split_sequence(std::vector<std::string> data, std::vector<mem> filtered_mems){
+void parallel_align(std::vector<std::string> data, std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence){
     return;
 }

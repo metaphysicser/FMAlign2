@@ -133,3 +133,111 @@ std::string clean_sequence(std::string sequence){
     return result;
 }
 
+void ArgParser::add_argument(const std::string& name, bool required = false, const std::string& default_value = "") {
+    if (args_.count(name) > 0) {
+        throw std::invalid_argument("Duplicate argument name: " + name);
+    }
+    args_[name] = { required, default_value };
+}
+
+void ArgParser::add_argument_help(const std::string& name, const std::string& help_text) {
+    if (args_.count(name) == 0) {
+        throw std::invalid_argument("Invalid argument name: " + name);
+    }
+    args_[name].help_text = help_text;
+}
+
+void ArgParser::print_help() const {
+    std::cout << "Usage: FMAlign2 [OPTIONS]\n\n";
+    std::cout << "Options:\n";
+
+    for (const auto& p : args_) {
+        std::cout << "  --" << p.first;
+
+        if (!p.second.required) {
+            std::cout << " (optional)";
+        }
+
+        if (!p.second.default_value.empty()) {
+            std::cout << " [default: " << p.second.default_value << "]";
+        }
+
+        std::cout << "\n    " << p.second.help_text << "\n\n";
+    }
+}
+
+void ArgParser::parse_args(int argc, char** argv) {
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+        if (arg[0] == '-') {
+            if (arg[1] == '-') {
+                std::string name = arg.substr(2);
+                if (name == "help" || arg == "h") {
+                    print_help();
+                    exit(0);
+                }
+                if (args_.count(name) == 0) {
+                    throw std::invalid_argument("Invalid argument: " + arg);
+                }
+                Arg& a = args_[name];
+
+                if (a.value != "") {
+                    throw std::invalid_argument("Duplicate argument: " + arg);
+                }
+                if (i == argc - 1 || argv[i + 1][0] == '-') {
+                    if (a.required) {
+                        throw std::invalid_argument("Missing value for argument: " + arg);
+                    }
+                    a.value = a.default_value;
+                }
+                else {
+                    a.value = argv[++i];
+                }
+            }
+            else {
+                for (size_t j = 1; j < arg.size(); j++) {
+                    std::string name = std::string(1, arg[j]);
+                    if (args_.count(name) == 0) {
+                        throw std::invalid_argument("Invalid argument: " + arg);
+                    }
+                    Arg& a = args_[name];
+                    if (a.value != "") {
+                        throw std::invalid_argument("Duplicate argument: " + arg);
+                    }
+                    if (a.required && j < arg.size() - 1) {
+                        throw std::invalid_argument("Missing value for argument: -" + name);
+                    }
+                    if (j == arg.size() - 1) {
+                        a.value = a.default_value;
+                    }
+                    else {
+                        a.value = arg.substr(j + 1);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    for (const auto& p : args_) {
+        if (p.second.required && p.second.value == "") {
+            throw std::invalid_argument("Missing required argument: --" + p.first);
+        }
+    }
+}
+
+std::string ArgParser::get(const std::string& name) const {
+    if (args_.count(name) == 0) {
+        throw std::invalid_argument("Invalid argument name: " + name);
+    }
+    const Arg& a = args_.at(name);
+    if (a.value == "") {
+        throw std::invalid_argument("Missing value for argument: --" + name);
+    }
+    return a.value;
+}
+
+bool ArgParser::has(const std::string& name) const {
+    return args_.count(name) > 0 && args_.at(name).value != "";
+}
+
+

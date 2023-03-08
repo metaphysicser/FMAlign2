@@ -23,23 +23,34 @@
 #include "include/common.h"
 #include "include/utils.h"
 #include "include/mem_finder.h"
-#include "include/mem_filter.h"
 #include "include/sequence_split_align.h"
 #include "include/thread_pool.h"
 
-#include <chrono>
-#include <thread>
-
-const char* data_path = "data/mt1x.fasta";
-
-int main() {
+GlobalArgs global_args;
+int main(int argc, char** argv) {
     Timer timer;
+    ArgParser parser;
+
+    parser.add_argument("input", true, "data/mt1x.fasta");
+    parser.add_argument_help("input", "The input file name.");
+
+    try {
+        parser.parse_args(argc, argv);
+        global_args.data_path = parser.get("input");
+    }
+    catch (const std::invalid_argument& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        parser.print_help();
+        return 1;
+    }
+
     std::vector<std::string> data;
     std::vector<std::string> name;
-    read_data(data_path, data, name);
-    std::vector<mem> mems = find_mem(data);
-    std::vector<mem> filtered_mems = filter_mem(mems);
-    split_sequence(data, filtered_mems);
+
+    read_data(global_args.data_path.c_str(), data, name);
+
+    std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence = find_mem(data);
+    parallel_align(data, split_points_on_sequence);
     double total_time = timer.elapsed_time();
     std::cout << "FMAlign2 total time: " << total_time << " seconds." << std::endl;
     return 0;

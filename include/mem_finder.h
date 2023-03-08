@@ -24,6 +24,7 @@
 #include "common.h"
 #include "gsacak.h"
 #include "thread_pool.h"
+#include "utils.h"
 #include <cstdint>
 #include <cstring>
 #include <numeric>
@@ -48,12 +49,21 @@ struct IntervalToMemConversionParams {
 };
 
 /**
- * Find MEMs in a set of sequences.
- *
+* @brief Filter out overlapping memory regions and generate split points for each sequence.
+* Given a vector of memory regions and the number of sequences, this function removes any
+* overlapping memory regions and generates split points for each sequence based on the non-overlapping regions.
+* @param mems Vector of memory regions.
+* @param sequence_num Number of sequences.
+* @return Vector of split points for each sequence.
+*/
+std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem>, uint_t sequence_num);
+
+/**
+ * @brief Find MEMs in a set of sequences.
  * @param data A vector of strings representing the sequences.
- * @return A vector of MEMs found in the sequences.
+ * @return Vector of split points for each sequence.
  */
-std::vector<mem> find_mem(std::vector<std::string> data);
+std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::string> data);
 
 /**
  * @brief Concatenates a vector of strings with separator 1 and a terminating 0.
