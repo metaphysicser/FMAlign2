@@ -201,6 +201,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     uint_t sequence_num = data.size();
     std::vector<std::vector<std::pair<int_t, int_t>>> split_point_on_sequence =  filter_mem(mems, sequence_num);
     double mem_process_time = timer.elapsed_time();
+    std::cout << "The sequence is divided into " << split_point_on_sequence[0].size() << " parts" << std::endl;
     std::cout << "MEM process time: " << mem_process_time << " seconds." << std::endl;
 
     return split_point_on_sequence;
