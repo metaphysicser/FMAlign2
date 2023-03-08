@@ -186,6 +186,7 @@ void ArgParser::parse_args(int argc, char** argv) {
                 }
                 if (i == argc - 1 || argv[i + 1][0] == '-') {
                     if (a.required) {
+                 
                         throw std::invalid_argument("Missing value for argument: " + arg);
                     }
                     a.value = a.default_value;
@@ -197,6 +198,10 @@ void ArgParser::parse_args(int argc, char** argv) {
             else {
                 for (size_t j = 1; j < arg.size(); j++) {
                     std::string name = std::string(1, arg[j]);
+                    if (name == "help" || arg == "h") {
+                        print_help();
+                        exit(0);
+                    }
                     if (args_.count(name) == 0) {
                         throw std::invalid_argument("Invalid argument: " + arg);
                     }
@@ -218,9 +223,12 @@ void ArgParser::parse_args(int argc, char** argv) {
             }
         }
     }
-    for (const auto& p : args_) {
+    for (auto& p : args_) {
         if (p.second.required && p.second.value == "") {
             throw std::invalid_argument("Missing required argument: --" + p.first);
+        }
+        if (p.second.required == false && p.second.value == "") {
+            p.second.value = p.second.default_value;
         }
     }
 }
