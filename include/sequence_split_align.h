@@ -22,7 +22,13 @@
 #define SEQUENCE_SPLIT_ALIGN_H
 
 #include "common.h"
+#include <algorithm>
 
-void parallel_align(std::vector<std::string> data, std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence);
-
+void parallel_align(std::vector<std::string> data, std::vector<std::string> name, std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence);
+/**
+* @brief Selects columns from a sequence of split points to enable multi thread.
+* @param split_points_on_sequence A vector of vectors of pairs, where each pair represents the start and mem length
+* @return A vector of indices of the selected columns.
+*/
+std::vector<int_t> select_columns(std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence);
 #endif
