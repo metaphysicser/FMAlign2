@@ -126,7 +126,7 @@ void* thread_routine(void* arg)
 //#if (_WIN32 || _WIN64)
 //                printf("thread %d wait timed out\n", pthread_self().x);
 //#else
-                printf("thread wait timed out\n");
+                // printf("thread wait timed out\n");
 // #endif
                 timeout = 1;
                 break;

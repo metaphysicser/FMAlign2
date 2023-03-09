@@ -146,8 +146,8 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     std::cout << "Suffix construction time: " << suffix_construction_time << " seconds." << std::endl;
 
     timer.reset();
-    int_t min_mem_length = 30;
-    int_t min_cross_sequence = ceil(0.5 * data.size());
+    int_t min_mem_length = global_args.min_mem_length;
+    int_t min_cross_sequence = ceil(global_args.min_seq_coverage * data.size());
     std::vector<uint_t> joined_sequence_bound;
     uint_t total_length = 0;
     for (uint_t i = 0; i < data.size(); i++) {

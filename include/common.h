@@ -55,6 +55,8 @@
 struct GlobalArgs {
 	std::string data_path;
 	int_t thread;
+	int_t min_mem_length;
+	float min_seq_coverage;
 };
 extern GlobalArgs global_args;
 
