@@ -118,6 +118,20 @@ std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem> me
         }
     }
 
+    for (uint_t j = 0; j < split_point_on_sequence[0].size(); j++) {
+        int_t count = 0;
+        for (uint_t i = 0; i < split_point_on_sequence.size(); i++) {
+            if (split_point_on_sequence[i][j].first == -1) {
+                count++;
+            }
+        }
+        if (count > sequence_num * (1 - global_args.min_seq_coverage)) {
+            for (uint_t i = 0; i < split_point_on_sequence.size(); i++) {
+                split_point_on_sequence[i].erase(split_point_on_sequence[i].begin() + j);
+            }
+        }
+    }
+
     return split_point_on_sequence;
 }
 

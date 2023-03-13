@@ -29,6 +29,9 @@
 
 GlobalArgs global_args;
 int main(int argc, char** argv) {
+#if M64
+    std::cout << "Using 64 bit mode" << std::endl;
+#endif
     Timer timer;
     ArgParser parser;
 

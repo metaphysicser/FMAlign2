@@ -24,8 +24,6 @@ void parallel_align(std::vector<std::string> data, std::vector<std::string> name
     Timer timer;
     uint_t chain_num = chain[0].size();
     uint_t seq_num = data.size();
-    std::vector<int_t> selected_cols = select_columns(chain);
-    std::vector<int_t> remaining_cols = get_remaining_cols(chain_num, selected_cols);
     std::vector<std::vector<std::string>> chain_string(chain_num); // chain_num * seq_num
 
     std::vector<ExpandChainParams> params(chain_num);
@@ -262,7 +260,7 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
     std::vector<std::string>& res_store, uint_t seq_index)
 {
     // Extract cigar string from the alignment
-    std::vector<uint_t> cigar = alignment.cigar;
+    std::vector<unsigned int> cigar = alignment.cigar;
     // Extract the start and end positions of the alignment on the reference sequence
     int_t ref_begin = alignment.ref_begin;
     int_t ref_end = alignment.ref_end;

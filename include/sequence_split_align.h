@@ -35,6 +35,10 @@ struct ExpandChainParams {
 	std::vector<std::vector<std::string>>::iterator result_store;
 };
 
+struct ParallelAlignParams {
+	std::vector<std::string> split_string;
+};
+
 void parallel_align(std::vector<std::string> data, std::vector<std::string> name, std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence);
 /**
 * @brief Selects columns from a sequence of split points to enable multi thread.
