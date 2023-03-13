@@ -278,7 +278,7 @@ std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t
         if (lcp_array[right] >= threshold) {
             if (lcp_array[right] == threshold) {
 #if  DEBUG
-                std::cout << lcp[right] << std::endl;
+                std::cout << lcp_array[right] << std::endl;
 #endif //  DEBUG
 
                 found = true;
