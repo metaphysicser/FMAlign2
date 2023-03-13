@@ -179,6 +179,9 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
         std::cerr << "There is no LCP interval, please adjust your paramters." << std::endl;
         exit(1);
     }
+    else {
+        std::cout << "The LCP interval number is " << interval_size << std::endl;
+    }
     std::vector<mem> mems;
     mems.resize(interval_size);
     int_t threads = global_args.thread;
@@ -277,10 +280,6 @@ std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t
 
         if (lcp_array[right] >= threshold) {
             if (lcp_array[right] == threshold) {
-#if  DEBUG
-                std::cout << lcp_array[right] << std::endl;
-#endif //  DEBUG
-
                 found = true;
             }
             right++;
