@@ -274,11 +274,11 @@ std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t
     bool found = false;
 
     while (right < (int_t)n) {
+#if DEBUG
+        std::cout << lcp_array[right] << std::endl;
+#endif
         if (lcp_array[right] >= threshold) {
             if (lcp_array[right] == threshold) {
-#if DEBUG
-                std::cout << intervals.size() << std::endl;
-#endif
                 found = true;
             }
             right++;
