@@ -267,7 +267,9 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
 std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t threshold, int_t min_cross_sequence, uint_t n) {
 
     std::vector<std::pair<uint_t, uint_t>> intervals;
-
+#if DEBUG
+    std::cout << "minimal cross sequence number is " << min_cross_sequence << std::endl;
+#endif
     int_t left = 0, right = 0;
     bool found = false;
 
