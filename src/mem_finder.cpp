@@ -276,9 +276,11 @@ std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t
     while (right < (int_t)n) {
         if (lcp_array[right] >= threshold) {
             if (lcp_array[right] == threshold) {
+#if DEBUG
+                std::cout << intervals.size() << std::endl;
+#endif
                 found = true;
             }
-
             right++;
         } else {
             if (found && right-left+1 >= min_cross_sequence) {
