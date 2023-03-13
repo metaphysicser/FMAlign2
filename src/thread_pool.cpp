@@ -117,7 +117,7 @@ void* thread_routine(void* arg)
 #else
             clock_gettime(CLOCK_REALTIME, &abstime);
 #endif
-            abstime.tv_sec += 20;
+            abstime.tv_sec += 10;
             
             int status;
             status = condition_timedwait(&pool->ready, &abstime);  // This function will unlock, allow other threads to access, and when awakened, lock
@@ -126,7 +126,7 @@ void* thread_routine(void* arg)
 //#if (_WIN32 || _WIN64)
 //                printf("thread %d wait timed out\n", pthread_self().x);
 //#else
-                // printf("thread wait timed out\n");
+                printf("thread wait timed out\n");
 // #endif
                 timeout = 1;
                 break;
