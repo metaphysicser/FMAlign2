@@ -267,18 +267,20 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
 std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t threshold, int_t min_cross_sequence, uint_t n) {
 
     std::vector<std::pair<uint_t, uint_t>> intervals;
-#if DEBUG
+
     std::cout << "minimal cross sequence number is " << min_cross_sequence << std::endl;
-#endif
+
     int_t left = 0, right = 0;
     bool found = false;
 
     while (right < (int_t)n) {
-#if DEBUG
-        std::cout << lcp_array[right] << std::endl;
-#endif
+
         if (lcp_array[right] >= threshold) {
             if (lcp_array[right] == threshold) {
+#if  DEBUG
+                std::cout << lcp[right] << std::endl;
+#endif //  DEBUG
+
                 found = true;
             }
             right++;

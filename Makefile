@@ -64,6 +64,6 @@ clean:
 ifeq ($(OS),Windows_NT)
 	del -f $(subst /,\\,$(OBJS)) FMAlign2.exe
 else
-	rm -f $(SRCS:.cpp=.o) FMAlign2
+	rm -f $(SRCS:.cpp=.o) src/gsacak.o FMAlign2
 endif
 	
