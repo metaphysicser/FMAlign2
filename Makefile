@@ -4,21 +4,17 @@ CC = g++
 CFLAGS = 
 ifdef DEBUG
 	CXXFLAGS += -O0 -g -DDEBUG
-	CFLAGS += -O0 -g -DDEBUG
+	CFLAGS += -O0 -g
 else
 	CXXFLAGS += -O3
 	CFLAGS += -O3
 endif
 
-
 ifeq ($(OS),Windows_NT)
     CXXFLAGS += -fopenmp -L.\ext\pthread-win32 -lpthread
 else
-  
 	CXXFLAGS += -fopenmp
-
 endif
-
 
 SRCS = main.cpp src/utils.cpp src/mem_finder.cpp src/sequence_split_align.cpp src/thread_pool.cpp src/thread_condition.cpp ext/SW/ssw.cpp ext/SW/ssw_cpp.cpp
 OBJS = $(SRCS:.cpp=.o)
@@ -64,6 +60,6 @@ clean:
 ifeq ($(OS),Windows_NT)
 	del -f $(subst /,\\,$(OBJS)) FMAlign2.exe
 else
-	rm -f $(SRCS:.cpp=.o) src/gsacak.o FMAlign2
+	rm -f $(OBJS) FMAlign2
 endif
 	
