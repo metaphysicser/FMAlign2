@@ -117,22 +117,28 @@ std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem> me
             }
         }
     }
-
+    // remove column that too much -1
+    std::vector<int_t> selected_cols;
     for (uint_t j = 0; j < split_point_on_sequence[0].size(); j++) {
-        int_t count = 0;
+        int_t count = 0;      
         for (uint_t i = 0; i < split_point_on_sequence.size(); i++) {
             if (split_point_on_sequence[i][j].first == -1) {
                 count++;
             }
         }
-        if (count > sequence_num * (1 - global_args.min_seq_coverage)) {
-            for (uint_t i = 0; i < split_point_on_sequence.size(); i++) {
-                split_point_on_sequence[i].erase(split_point_on_sequence[i].begin() + j);
-            }
+        if (count < floor(sequence_num * (1 - global_args.min_seq_coverage))) {
+            selected_cols.push_back(j);
+        }
+    }
+    std::vector<std::vector<std::pair<int_t, int_t>>> chain(sequence_num);
+    for (uint_t i = 0; i < selected_cols.size(); i++) {
+        for (uint_t j = 0; j < split_point_on_sequence.size(); j++) {
+            chain[j].push_back(split_point_on_sequence[j][selected_cols[i]]);
         }
     }
 
-    return split_point_on_sequence;
+
+    return chain;
 }
 
 

@@ -68,6 +68,7 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
     {
         std::string tmp_data = clean_sequence(file_t -> seq.s);
         std::string tmp_name = file_t -> name.s;
+        if(file_t->comment.s) tmp_name += file_t->comment.s;
         data.push_back(tmp_data);
         name.push_back(tmp_name);
         merged_length += tmp_length;
@@ -196,30 +197,9 @@ void ArgParser::parse_args(int argc, char** argv) {
                 }
             }
             else {
-                for (size_t j = 1; j < arg.size(); j++) {
-                    std::string name = std::string(1, arg[j]);
-                    if (name == "help" || arg == "h") {
-                        print_help();
-                        exit(0);
-                    }
-                    if (args_.count(name) == 0) {
-                        throw std::invalid_argument("Invalid argument: " + arg);
-                    }
-                    Arg& a = args_[name];
-                    if (a.value != "") {
-                        throw std::invalid_argument("Duplicate argument: " + arg);
-                    }
-                    if (a.required && j < arg.size() - 1) {
-                        throw std::invalid_argument("Missing value for argument: -" + name);
-                    }
-                    if (j == arg.size() - 1) {
-                        a.value = a.default_value;
-                    }
-                    else {
-                        a.value = arg.substr(j + 1);
-                    }
-                    break;
-                }
+                std::cout << "please check the format, for example, --in instead of -in\n";
+                print_help();
+                exit(0);
             }
         }
     }

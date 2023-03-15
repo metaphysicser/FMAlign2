@@ -249,7 +249,7 @@ void* expand_chain(void* arg) {
 
             ref_end_pos = tmp_index >= chain_num - 1 ? data[i].length() - 1 : chain[i][tmp_index + 1].first;
 
-            std::string ref = data[i].substr(ref_begin_pos, ref_end_pos - ref_begin_pos + 1);
+            std::string ref = data[i].substr(ref_begin_pos, ref_end_pos - ref_begin_pos);
 
             // Get the reference subsequence and align it with the query subsequence
             aligner.Align(query.c_str(), ref.c_str(), ref.size(), filter, &alignment, maskLen);
@@ -267,8 +267,9 @@ void* expand_chain(void* arg) {
         }
     }
     *(ptr->result_store) = aligned_fragment;
-    // std::cout << chain_index << '\n';
-    
+#if DEBUG
+    std::cout << chain_index << '\n';
+#endif    
     return NULL;
 }
 
@@ -292,13 +293,29 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
     // Extract the start and end positions of the alignment on the reference sequence
     int_t ref_begin = alignment.ref_begin;
     int_t ref_end = alignment.ref_end;
+
     uint_t query_begin = 0;
 
     std::string aligned_result = "";
     // If the alignment failed, return (-1,-1)
-    if (ref_begin == -1) {
+    if (ref_begin <= -1) {
         res_store[seq_index] = aligned_result;
         return std::make_pair(-1, -1);
+    }
+
+    int_t S_count = 0;
+    int_t total_length = alignment.query_end;
+    if (cigar_int_to_op(cigar[0]) == 'S') {
+        S_count += cigar_int_to_len(cigar[0]);
+    }
+    if (cigar_int_to_op(cigar[cigar.size() - 1]) == 'S') {
+        S_count += cigar_int_to_len(cigar[cigar.size() - 1]);
+        total_length += cigar_int_to_len(cigar[cigar.size() - 1]);
+    }
+
+    if (S_count > ceil(0.8 * total_length)) {
+            res_store[seq_index] = aligned_result;
+            return std::make_pair(-1, -1);
     }
     uint_t p_ref = 0;
     uint_t p_query = 0;

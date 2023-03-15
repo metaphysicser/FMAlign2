@@ -78,10 +78,16 @@ int main(int argc, char** argv) {
     std::vector<std::string> data;
     std::vector<std::string> name;
 
-    read_data(global_args.data_path.c_str(), data, name);
-
-    std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence = find_mem(data);
-    split_and_parallel_align(data, name, split_points_on_sequence);
+    try {
+        read_data(global_args.data_path.c_str(), data, name);
+        std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence = find_mem(data);
+        split_and_parallel_align(data, name, split_points_on_sequence);
+    }
+    catch (const std::bad_alloc& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        exit(0);
+    }
+    
     double total_time = timer.elapsed_time();
     std::cout << "FMAlign2 total time: " << total_time << " seconds." << std::endl;
     return 0;
