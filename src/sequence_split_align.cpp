@@ -20,7 +20,7 @@
 
 #include "../include/sequence_split_align.h"
 
-void parallel_align(std::vector<std::string> data, std::vector<std::string> name, std::vector<std::vector<std::pair<int_t, int_t>>> chain){
+void split_and_parallel_align(std::vector<std::string> data, std::vector<std::string> name, std::vector<std::vector<std::pair<int_t, int_t>>> chain){
     Timer timer;
     uint_t chain_num = chain[0].size();
     uint_t seq_num = data.size();
@@ -38,9 +38,37 @@ void parallel_align(std::vector<std::string> data, std::vector<std::string> name
     for (uint_t i = 0; i < chain_num; i++) {
         expand_chain(&params[i]);
     }
+    params.clear();
+
+#if DEBUG   
+    for (uint_t j = 0; j < chain_num; ++j) {
+        uint_t len = chain_string[j][0].length();
+        for (uint_t i = 1; i < seq_num; ++i) {
+            if (chain_string[j][i].length() != len) {
+                std::cout <<"chain_index: " << j << " seq_index: " << i << " " << chain_string[j][i].length() << "!=" << len << std::endl;
+            }
+        }
+    }
+#endif    
 
     double total_time = timer.elapsed_time();
     std::cout << "SW expand total time: " << total_time << " seconds." << std::endl;
+    timer.reset();
+
+    /*std::vector<std::vector<std::pair<int_t, int_t>>> parallel_align_range = get_parallel_align_range(data, chain);
+    uint_t parallel_num = parallel_align_range[0].size();
+    std::vector<std::vector<std::string>> parallel_string(parallel_num, std::vector<std::string>(seq_num));
+
+    std::vector<ParallelAlignParams> parallel_params(parallel_num);
+    for (uint_t i = 0; i < parallel_num; i++) {
+        parallel_params[i].data = &data;
+        parallel_params[i].parallel_range = &parallel_align_range;
+        parallel_params[i].task_index = i;
+        parallel_params[i].result_store = parallel_string.begin() + i;
+    }
+    for (uint_t i = 0; i < parallel_num; i++) {
+        expand_chain(&parallel_params[i]);
+    }*/
 
     return;
 }
@@ -180,7 +208,7 @@ void* expand_chain(void* arg) {
     // Get the number of sequences in the data vector and the number of chains in the current chain
     uint_t seq_num = data.size();
     uint_t chain_num = chain[0].size();
-
+    
     // Declares a default Aligner
     StripedSmithWaterman::Aligner aligner;
     // Declares a default filter
@@ -284,12 +312,14 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
         case 'S': {
             // Handle soft clipping at the beginning and end of the alignment
             if (i == 0) {
+                int_t tmp_len = len;
                 if (ref_begin <= len) {
-                    for (int_t j = 0; j < len - ref_begin; j++) {
+                    while (tmp_len > ref_begin) {
                         aligned_result += "-";
-                    }
+                        tmp_len--;
+                    }                 
                 }
-                for (int_t j = 0; j <= ref_begin; j++) {
+                for (int_t j = ref_begin - tmp_len; j < ref_begin; j++) {
                     aligned_result += ref[j];
                 }        
             }
@@ -356,4 +386,76 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
 
     std::pair<int, int> p(ref_begin, ref_end - ref_begin + 1);
     return p;
+}
+
+/**
+ * @brief Get the range of each sequence in parallel alignment
+ * @param data The vector of sequences to be aligned
+ * @param chain The vector of chains representing the alignment
+ * @return The vector of ranges for each sequence in the alignment
+ */
+std::vector<std::vector<std::pair<int_t, int_t>>> get_parallel_align_range(std::vector<std::string> data, std::vector<std::vector<std::pair<int_t, int_t>>> chain) {
+    // Get the number of sequences and chains
+    uint_t seq_num = data.size();
+    uint_t chain_num = chain[0].size();
+    // Initialize the vector to store the ranges
+    std::vector<std::vector<std::pair<int_t, int_t>>> parallel_align_range(seq_num);
+
+    // Iterate through each sequence
+    for (uint_t i = 0; i < seq_num; i++) {
+        // Initialize the last position as 0 and a temporary vector to store the ranges
+        int_t last_pos = 0;
+        std::vector<std::pair<int_t, int_t>> tmp_range;
+        // Iterate through each chain for the current sequence
+        for (uint_t j = 0; j < chain_num; j++) {
+            // Get the begin position for the current chain
+            int_t begin_pos = chain[i][j].first;
+            // If the chain cannot be aligned, add (-1,-1) to the range and set the last position as -1
+            if (begin_pos == -1) {
+                tmp_range.push_back(std::make_pair(-1, -1));
+                last_pos = -1;
+            }
+            else {
+                // If the last chain could not be aligned, add (-1,-1) to the range
+                if (last_pos == -1) {
+                    tmp_range.push_back(std::make_pair(-1, -1));
+                }
+                else {
+                    // Add the range between the last position and the current chain's begin position
+                    tmp_range.push_back(std::make_pair(last_pos, begin_pos - last_pos));
+                }
+                // Update the last position to the end of the current chain
+                last_pos = begin_pos + chain[i][j].second;
+            }
+        }
+        // If the last chain could not be aligned, add (-1,-1) to the range
+        if (last_pos == -1) {
+            tmp_range.push_back(std::make_pair(-1, -1));
+        }
+        else {
+            // Add the range between the last position and the end of the sequence
+            tmp_range.push_back(std::make_pair(last_pos, data[i].length() - last_pos));
+        }
+        // Add the ranges for the current sequence to the vector of ranges
+        parallel_align_range[i] = tmp_range;
+    }
+    // Return the vector of ranges
+    return parallel_align_range;
+}
+
+void* parallel_align(void* arg) {
+    // Cast the input parameters to the correct struct type
+    ParallelAlignParams* ptr = static_cast<ParallelAlignParams*>(arg);
+    // Get data, chain, and chain_index from the input parameters
+    const std::vector<std::string> data = *(ptr->data);
+    std::vector<std::vector<std::pair<int_t, int_t>>> parallel_range = *(ptr->parallel_range);
+    const uint_t task_index = ptr->task_index;
+    // Get the number of sequences in the data vector and the number of chains in the current chain
+    uint_t seq_num = data.size();
+    uint_t parallel_num = parallel_range[0].size();
+
+    for (uint_t i = 0; i < seq_num; i++) {
+
+    }
+    return NULL;
 }

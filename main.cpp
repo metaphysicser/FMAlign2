@@ -30,25 +30,26 @@
 GlobalArgs global_args;
 int main(int argc, char** argv) {
 #if M64
-    std::cout << "Using 64 bit mode" << std::endl;
+    std::cout << "FMAlign2 is using 64 bit mode" << std::endl;
+#else
+    std::cout << "FMAlign2 is using 32 bit mode" << std::endl;
 #endif
     Timer timer;
     ArgParser parser;
 
-    parser.add_argument("input", true, "data/mt1x.fasta");
-    parser.add_argument_help("input", "The input file name.");
-    parser.add_argument("thread", false, "cpu_num");
-    parser.add_argument_help("thread", "The maximum number of threads that the program runs, the recommended setting is the number of CPUs");
-    parser.add_argument("min_mem_length", false, "30");
-    parser.add_argument_help("min_mem_length", "The minimum length of MEM");
-    parser.add_argument("min_seq_coverage", false, "0.5");
-    parser.add_argument_help("min_seq_coverage", "A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1.");
-
+    parser.add_argument("in", true, "data/mt1x.fasta");
+    parser.add_argument_help("in", "The input file name.");
+    parser.add_argument("t", false, "cpu_num");
+    parser.add_argument_help("t", "The maximum number of threads that the program runs, the recommended setting is the number of CPUs");
+    parser.add_argument("l", false, "30");
+    parser.add_argument_help("l", "The minimum length of MEM");
+    parser.add_argument("c", false, "0.5");
+    parser.add_argument_help("c", "A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1.");
 
     try {
         parser.parse_args(argc, argv);
-        global_args.data_path = parser.get("input");
-        std::string tmp_thread = parser.get("thread");
+        global_args.data_path = parser.get("in");
+        std::string tmp_thread = parser.get("t");
         if (tmp_thread == "cpu_num") {
             global_args.thread = std::thread::hardware_concurrency();
         }
@@ -56,10 +57,10 @@ int main(int argc, char** argv) {
             global_args.thread = std::stoi(tmp_thread);
         }
         std::cout << "The number of threads is set to " << global_args.thread << std::endl;
-        global_args.min_mem_length = std::stoi(parser.get("min_mem_length"));
+        global_args.min_mem_length = std::stoi(parser.get("l"));
         std::cout << "The minimum length of MEM is set to " << global_args.min_mem_length << std::endl;
 
-        global_args.min_seq_coverage = std::stof(parser.get("min_seq_coverage"));
+        global_args.min_seq_coverage = std::stof(parser.get("c"));
         if (global_args.min_seq_coverage < 0 || global_args.min_seq_coverage > 1) {
             std::cerr << "min_seq_coverage should be ranged from 0 to 1." << std::endl;
             exit(0);
@@ -80,7 +81,7 @@ int main(int argc, char** argv) {
     read_data(global_args.data_path.c_str(), data, name);
 
     std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence = find_mem(data);
-    parallel_align(data, name, split_points_on_sequence);
+    split_and_parallel_align(data, name, split_points_on_sequence);
     double total_time = timer.elapsed_time();
     std::cout << "FMAlign2 total time: " << total_time << " seconds." << std::endl;
     return 0;
