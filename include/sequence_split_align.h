@@ -27,6 +27,9 @@
 #include "thread_pool.h"
 #include "utils.h"
 #include <algorithm>
+#include <sstream>
+#include <cstdio>
+
 
 struct ExpandChainParams {
 	std::vector<std::string>* data;
@@ -37,7 +40,7 @@ struct ExpandChainParams {
 
 struct ParallelAlignParams {
 	std::vector<std::string>* data;
-	std::vector<std::vector<std::pair<int_t, int_t>>>* parallel_range;
+	std::vector<std::vector<std::pair<int_t, int_t>>>::iterator parallel_range;
 	uint_t task_index;
 	std::vector<std::vector<std::string>>::iterator result_store;
 };
@@ -96,4 +99,11 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
  * @return The vector of ranges for each sequence in the alignment
  */
 std::vector<std::vector<std::pair<int_t, int_t>>> get_parallel_align_range(std::vector<std::string> data, std::vector<std::vector<std::pair<int_t, int_t>>> chain);
+
+void* parallel_align(void* arg);
+
+std::string align_fasta(std::string file_name);
+
+
+void delete_tmp_folder(uint_t task_count);
 #endif

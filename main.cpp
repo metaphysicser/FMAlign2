@@ -45,6 +45,11 @@ int main(int argc, char** argv) {
     parser.add_argument_help("l", "The minimum length of MEM");
     parser.add_argument("c", false, "0.5");
     parser.add_argument_help("c", "A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1.");
+    parser.add_argument("p", false, "halign");
+    parser.add_argument_help("p", "The MSA method used in parallel align. for example, halign, mafft and so on.");
+    parser.add_argument("o", false, "output.aligned.fasta");
+    parser.add_argument_help("o", "The output file name with its path");
+
 
     try {
         parser.parse_args(argc, argv);
@@ -67,6 +72,11 @@ int main(int argc, char** argv) {
         }
         else {
             std::cout << "min_seq_coverage is set to " << global_args.min_seq_coverage << std::endl;
+        }
+        global_args.package = parser.get("p");
+        if (global_args.package != "halign" && global_args.package != "mafft") {
+            std::cerr << global_args.package << " is a invalid method." << std::endl;
+            exit(1);
         }
     }
     catch (const std::invalid_argument& e) {

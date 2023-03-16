@@ -55,21 +55,25 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
     std::cout << "SW expand total time: " << total_time << " seconds." << std::endl;
     timer.reset();
 
-    /*std::vector<std::vector<std::pair<int_t, int_t>>> parallel_align_range = get_parallel_align_range(data, chain);
-    uint_t parallel_num = parallel_align_range[0].size();
+    std::vector<std::vector<std::pair<int_t, int_t>>> parallel_align_range = get_parallel_align_range(data, chain);
+    uint_t parallel_num = parallel_align_range.size();
     std::vector<std::vector<std::string>> parallel_string(parallel_num, std::vector<std::string>(seq_num));
 
     std::vector<ParallelAlignParams> parallel_params(parallel_num);
+    threadpool pool;
+    threadpool_init(&pool, global_args.thread);
     for (uint_t i = 0; i < parallel_num; i++) {
         parallel_params[i].data = &data;
-        parallel_params[i].parallel_range = &parallel_align_range;
+        parallel_params[i].parallel_range = parallel_align_range.begin()+i;
         parallel_params[i].task_index = i;
         parallel_params[i].result_store = parallel_string.begin() + i;
+        threadpool_add_task(&pool, parallel_align, &parallel_params[i]);
     }
-    for (uint_t i = 0; i < parallel_num; i++) {
-        expand_chain(&parallel_params[i]);
+    threadpool_destroy(&pool);
+    /*for (uint_t i = 0; i < parallel_num; i++) {
+        parallel_align(&parallel_params[i]);
     }*/
-
+    delete_tmp_folder(parallel_num);
     return;
 }
 
@@ -456,8 +460,15 @@ std::vector<std::vector<std::pair<int_t, int_t>>> get_parallel_align_range(std::
         // Add the ranges for the current sequence to the vector of ranges
         parallel_align_range[i] = tmp_range;
     }
+    std::vector<std::vector<std::pair<int_t, int_t>>> transpose_res(parallel_align_range[0].size(), std::vector<std::pair<int_t, int_t>>(seq_num));
+    for (uint_t i = 0; i < seq_num; i++) {
+        for (uint_t j = 0; j < parallel_align_range[0].size(); j++) {
+            transpose_res[j][i] = parallel_align_range[i][j];
+        }
+    }
+    parallel_align_range.clear();
     // Return the vector of ranges
-    return parallel_align_range;
+    return transpose_res;
 }
 
 void* parallel_align(void* arg) {
@@ -465,14 +476,64 @@ void* parallel_align(void* arg) {
     ParallelAlignParams* ptr = static_cast<ParallelAlignParams*>(arg);
     // Get data, chain, and chain_index from the input parameters
     const std::vector<std::string> data = *(ptr->data);
-    std::vector<std::vector<std::pair<int_t, int_t>>> parallel_range = *(ptr->parallel_range);
+    std::vector<std::pair<int_t, int_t>> parallel_range = *(ptr->parallel_range);
     const uint_t task_index = ptr->task_index;
     // Get the number of sequences in the data vector and the number of chains in the current chain
     uint_t seq_num = data.size();
-    uint_t parallel_num = parallel_range[0].size();
+    std::string file_name = "./tmp/task-" + std::to_string(task_index) + ".fasta";
+    std::ofstream file;
+    file.open(file_name);
 
-    for (uint_t i = 0; i < seq_num; i++) {
+    if (!file.is_open()) {
+        std::cerr << file_name << " fail to open!" << std::endl;
+        exit(1);
+    }
+    for (uint_t i = 0; i < seq_num; i++) {  
+        if (parallel_range[i].first >= 0) {
+            std::string seq_content = data[i].substr(parallel_range[i].first, parallel_range[i].second);
+            std::stringstream sstreasm;
+            sstreasm << ">SEQENCE" << i << "\n" << seq_content << "\n";
+            file << sstreasm.str();
+        }       
+    }
+    file.close();
+    std::string res_file_name = align_fasta(file_name);
+    
+
+   
+    return NULL;
+}
+
+std::string align_fasta(std::string file_name) {
+    std::string cmnd = "";
+    std::string res_file_name = file_name.substr(0, file_name.find(".fasta")) + ".aligned.fasta";
+    if (global_args.package == "halign") {
+         cmnd.append("java -jar .\\ext\\halign3\\share\\halign-stmsa.jar ")
+         .append("-t 1").append(" -o ").append(res_file_name).append(" ").append(file_name);
+    }
+    else if (global_args.package == "mafft") {
 
     }
-    return NULL;
+
+#if (defined(__linux__))
+    cmnd.apend(" > /dev/null");
+#else
+    cmnd.append(" > NUL");
+#endif
+
+    system(cmnd.c_str());
+    return res_file_name;
+}
+
+void delete_tmp_folder(uint_t task_count) {
+    for (uint_t i = 0; i < task_count; i++) {
+        std::string file_name = "./tmp/task-" + std::to_string(i) + ".fasta";
+        std::string res_file_name = "./tmp/task-" + std::to_string(i) + ".aligned.fasta";
+        if (remove(file_name.c_str()) != 0) {
+            std::cerr << "Error deleting file " << file_name << std::endl;
+        }
+        if (remove(res_file_name.c_str()) != 0) {
+            std::cerr << "Error deleting file " << res_file_name << std::endl;
+        }
+    }
 }
