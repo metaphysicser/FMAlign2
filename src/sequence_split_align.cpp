@@ -516,7 +516,7 @@ std::string align_fasta(std::string file_name) {
     }
 
 #if (defined(__linux__))
-    cmnd.apend(" > /dev/null");
+    cmnd.append(" > /dev/null");
 #else
     cmnd.append(" > NUL");
 #endif
