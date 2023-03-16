@@ -30,11 +30,11 @@
 #include <chrono> 
 #include <math.h>
 #include <algorithm>
-#if (defined(__linux__) || defined(__APPLE__))
-#include <unistd.h>
+#if (defined(__linux__))
+    #include <unistd.h>
 #else
-#include <io.h>
-#include <process.h>
+    #include <io.h>
+    #include <process.h>
 #endif
 #include <string>
 #include <vector>

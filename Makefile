@@ -2,6 +2,9 @@ CXX = g++
 CXXFLAGS = -Wall -std=c++11
 CC = g++
 CFLAGS = 
+
+SRCS = main.cpp src/utils.cpp src/mem_finder.cpp src/sequence_split_align.cpp ext/SW/ssw.cpp ext/SW/ssw_cpp.cpp
+
 ifdef DEBUG
 	CXXFLAGS += -O0 -g -DDEBUG
 	CFLAGS += -O0 -g
@@ -11,12 +14,11 @@ else
 endif
 
 ifeq ($(OS),Windows_NT)
-    CXXFLAGS +=  -L.\ext\pthread-win32 -lpthread
+    CXXFLAGS +=  -fopenmp
 else
-	CXXFLAGS += -lpthread
+	CXXFLAGS += -lpthread -pthread
+	SRCS += src/thread_pool.cpp src/thread_condition.cpp
 endif
-
-SRCS = main.cpp src/utils.cpp src/mem_finder.cpp src/sequence_split_align.cpp src/thread_pool.cpp src/thread_condition.cpp ext/SW/ssw.cpp ext/SW/ssw_cpp.cpp
 OBJS = $(SRCS:.cpp=.o)
 OBJS += src/gsacak.o
 
@@ -27,7 +29,6 @@ endif
 
 FMAlign2: $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o FMAlign2
-
 
 utils.o: src/utils.cpp include/utils.h include/common.h include/kseq.h
 	$(CXX) $(CXXFLAGS) -c src/utils.cpp -o $@
@@ -41,11 +42,14 @@ sequence_split_align.o: src/sequence_split_align.cpp include/common.h
 gsacak.o: src/gsacak.c include/gsacak.h
 	$(C) $(CFLAGS)  -c src/gsacak.c -o $@
 
+ifeq ($(OS),Windows_NT)
+else
 thread_pool.o: src/thread_pool.cpp include/thread_pool.h include/thread_condition.h
 	$(CXX) $(CXXFLAGS) -c src/thread_pool.cpp -o $@
 
 thread_condition.o: src/thread_condition.cpp include/thread_condition.h
 	$(CXX) $(CXXFLAGS) -c src/thread_conition.cpp -o $@
+endif
 
 ssw.o: ext/SW/ssw.cpp ext/SW/ssw.h
 	$(CXX) $(CXXFLAGS) -c ext/SW/ssw.cpp -o $@

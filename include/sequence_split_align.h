@@ -24,12 +24,14 @@
 #include "common.h"
 #include "../ext/SW/ssw_cpp.h"
 #include "../ext/SW/ssw.h"
-#include "thread_pool.h"
 #include "utils.h"
 #include <algorithm>
 #include <sstream>
 #include <cstdio>
+#include <io.h>
+#include <direct.h>
 
+#define TMP_FOLDER "./tmp"
 
 struct ExpandChainParams {
 	std::vector<std::string>* data;
@@ -104,6 +106,9 @@ void* parallel_align(void* arg);
 
 std::string align_fasta(std::string file_name);
 
-
+/**
+* @brief Deletes temporary files generated during sequence alignment tasks.
+* @param task_count The number of tasks for which temporary files were created.
+*/
 void delete_tmp_folder(uint_t task_count);
 #endif

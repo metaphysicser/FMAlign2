@@ -190,11 +190,11 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     }
     std::vector<mem> mems;
     mems.resize(interval_size);
-    int_t threads = global_args.thread;
     // Convert each interval to a MEM in parallel
     IntervalToMemConversionParams* params = new IntervalToMemConversionParams[interval_size];
+#if (defined(__linux__))
     threadpool pool;
-    threadpool_init(&pool, threads);
+    threadpool_init(&pool, global_args.thread);
     for (uint_t i = 0; i < interval_size; i++) {
         params[i].SA = SA;
         params[i].DA = DA;
@@ -207,6 +207,19 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
         threadpool_add_task(&pool, interval2mem, params+i);
     }
     threadpool_destroy(&pool);
+#else
+#pragma omp parallel for num_threads(global_args.thread)
+    for (uint_t i = 0; i < interval_size; i++) {
+        params[i].SA = SA;
+        params[i].DA = DA;
+        params[i].interval = intervals[i];
+        params[i].concat_data = concat_data;
+        params[i].result_store = mems.begin() + i;
+        params[i].min_mem_length = min_mem_length;
+        params[i].joined_sequence_bound = joined_sequence_bound;
+        interval2mem(params + i);
+    }
+#endif
 
     if (mems.size() <= 0) {
         std::cerr << "There is no MEM, please adjust your paramters." << std::endl;

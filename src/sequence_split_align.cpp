@@ -55,11 +55,20 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
     std::cout << "SW expand total time: " << total_time << " seconds." << std::endl;
     timer.reset();
 
+    if (0 != access(TMP_FOLDER, 0))
+    {
+        if (0 != mkdir(TMP_FOLDER)) {
+            std::cerr << "Fail to create file folder " << TMP_FOLDER << std::endl;
+        }
+    }
+
+
     std::vector<std::vector<std::pair<int_t, int_t>>> parallel_align_range = get_parallel_align_range(data, chain);
     uint_t parallel_num = parallel_align_range.size();
     std::vector<std::vector<std::string>> parallel_string(parallel_num, std::vector<std::string>(seq_num));
 
     std::vector<ParallelAlignParams> parallel_params(parallel_num);
+#if (defined(__linux__))
     threadpool pool;
     threadpool_init(&pool, global_args.thread);
     for (uint_t i = 0; i < parallel_num; i++) {
@@ -70,9 +79,16 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
         threadpool_add_task(&pool, parallel_align, &parallel_params[i]);
     }
     threadpool_destroy(&pool);
-    /*for (uint_t i = 0; i < parallel_num; i++) {
+#else
+#pragma omp parallel for num_threads(global_args.thread)
+    for (uint_t i = 0; i < parallel_num; i++) {
+        parallel_params[i].data = &data;
+        parallel_params[i].parallel_range = parallel_align_range.begin() + i;
+        parallel_params[i].task_index = i;
+        parallel_params[i].result_store = parallel_string.begin() + i;
         parallel_align(&parallel_params[i]);
-    }*/
+    }
+#endif
     delete_tmp_folder(parallel_num);
     return;
 }
@@ -508,7 +524,7 @@ std::string align_fasta(std::string file_name) {
     std::string cmnd = "";
     std::string res_file_name = file_name.substr(0, file_name.find(".fasta")) + ".aligned.fasta";
     if (global_args.package == "halign") {
-         cmnd.append("java -jar .\\ext\\halign3\\share\\halign-stmsa.jar ")
+         cmnd.append("java -jar ./ext/halign3/share/halign-stmsa.jar ")
          .append("-t 1").append(" -o ").append(res_file_name).append(" ").append(file_name);
     }
     else if (global_args.package == "mafft") {
@@ -525,6 +541,10 @@ std::string align_fasta(std::string file_name) {
     return res_file_name;
 }
 
+/**
+* @brief Deletes temporary files generated during sequence alignment tasks.
+* @param task_count The number of tasks for which temporary files were created.
+*/
 void delete_tmp_folder(uint_t task_count) {
     for (uint_t i = 0; i < task_count; i++) {
         std::string file_name = "./tmp/task-" + std::to_string(i) + ".fasta";
