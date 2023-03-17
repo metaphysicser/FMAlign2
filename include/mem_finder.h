@@ -36,7 +36,7 @@
 #include <algorithm>
 #include <vector>
 #include <unordered_map>
-
+#include <sstream>
 struct sub_string {
     int_t sequence_index; // the sequence index that substring in
     uint_t position; // the begin position in the seqence

@@ -148,6 +148,9 @@ std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem> me
  * @return Vector of split points for each sequence.
  */
 std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::string> data){
+    std::cout << "#                    Finding MEM...                         #" << std::endl;
+    print_table_divider();
+    std::string output = "";
     Timer timer;
     uint_t n = 0;
     unsigned char* concat_data = concat_strings(data, n); 
@@ -163,7 +166,10 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     timer.reset();
     gsacak((unsigned char *)concat_data, (uint_t*)SA, LCP, DA, n);
     double suffix_construction_time = timer.elapsed_time();
-    std::cout << "Suffix construction time: " << suffix_construction_time << " seconds." << std::endl;
+    std::stringstream s;
+    s << std::fixed << std::setprecision(2) << suffix_construction_time;
+    output = "Suffix construction time: " + s.str() + " seconds";
+    print_table_line(output);
 
     timer.reset();
     int_t min_mem_length = global_args.min_mem_length;
@@ -181,13 +187,14 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
 
     uint_t interval_size = intervals.size();
 
-    if (interval_size <= 0) {
-        std::cerr << "There is no LCP interval, please adjust your paramters." << std::endl;
-        exit(1);
+    /*if (interval_size <= 0) {
+        output = "Warning: There is no LCP interval! please adjust your paramters.";
+        print_table_line(output);
     }
     else {
-        std::cout << "The LCP interval number is " << interval_size << std::endl;
-    }
+        std::string output_ = "LCP interval number: " + interval_size;
+        print_table_line(output_);
+    }*/
     std::vector<mem> mems;
     mems.resize(interval_size);
     // Convert each interval to a MEM in parallel
@@ -222,8 +229,9 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
 #endif
 
     if (mems.size() <= 0) {
-        std::cerr << "There is no MEM, please adjust your paramters." << std::endl;
-        exit(1);
+        output = "Warning: There is no MEM, please adjust your paramters.";
+        print_table_line(output);
+       
     }
 
     // Sort the MEMs based on their average positions and assign their indices
@@ -237,8 +245,13 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     uint_t sequence_num = data.size();
     std::vector<std::vector<std::pair<int_t, int_t>>> split_point_on_sequence =  filter_mem(mems, sequence_num);
     double mem_process_time = timer.elapsed_time();
-    std::cout << "The sequence is divided into " << split_point_on_sequence[0].size() << " parts" << std::endl;
-    std::cout << "MEM process time: " << mem_process_time << " seconds." << std::endl;
+    output = "Sequence divide parts: " + std::to_string(split_point_on_sequence[0].size());
+    print_table_line(output);
+    s.str("");
+    s << std::fixed << std::setprecision(3) << mem_process_time;
+    output = "MEM process time: " + s.str() + " seconds.";
+    print_table_line(output);
+    print_table_divider();
 
     return split_point_on_sequence;
 }
@@ -289,8 +302,8 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
 std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t threshold, int_t min_cross_sequence, uint_t n) {
 
     std::vector<std::pair<uint_t, uint_t>> intervals;
-
-    std::cout << "minimal cross sequence number is " << min_cross_sequence << std::endl;
+    std::string output = "Minimal cross sequence number: " + std::to_string(min_cross_sequence);
+    print_table_line(output);
 
     int_t left = 0, right = 0;
     bool found = false;

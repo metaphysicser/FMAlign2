@@ -29,13 +29,9 @@
 
 GlobalArgs global_args;
 int main(int argc, char** argv) {
-#if M64
-    std::cout << "FMAlign2 is using 64 bit mode" << std::endl;
-#else
-    std::cout << "FMAlign2 is using 32 bit mode" << std::endl;
-#endif
     Timer timer;
     ArgParser parser;
+    std::string output = "";
 
     parser.add_argument("in", true, "data/mt1x.fasta");
     parser.add_argument_help("in", "The input file name.");
@@ -61,21 +57,21 @@ int main(int argc, char** argv) {
         else {
             global_args.thread = std::stoi(tmp_thread);
         }
-        std::cout << "The number of threads is set to " << global_args.thread << std::endl;
-        global_args.min_mem_length = std::stoi(parser.get("l"));
-        std::cout << "The minimum length of MEM is set to " << global_args.min_mem_length << std::endl;
+      
+        global_args.min_mem_length = std::stoi(parser.get("l"));      
 
         global_args.min_seq_coverage = std::stof(parser.get("c"));
         if (global_args.min_seq_coverage < 0 || global_args.min_seq_coverage > 1) {
-            std::cerr << "min_seq_coverage should be ranged from 0 to 1." << std::endl;
-            exit(0);
-        }
-        else {
-            std::cout << "min_seq_coverage is set to " << global_args.min_seq_coverage << std::endl;
+            std::string output = "Error: min_seq_coverage should be ranged from 0 to 1!";
+            std::cerr << output << std::endl;
+            std::cerr << "Program Exit!" << std::endl;
+            exit(1);
         }
         global_args.package = parser.get("p");
         if (global_args.package != "halign" && global_args.package != "mafft") {
-            std::cerr << global_args.package << " is a invalid method." << std::endl;
+            std::string output = "Error: " + global_args.package + " is a invalid method!";
+            std::cerr << output << std::endl;
+            std::cerr << "Program Exit!" << std::endl;
             exit(1);
         }
     }
@@ -84,6 +80,8 @@ int main(int argc, char** argv) {
         parser.print_help();
         return 1;
     }
+
+    print_algorithm_info();
 
     std::vector<std::string> data;
     std::vector<std::string> name;
@@ -94,11 +92,17 @@ int main(int argc, char** argv) {
         split_and_parallel_align(data, name, split_points_on_sequence);
     }
     catch (const std::bad_alloc& e) {
+        print_table_bound();
         std::cerr << "Error: " << e.what() << std::endl;
-        exit(0);
+        std::cout << "Program Exit!" << std::endl;
+        exit(1);
     }
-    
+
     double total_time = timer.elapsed_time();
-    std::cout << "FMAlign2 total time: " << total_time << " seconds." << std::endl;
+    std::stringstream s;
+    s << std::fixed << std::setprecision(2) << total_time;
+    output = "FMAlign2 total time: " + s.str() + " seconds.";
+    print_table_line(output);
+    print_table_bound();
     return 0;
 }

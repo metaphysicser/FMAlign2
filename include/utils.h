@@ -40,7 +40,10 @@
 #include <vector>
 #include <map>
 #include <stdexcept>
+#include <iomanip>
+#include <sstream>
 
+#define TABLE_LEN 60
 /**
  * @brief A timer class that measures elapsed time. 
  * This class uses C++11 chrono library to measure elapsed time in seconds with double precision. 
@@ -156,5 +159,20 @@ bool access_file(const char* data_path);
  * @return The cleaned DNA sequence as a new string.
 */
 std::string clean_sequence(std::string sequence);
+
+/**
+* @brief Print information about the FMAlign2 algorithm
+* This function prints various information about the FMAlign2 algorithm,
+* including the mode (32-bit or 64-bit), number of threads, minimum MEM length,
+* sequence coverage, and parallel align method.
+* @return void
+*/
+void print_algorithm_info();
+
+void print_table_line(const std::string& output);
+
+void print_table_divider();
+
+void print_table_bound();
 
 #endif

@@ -50,11 +50,19 @@ double Timer::elapsed_time() const {
  * @return multiple sequence stored in vector 
 */
 void read_data(const char* data_path, std::vector<std::string>& data, std::vector<std::string>& name){
+    std::cout << "#                   Reading Data...                         #" << std::endl;
+    print_table_divider();
+    std::string output = "";
+    std::string str_data_path = data_path;
     // check weather the input path could be accessed 
     if(access_file(data_path)){
-        std::cout<< data_path << " could be accessed" << std::endl;
+        output = str_data_path + " could be accessed";
+        print_table_line(output);
     }else{
-        std::cerr << data_path << " could not be accessed, please check the input data path" << std::endl;
+        print_table_bound();
+        output = "Error:" + str_data_path + " could not be accessed, Please check if the path of the input data is correct or if the data exists!";
+        std::cerr <<  output << std::endl;
+        std::cerr << "Program Exit!" << std::endl;
         exit(1);
     }
 
@@ -76,15 +84,25 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
     kseq_destroy(file_t);
 
     if(merged_length + data.size() > UINT32_MAX && M64 == 0){
-        std::cerr << "The input data is too large and the 32-bit program may not produce correct results. Please compile a 64-bit program using the M64 parameter." << std::endl;
+        print_table_bound();
+        std::cerr << "Error: The input data is too large and the 32-bit program may not produce correct results. Please compile a 64-bit program using the M64 parameter." << std::endl;
+        std::cerr << "Program Exit!" << std::endl;
         exit(1);
     }
     #if M64
-    std::cout << "The input data occupies approximately "<< std::fixed << std::setprecision(2) << merged_length / pow(2, 30) <<" GB of memory" << std::endl;
+    std::stringstream s;
+    s << std::fixed << std::setprecision(2) << merged_length / pow(2, 30);
+    output = "Data Memory Usage: " + s.str()
+    print_table_line(output);
     #else
-    std::cout << "The input data occupies approximately "<< std::fixed << std::setprecision(2) << merged_length / pow(2, 20) <<" MB of memory" << std::endl;
+    std::stringstream s;
+    s << std::fixed << std::setprecision(2) << merged_length / pow(2, 20);
+    output = "Data Memory Usage: " + s.str() + " MB";
+    print_table_line(output);
     #endif
-    std::cout << "the number of input sequences is " << data.size() << std::endl;
+    output = "Sequence Number: " + std::to_string(data.size());
+    print_table_line(output);
+    print_table_divider();
     return;
 }
 
@@ -226,6 +244,53 @@ std::string ArgParser::get(const std::string& name) const {
 
 bool ArgParser::has(const std::string& name) const {
     return args_.count(name) > 0 && args_.at(name).value != "";
+}
+
+/**
+* @brief Print information about the FMAlign2 algorithm
+* This function prints various information about the FMAlign2 algorithm,
+* including the mode (32-bit or 64-bit), number of threads, minimum MEM length,
+* sequence coverage, and parallel align method.
+* @return void
+*/
+void print_algorithm_info() {
+    print_table_bound();
+    std::cout << "#               FMAlign2 algorithm info                     #" << std::endl;
+    print_table_divider();
+#if M64
+    std::string output = "Mode: 64 bit";
+    print_table_line(output);
+#else
+    std::string output = "Mode: 32 bit";
+    print_table_line(output);
+#endif
+    std::string thread_output = "Thread: " + std::to_string(global_args.thread);
+    print_table_line(thread_output);
+
+    std::string l_output = "Minimum MEM length: " + std::to_string(global_args.min_mem_length);
+    print_table_line(l_output);
+
+    std::stringstream s;
+    s << std::fixed << std::setprecision(2) << global_args.min_seq_coverage;
+    std::string c_output = "Sequence coverage: " + s.str();
+    print_table_line(c_output);
+
+    std::string p_output = "Parallel align method: " + global_args.package;
+    print_table_line(p_output);
+
+    print_table_bound();
+}
+
+void print_table_line(const std::string &output) {
+    std::cout << "# " << std::left << std::setw(TABLE_LEN-2) << std::setfill(' ') << output << "#" << std::endl;
+}
+
+void print_table_divider() {
+    std::cout << "#" << std::right << std::setw(TABLE_LEN) << std::setfill('-') << "#" << std::endl;
+}
+
+void print_table_bound() {
+    std::cout << "#" << std::right << std::setw(TABLE_LEN) << std::setfill('#') << "#" << std::endl;
 }
 
 

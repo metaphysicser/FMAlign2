@@ -21,6 +21,9 @@
 #include "../include/sequence_split_align.h"
 
 void split_and_parallel_align(std::vector<std::string> data, std::vector<std::string> name, std::vector<std::vector<std::pair<int_t, int_t>>> chain){
+    std::cout << "#                Parallel Aligning...                       #" << std::endl;
+    print_table_divider();
+    std::string output = "";
     Timer timer;
     uint_t chain_num = chain[0].size();
     uint_t seq_num = data.size();
@@ -51,8 +54,11 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
     }
 #endif    
 
-    double total_time = timer.elapsed_time();
-    std::cout << "SW expand total time: " << total_time << " seconds." << std::endl;
+    double SW_time = timer.elapsed_time();
+    std::stringstream s;
+    s << std::fixed << std::setprecision(2) << SW_time;
+    output = "SW expand time: " + s.str() + " seconds.";
+    print_table_line(output);
     timer.reset();
 
     if (0 != access(TMP_FOLDER, 0))
@@ -90,6 +96,8 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
     }
 #endif
     delete_tmp_folder(parallel_num);
+
+    print_table_divider();
     return;
 }
 
