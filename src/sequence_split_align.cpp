@@ -97,6 +97,14 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
 #endif
     delete_tmp_folder(parallel_num);
 
+    double parallel_align_time = timer.elapsed_time();
+    s.str("");
+    s << std::fixed << std::setprecision(2) << parallel_align_time;
+    output = "Parallel align time: " + s.str() + " seconds.";
+    print_table_line(output);
+
+    concat_alignment(chain_string, parallel_string, name);
+
     print_table_divider();
     return;
 }
@@ -529,7 +537,13 @@ void* parallel_align(void* arg) {
     std::vector<std::string> aligned_seq;
     std::vector<std::string> aligned_name;
     read_data(res_file_name.c_str(), aligned_seq, aligned_name, false);
-   
+    std::vector<std::string> final_aligned_seq(seq_num, "");
+
+    for (uint_t i = 0; i < aligned_seq_index.size(); i++) {
+        final_aligned_seq[aligned_seq_index[i]] = aligned_seq[i];
+    }
+
+    *(ptr->result_store) = final_aligned_seq;
    
     return NULL;
 }
@@ -579,4 +593,36 @@ void delete_tmp_folder(uint_t task_count) {
             std::cerr << "Error deleting file " << res_file_name << std::endl;
         }
     }
+}
+
+void concat_alignment(std::vector<std::vector<std::string>> &chain_string, std::vector<std::vector<std::string>>&parallel_string, std::vector<std::string> &name) {
+    std::string output_path = global_args.output_path;
+    std::vector<std::string> concated_data(name.size(), "");
+    
+    for (uint_t i = 0; i < name.size(); i++) {
+        for (uint_t j = 0; j < parallel_string.size(); j++) {
+            concated_data[i] += parallel_string[j][i];
+            if (j < chain_string.size()) {
+                concated_data[i] += chain_string[j][i];
+            }
+        }
+    }
+    
+
+    std::ofstream output_file;
+    output_file.open(output_path);
+    if (!output_file.is_open()) {
+        std::cerr << "Error opening output file " << output_path << std::endl;
+        exit(1);
+    }
+
+    for (uint_t i = 0; i < concated_data.size(); i++) {
+        std::stringstream ss;
+        ss << ">" << name[i] << "\n" << concated_data[i] << "\n";
+        output_file << ss.str();
+    }
+
+    output_file.close();
+
+    
 }

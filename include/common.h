@@ -63,6 +63,7 @@ struct GlobalArgs {
 	int_t min_mem_length;
 	float min_seq_coverage;
 	std::string package;
+	std::string output_path;
 };
 extern GlobalArgs global_args;
 

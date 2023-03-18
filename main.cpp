@@ -74,6 +74,8 @@ int main(int argc, char** argv) {
             std::cerr << "Program Exit!" << std::endl;
             exit(1);
         }
+
+        global_args.output_path = parser.get("o");
     }
     catch (const std::invalid_argument& e) {
         std::cerr << "Error: " << e.what() << std::endl;

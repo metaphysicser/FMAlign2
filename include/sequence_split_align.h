@@ -111,4 +111,7 @@ std::string align_fasta(std::string file_name);
 * @param task_count The number of tasks for which temporary files were created.
 */
 void delete_tmp_folder(uint_t task_count);
+
+
+void concat_alignment(std::vector<std::vector<std::string>>&chain_string, std::vector<std::vector<std::string>>&parallel_string, std::vector<std::string> &name);
 #endif
