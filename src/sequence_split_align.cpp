@@ -61,9 +61,9 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
     print_table_line(output);
     timer.reset();
 
-    if (0 != access(TMP_FOLDER, 0))
+    if (0 != access(TMP_FOLDER.c_str(), 0))
     {
-        if (0 != mkdir(TMP_FOLDER)) {
+        if (0 != mkdir(TMP_FOLDER.c_str())) {
             std::cerr << "Fail to create file folder " << TMP_FOLDER << std::endl;
         }
     }
@@ -504,7 +504,7 @@ void* parallel_align(void* arg) {
     const uint_t task_index = ptr->task_index;
     // Get the number of sequences in the data vector and the number of chains in the current chain
     uint_t seq_num = data.size();
-    std::string file_name = "./tmp/task-" + std::to_string(task_index) + ".fasta";
+    std::string file_name = TMP_FOLDER + "task-" + std::to_string(task_index) + ".fasta";
     std::ofstream file;
     file.open(file_name);
 
@@ -512,18 +512,24 @@ void* parallel_align(void* arg) {
         std::cerr << file_name << " fail to open!" << std::endl;
         exit(1);
     }
+
+    std::vector<uint_t> aligned_seq_index;
     for (uint_t i = 0; i < seq_num; i++) {  
         if (parallel_range[i].first >= 0) {
             std::string seq_content = data[i].substr(parallel_range[i].first, parallel_range[i].second);
             std::stringstream sstreasm;
             sstreasm << ">SEQENCE" << i << "\n" << seq_content << "\n";
             file << sstreasm.str();
+            aligned_seq_index.push_back(i);
         }       
     }
     file.close();
     std::string res_file_name = align_fasta(file_name);
-    
 
+    std::vector<std::string> aligned_seq;
+    std::vector<std::string> aligned_name;
+    read_data(res_file_name.c_str(), aligned_seq, aligned_name, false);
+   
    
     return NULL;
 }
@@ -534,16 +540,25 @@ std::string align_fasta(std::string file_name) {
     if (global_args.package == "halign") {
          cmnd.append("java -jar ./ext/halign3/share/halign-stmsa.jar ")
          .append("-t 1").append(" -o ").append(res_file_name).append(" ").append(file_name);
+#if (defined(__linux__))
+         cmnd.append(" > /dev/null");
+#else
+         cmnd.append(" > NUL");
+#endif
     }
     else if (global_args.package == "mafft") {
-
-    }
-
+        cmnd.append(".\\ext\\mafft\\usr\\lib\\mafft\\disttbfast.exe ")
+            .append("-q 0 -E 1 -V -1.53 -s 0.0 -W 6 -O -C ")
+            .append("1").append(" -b 62 -g 0 -f -1.53 -Q 100.0 -h 0 -F -X 0.1 -i ")
+            .append(file_name).append(" > ")
+            .append(res_file_name);
 #if (defined(__linux__))
-    cmnd.append(" > /dev/null");
+        cmnd.append(" 2> /dev/null");
+        std::replace(cmnd.begin(), cmnd.end(), '\\', '/');
 #else
-    cmnd.append(" > NUL");
+        cmnd.append(" 2> NUL");   
 #endif
+    }
 
     system(cmnd.c_str());
     return res_file_name;
@@ -555,8 +570,8 @@ std::string align_fasta(std::string file_name) {
 */
 void delete_tmp_folder(uint_t task_count) {
     for (uint_t i = 0; i < task_count; i++) {
-        std::string file_name = "./tmp/task-" + std::to_string(i) + ".fasta";
-        std::string res_file_name = "./tmp/task-" + std::to_string(i) + ".aligned.fasta";
+        std::string file_name = TMP_FOLDER +"task-" + std::to_string(i) + ".fasta";
+        std::string res_file_name = TMP_FOLDER + "task-" + std::to_string(i) + ".aligned.fasta";
         if (remove(file_name.c_str()) != 0) {
             std::cerr << "Error deleting file " << file_name << std::endl;
         }

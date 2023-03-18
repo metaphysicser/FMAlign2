@@ -142,7 +142,7 @@ private:
  * @param name store sequence name
  * @return multiple sequence stored in vector 
 */
-void read_data(const char* data_path, std::vector<std::string>& data, std::vector<std::string>& name);
+void read_data(const char* data_path, std::vector<std::string>& data, std::vector<std::string>& name, bool verbose);
 
 /**
  * @brief: Check whether the file exists in the specified path.

@@ -49,21 +49,26 @@ double Timer::elapsed_time() const {
  * @param name store sequence name
  * @return multiple sequence stored in vector 
 */
-void read_data(const char* data_path, std::vector<std::string>& data, std::vector<std::string>& name){
-    std::cout << "#                   Reading Data...                         #" << std::endl;
-    print_table_divider();
+void read_data(const char* data_path, std::vector<std::string>& data, std::vector<std::string>& name, bool verbose = true){
+    if (verbose) {
+        std::cout << "#                   Reading Data...                         #" << std::endl;
+        print_table_divider();
+    }
     std::string output = "";
     std::string str_data_path = data_path;
     // check weather the input path could be accessed 
-    if(access_file(data_path)){
-        output = str_data_path + " could be accessed";
-        print_table_line(output);
-    }else{
-        print_table_bound();
-        output = "Error:" + str_data_path + " could not be accessed, Please check if the path of the input data is correct or if the data exists!";
-        std::cerr <<  output << std::endl;
-        std::cerr << "Program Exit!" << std::endl;
-        exit(1);
+    if (verbose) {
+        if (access_file(data_path)) {
+            output = str_data_path + " could be accessed";
+            print_table_line(output);
+        }
+        else {
+            print_table_bound();
+            output = "Error:" + str_data_path + " could not be accessed, Please check if the path of the input data is correct or if the data exists!";
+            std::cerr << output << std::endl;
+            std::cerr << "Program Exit!" << std::endl;
+            exit(1);
+        }
     }
 
     FILE* f_pointer = fopen(data_path, "r");
@@ -82,27 +87,35 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
         merged_length += tmp_length;
     }
     kseq_destroy(file_t);
+    fclose(f_pointer);
 
-    if(merged_length + data.size() > UINT32_MAX && M64 == 0){
+    if(verbose && merged_length + data.size() > UINT32_MAX && M64 == 0){
         print_table_bound();
         std::cerr << "Error: The input data is too large and the 32-bit program may not produce correct results. Please compile a 64-bit program using the M64 parameter." << std::endl;
         std::cerr << "Program Exit!" << std::endl;
         exit(1);
     }
     #if M64
-    std::stringstream s;
-    s << std::fixed << std::setprecision(2) << merged_length / pow(2, 30);
-    output = "Data Memory Usage: " + s.str()
-    print_table_line(output);
+    if (verbose) {
+        std::stringstream s;
+        s << std::fixed << std::setprecision(2) << merged_length / pow(2, 30);
+        output = "Data Memory Usage: " + s.str()
+        print_table_line(output);
+    }
+    
     #else
-    std::stringstream s;
-    s << std::fixed << std::setprecision(2) << merged_length / pow(2, 20);
-    output = "Data Memory Usage: " + s.str() + " MB";
-    print_table_line(output);
+    if (verbose) {
+        std::stringstream s;
+        s << std::fixed << std::setprecision(2) << merged_length / pow(2, 20);
+        output = "Data Memory Usage: " + s.str() + " MB";
+        print_table_line(output);
+    }
     #endif
-    output = "Sequence Number: " + std::to_string(data.size());
-    print_table_line(output);
-    print_table_divider();
+    if (verbose) {
+        output = "Sequence Number: " + std::to_string(data.size());
+        print_table_line(output);
+        print_table_divider();
+    }
     return;
 }
 

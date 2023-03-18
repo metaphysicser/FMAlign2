@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> name;
 
     try {
-        read_data(global_args.data_path.c_str(), data, name);
+        read_data(global_args.data_path.c_str(), data, name, true);
         std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence = find_mem(data);
         split_and_parallel_align(data, name, split_points_on_sequence);
     }

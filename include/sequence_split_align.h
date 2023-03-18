@@ -31,7 +31,7 @@
 #include <io.h>
 #include <direct.h>
 
-#define TMP_FOLDER "./tmp"
+const std::string TMP_FOLDER = "./tmp/";
 
 struct ExpandChainParams {
 	std::vector<std::string>* data;
