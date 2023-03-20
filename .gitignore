@@ -8,3 +8,10 @@
 /Debug
 /x64/Debug
 /obj
+/fig
+/x64/Release
+/trace
+/pthread.dll
+/PropertySheet.props
+/pre
+/order
