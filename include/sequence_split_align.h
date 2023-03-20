@@ -28,6 +28,11 @@
 #include <algorithm>
 #include <sstream>
 #include <cstdio>
+#ifdef __linux__
+#include <sys/stat.h>
+#else
+#include <direct.h>
+#endif
 
 
 const std::string TMP_FOLDER = "./tmp/";
