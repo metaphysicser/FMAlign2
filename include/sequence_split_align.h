@@ -28,7 +28,6 @@
 #include <algorithm>
 #include <sstream>
 #include <cstdio>
-#include <io.h>
 #include <direct.h>
 
 const std::string TMP_FOLDER = "./tmp/";
