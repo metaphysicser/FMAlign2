@@ -16,7 +16,7 @@ endif
 ifeq ($(OS),Windows_NT)
     CXXFLAGS +=  -fopenmp
 else
-	CXXFLAGS += -lpthread -pthread
+	CXXFLAGS += -lpthread -pthread -lrt
 	SRCS += src/thread_pool.cpp src/thread_condition.cpp
 endif
 OBJS = $(SRCS:.cpp=.o)
