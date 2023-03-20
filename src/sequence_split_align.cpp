@@ -580,7 +580,7 @@ std::string align_fasta(std::string file_name) {
 #endif
     }
 
-    system(cmnd.c_str());
+    int res = system(cmnd.c_str());
     return res_file_name;
 }
 
