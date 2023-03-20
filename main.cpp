@@ -34,17 +34,17 @@ int main(int argc, char** argv) {
     std::string output = "";
 
     parser.add_argument("in", true, "data/mt1x.fasta");
-    parser.add_argument_help("in", "The input file name.");
+    parser.add_argument_help("in", "The path to the input file.");
     parser.add_argument("t", false, "cpu_num");
-    parser.add_argument_help("t", "The maximum number of threads that the program runs, the recommended setting is the number of CPUs");
+    parser.add_argument_help("t", "The maximum number of threads that the program runs, the recommended setting is the number of CPUs.");
     parser.add_argument("l", false, "30");
-    parser.add_argument_help("l", "The minimum length of MEM");
-    parser.add_argument("c", false, "0.5");
+    parser.add_argument_help("l", "The minimum length of MEM.");
+    parser.add_argument("c", false, "0.7");
     parser.add_argument_help("c", "A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1.");
     parser.add_argument("p", false, "halign");
     parser.add_argument_help("p", "The MSA method used in parallel align. for example, halign, mafft and so on.");
     parser.add_argument("o", false, "output.aligned.fasta");
-    parser.add_argument_help("o", "The output file name with its path");
+    parser.add_argument_help("o", "The path to the output file.");
 
 
     try {
