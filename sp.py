@@ -104,7 +104,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', type=str, required=False, default='output.aligned.fasta', help='Fasta file path to be scored.')
     parser.add_argument('--match', type=float, default=1, help='match score, default=1.')
-    parser.add_argument('--mismatch', type=float, default=0, help='mismatch score, default=-1.')
+    parser.add_argument('--mismatch', type=float, default=-2, help='mismatch score, default=-1.')
     parser.add_argument('--gap1', type=float, default=0, help='gap-base score, default=-2.')
     parser.add_argument('--gap2', type=float, default=0, help='gap-gap score, default=0.')
     args = parser.parse_args()
