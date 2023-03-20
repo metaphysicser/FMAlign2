@@ -63,9 +63,15 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
 
     if (0 != access(TMP_FOLDER.c_str(), 0))
     {
+#ifdef __linux__
+        if (0 != mkdir(TMP_FOLDER.c_str(), 0755)) {
+            std::cerr << "Fail to create file folder " << TMP_FOLDER << std::endl;
+    }
+#else
         if (0 != mkdir(TMP_FOLDER.c_str())) {
             std::cerr << "Fail to create file folder " << TMP_FOLDER << std::endl;
         }
+#endif
     }
 
 
