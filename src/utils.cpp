@@ -99,7 +99,7 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
     if (verbose) {
         std::stringstream s;
         s << std::fixed << std::setprecision(2) << merged_length / pow(2, 30);
-        output = "Data Memory Usage: " + s.str()
+        output = "Data Memory Usage: " + s.str();
         print_table_line(output);
     }
     

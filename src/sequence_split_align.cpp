@@ -852,8 +852,10 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
     
     int res = system(cmd.c_str());
     if (res != 0) {
+#if DEBUG
         std::string out = "Warning: Seq-Profile alignment may result in errors and may produce invalid results.";
         print_table_line(out);
+#endif
     }
     // Define vectors for storing aligned sequences and their names
     std::vector<std::string> align_res;
