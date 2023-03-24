@@ -29,15 +29,17 @@
 
 GlobalArgs global_args;
 int main(int argc, char** argv) {
+    // Create a Timer object to record the execution time.
     Timer timer;
+    // Create an ArgParser object to parse command line arguments.
     ArgParser parser;
     std::string output = "";
-
+    // Add command line arguments to the ArgParser object.
     parser.add_argument("in", true, "data/mt1x.fasta");
     parser.add_argument_help("in", "The path to the input file.");
     parser.add_argument("t", false, "cpu_num");
     parser.add_argument_help("t", "The maximum number of threads that the program runs, the recommended setting is the number of CPUs.");
-    parser.add_argument("l", false, "30");
+    parser.add_argument("l", false, "200");
     parser.add_argument_help("l", "The minimum length of MEM.");
     parser.add_argument("c", false, "0.7");
     parser.add_argument_help("c", "A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1.");
@@ -46,7 +48,7 @@ int main(int argc, char** argv) {
     parser.add_argument("o", false, "output.aligned.fasta");
     parser.add_argument_help("o", "The path to the output file.");
 
-
+    // Add command line arguments to the ArgParser object.
     try {
         parser.parse_args(argc, argv);
         global_args.data_path = parser.get("in");
@@ -76,7 +78,7 @@ int main(int argc, char** argv) {
         }
 
         global_args.output_path = parser.get("o");
-    }
+    } // Catch any invalid arguments and print the help message.
     catch (const std::invalid_argument& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         parser.print_help();
@@ -89,11 +91,13 @@ int main(int argc, char** argv) {
     std::vector<std::string> name;
 
     try {
+        // Read data from the input file and store in data and name vectors
         read_data(global_args.data_path.c_str(), data, name, true);
+        // Find MEMs in the sequences and split the sequences into fragments for parallel alignment.
         std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence = find_mem(data);
         split_and_parallel_align(data, name, split_points_on_sequence);
     }
-    catch (const std::bad_alloc& e) {
+    catch (const std::bad_alloc& e) { // Catch any bad allocations and print an error message.
         print_table_bound();
         std::cerr << "Error: " << e.what() << std::endl;
         std::cout << "Program Exit!" << std::endl;
