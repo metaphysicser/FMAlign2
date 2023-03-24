@@ -835,7 +835,12 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
     // use the alignment tool to align the sequences.
     std::string cmd = "";
 #if (defined(__linux__))
-
+    cmd.append("ext/profile-two-align/linux/profile_two_align")
+        .append(" -q ").append(seq_file_name)
+        .append(" -p ").append(profile_file_name)
+        .append(" -F")
+        .append(" -D")
+        .append(" 2> /dev/null");
 #else
     cmd.append("ext\\profile-two-align\\win\\profile_two_align.exe")
         .append(" -q ").append(seq_file_name)
