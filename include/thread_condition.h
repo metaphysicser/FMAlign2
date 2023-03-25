@@ -5,7 +5,6 @@
 #if (defined(__linux__) || defined(__APPLE__) || defined(__MINGW32__) || defined(__MINGW64__))
 #include <pthread.h>
 #else
-#include "../ext/pthread-win32/pthread.h"
 #endif
 // Encapsulates a mutex and condition variable as state
 typedef struct condition

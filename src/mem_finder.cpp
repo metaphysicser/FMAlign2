@@ -28,7 +28,18 @@
 * @param sequence_num Number of sequences.
 * @return Vector of split points for each sequence.
 */
-std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem> mems, uint_t sequence_num) {
+std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem> &mems, uint_t sequence_num) {
+    // delete MEM full of "-"
+    std::vector<mem>::iterator mem_it = mems.begin();
+    while (mem_it != mems.end()) {
+        mem tmp_mem = *mem_it;
+        if (tmp_mem.mem_length <= 0) {
+            mem_it = mems.erase(mem_it);
+        }
+        else {
+            mem_it++;
+        }  
+    }
     // Initialize dynamic programming tables to keep track of size and previous indices
     uint_t mem_num = mems.size();
     std::vector<double> dp(mem_num, 0);
@@ -126,7 +137,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem> me
                 count++;
             }
         }
-        if (count < floor(sequence_num * (1 - global_args.min_seq_coverage))) {
+        if (count <= floor(sequence_num * (1 - global_args.min_seq_coverage))) {
             selected_cols.push_back(j);
         }
     }
@@ -136,8 +147,6 @@ std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem> me
             chain[j].push_back(split_point_on_sequence[j][selected_cols[i]]);
         }
     }
-
-
     return chain;
 }
 
@@ -187,14 +196,6 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
 
     uint_t interval_size = intervals.size();
 
-    /*if (interval_size <= 0) {
-        output = "Warning: There is no LCP interval! please adjust your paramters.";
-        print_table_line(output);
-    }
-    else {
-        std::string output_ = "LCP interval number: " + interval_size;
-        print_table_line(output_);
-    }*/
     std::vector<mem> mems;
     mems.resize(interval_size);
     // Convert each interval to a MEM in parallel
@@ -448,6 +449,16 @@ void* interval2mem(void* arg) {
     result.mem_length = min_mem_length + offset;
     for (uint_t i = 0; i < result.substrings.size(); i++) {
         result.substrings[i].position -= offset;
+    }
+    uint_t gap_count = 0;
+    for (int_t i = 0; i < result.mem_length; i++) {
+        uint_t tmp_pos = result.substrings[0].position + i + joined_sequence_bound[result.substrings[0].sequence_index];
+        if (concat_data[tmp_pos] == '-') {
+            gap_count++;
+        }
+    }
+    if (gap_count > ceil(0.8 * result.mem_length)) {
+        result.mem_length = -1;
     }
     // Store the result in the input parameters structure
     *(ptr->result_store) = result;

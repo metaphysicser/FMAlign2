@@ -24,7 +24,9 @@
 #include "include/utils.h"
 #include "include/mem_finder.h"
 #include "include/sequence_split_align.h"
+#if defined(__linux__)
 #include "include/thread_pool.h"
+#endif
 #include <thread>
 
 GlobalArgs global_args;

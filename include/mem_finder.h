@@ -68,7 +68,7 @@ struct IntervalToMemConversionParams {
 * @param sequence_num Number of sequences.
 * @return Vector of split points for each sequence.
 */
-std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem>, uint_t sequence_num);
+std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem>& mems, uint_t sequence_num);
 
 /**
  * @brief Find MEMs in a set of sequences.
