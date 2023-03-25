@@ -246,7 +246,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     uint_t sequence_num = data.size();
     std::vector<std::vector<std::pair<int_t, int_t>>> split_point_on_sequence =  filter_mem(mems, sequence_num);
     double mem_process_time = timer.elapsed_time();
-    output = "Sequence divide parts: " + std::to_string(split_point_on_sequence[0].size());
+    output = "Sequence divide parts: " + std::to_string(split_point_on_sequence[0].size()+1);
     print_table_line(output);
     s.str("");
     s << std::fixed << std::setprecision(3) << mem_process_time;
