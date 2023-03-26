@@ -608,15 +608,20 @@ std::string align_fasta(std::string file_name) {
 #endif
     }
     else if (global_args.package == "mafft") {
-        cmnd.append(".\\ext\\mafft\\usr\\lib\\mafft\\disttbfast.exe ")
+        
+#if (defined(__linux__))
+        cmnd.append("./ext/mafft/linux/usr/libexec/mafft/disttbfast ")
             .append("-q 0 -E 1 -V -1.53 -s 0.0 -W 6 -O -C ")
             .append("1").append(" -b 62 -g 0 -f -1.53 -Q 100.0 -h 0 -F -X 0.1 -i ")
             .append(file_name).append(" > ")
             .append(res_file_name);
-#if (defined(__linux__))
         cmnd.append(" 2> /dev/null");
-        std::replace(cmnd.begin(), cmnd.end(), '\\', '/');
 #else
+        cmnd.append(".\\ext\\mafft\\win\\usr\\lib\\mafft\\disttbfast.exe ")
+            .append("-q 0 -E 1 -V -1.53 -s 0.0 -W 6 -O -C ")
+            .append("1").append(" -b 62 -g 0 -f -1.53 -Q 100.0 -h 0 -F -X 0.1 -i ")
+            .append(file_name).append(" > ")
+            .append(res_file_name);
         cmnd.append(" 2> NUL");   
 #endif
     }
