@@ -273,6 +273,12 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
     // Allocate memory for concatenated string
     unsigned char* concat_data = new unsigned char[total_length];
 
+    if (!concat_data) {
+        std::string out = "concat_data could not allocate enough space\n";
+        print_table_line(out);
+        exit(1);
+    }
+
     // Concatenate all strings with 1 as separator
     uint_t index = 0;
     for (const auto& s : strings) {
