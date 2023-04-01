@@ -269,8 +269,9 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
  * @note The returned string must be deleted by the caller.
 */
 unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n) {
+    std::string output;
 #if DEBUG
-    std::string output = "data is joining...\n";
+    output = "data is joining...\n";
     print_table_line(output);
 #endif
     
@@ -278,7 +279,7 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
     uint_t total_length = std::accumulate(strings.begin(), strings.end(), 0,
                                           [](uint_t sum, const std::string& s) { return sum + s.length() + 1; });
 #if DEBUG
-    std::string output = "data is joined\n";
+    output = "data is joined\n";
     print_table_line(output);
 #endif
     total_length++;  // Add 1 for the terminating 0
