@@ -162,15 +162,9 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     std::string output = "";
     Timer timer;
     uint_t n = 0;
-#if DEBUG
-    output = "data is joining...\n";
-    print_table_line(output);
-#endif
+
     unsigned char* concat_data = concat_strings(data, n); 
-#if DEBUG
-    output = "data is joined\n";
-    print_table_line(output);
-#endif    
+    
     uint_t *SA = NULL;
     SA = (uint_t*) malloc(n*sizeof(uint_t));
     // LCP[0] = 0, LCP[i] = lcp(concat_data[SA[i]], concat_data[SA[i-1]])
@@ -275,9 +269,18 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
  * @note The returned string must be deleted by the caller.
 */
 unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n) {
+#if DEBUG
+    output = "data is joining...\n";
+    print_table_line(output);
+#endif
+    
      // Calculate total length of concatenated string
     uint_t total_length = std::accumulate(strings.begin(), strings.end(), 0,
                                           [](uint_t sum, const std::string& s) { return sum + s.length() + 1; });
+#if DEBUG
+    output = "data is joined\n";
+    print_table_line(output);
+#endif
     total_length++;  // Add 1 for the terminating 0
 
     // Allocate memory for concatenated string
