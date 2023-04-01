@@ -277,7 +277,10 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
                                           [](uint_t sum, const std::string& s) { return sum + s.length() + 1; });
 
     total_length++;  // Add 1 for the terminating 0
-
+#if DEBUG
+    output = "data is joined\n";
+    print_table_line(output);
+#endif
     // Allocate memory for concatenated string
     unsigned char* concat_data = new unsigned char[total_length];
 
@@ -298,10 +301,7 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
         concat_data[index] = 1;
         index++;
     }
-#if DEBUG
-    output = "data is joined\n";
-    print_table_line(output);
-#endif
+
     // Set the terminating 0
     concat_data[total_length - 1] = 0;
 
