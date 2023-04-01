@@ -167,7 +167,10 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     print_table_line(output);
 #endif
     unsigned char* concat_data = concat_strings(data, n); 
-    
+#if DEBUG
+    output = "data is joined\n";
+    print_table_line(output);
+#endif    
     uint_t *SA = NULL;
     SA = (uint_t*) malloc(n*sizeof(uint_t));
     // LCP[0] = 0, LCP[i] = lcp(concat_data[SA[i]], concat_data[SA[i-1]])
