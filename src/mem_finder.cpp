@@ -270,11 +270,15 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
 */
 unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n) {
     std::string output;
-
+    // Calculate total length of concatenated string
+    uint_t total_length = 0;
+    for (uint_t i = 0; i < strings.size(); i++) {
+        total_length += strings[i].length() + 1;
+    }
     
      // Calculate total length of concatenated string
-    uint_t total_length = std::accumulate(strings.begin(), strings.end(), 0,
-                                          [](uint_t sum, const std::string& s) { return sum + s.length() + 1; });
+    /*uint_t total_length = std::accumulate(strings.begin(), strings.end(), 0,
+                                          [](uint_t sum, const std::string& s) { return sum + s.length() + 1; });*/
 
     total_length++;  // Add 1 for the terminating 0
 #if DEBUG
