@@ -171,7 +171,10 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     LCP = (int_t*) malloc(n*sizeof(int_t));
     int32_t *DA = NULL;
     DA = (int32_t*) malloc(n*sizeof(int32_t));
-
+#if DEBUG
+    output = "Suffix is constructing...\n";
+    print_table_line(output);
+#endif
     timer.reset();
     gsacak((unsigned char *)concat_data, (uint_t*)SA, LCP, DA, n);
     double suffix_construction_time = timer.elapsed_time();
