@@ -278,6 +278,7 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
 
     total_length++;  // Add 1 for the terminating 0
 #if DEBUG
+    std::cout << total_length << std::endl;
     output = "data is joined\n";
     print_table_line(output);
 #endif
