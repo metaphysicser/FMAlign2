@@ -162,6 +162,10 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     std::string output = "";
     Timer timer;
     uint_t n = 0;
+#if DEBUG
+    output = "data is joining...\n";
+    print_table_line(output);
+#endif
     unsigned char* concat_data = concat_strings(data, n); 
     
     uint_t *SA = NULL;
