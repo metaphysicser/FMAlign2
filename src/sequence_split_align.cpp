@@ -632,6 +632,7 @@ std::string align_fasta(std::string file_name) {
         if (res != 0) {
             std::string out = "Warning: Parallel alignment may result in errors and may produce invalid results.";
             print_table_line(out);
+            throw "Fail to run exe";
         }
     }
     catch (const std::bad_alloc& e) { // Catch any bad allocations and print an error message.
