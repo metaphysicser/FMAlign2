@@ -64,6 +64,7 @@ struct GlobalArgs {
 	float min_seq_coverage;
 	std::string package;
 	std::string output_path;
+	int_t degree;
 };
 extern GlobalArgs global_args;
 

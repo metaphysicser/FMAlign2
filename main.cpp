@@ -49,6 +49,8 @@ int main(int argc, char** argv) {
     parser.add_argument_help("p", "The MSA method used in parallel align. for example, halign, mafft and so on.");
     parser.add_argument("o", false, "output.aligned.fasta");
     parser.add_argument_help("o", "The path to the output file.");
+    parser.add_argument("d", false, "0");
+    parser.add_argument_help("o", "depth of recursion");
 
     // Add command line arguments to the ArgParser object.
     try {
@@ -68,8 +70,12 @@ int main(int argc, char** argv) {
         else {
             global_args.min_mem_length = -1;
         }
-              
+        
 
+        global_args.degree = std::stoi(parser.get("d"));
+        if (global_args.degree > 1) {
+            exit(1);
+        }
         global_args.min_seq_coverage = std::stof(parser.get("c"));
         if (global_args.min_seq_coverage < 0 || global_args.min_seq_coverage > 1) {
             std::string output = "Error: min_seq_coverage should be ranged from 0 to 1!";

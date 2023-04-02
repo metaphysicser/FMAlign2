@@ -640,16 +640,18 @@ std::string align_fasta(std::string file_name) {
                 .append(" --o ").append(res_file_name)
                 .append(" --c ").append(std::to_string(global_args.min_seq_coverage))
                 .append(" --p ").append(global_args.package)
-                .append(" --t 1");
-            cmnd.append(" &> /dev/null");
+                .append(" --t 1")
+                .append(" --d ").append(std::to_string(global_args.degree+1));
+            cmnd.append(" 2> /dev/null");
 #else
             cmnd.append("./FMAlign2.exe ")
                 .append("--in ").append(file_name)
                 .append(" --o ").append(res_file_name)
                 .append(" --c ").append(std::to_string(global_args.min_seq_coverage))
                 .append(" --p ").append(global_args.package)
-                .append(" --t 1");
-            cmnd.append(" &> NUL");
+                .append(" --t 1")
+                .append(" --d ").append(std::to_string(global_args.degree+1));
+            cmnd.append(" 2> NUL");
 #endif
             res = system(cmnd.c_str());
             if (res != 0) {
