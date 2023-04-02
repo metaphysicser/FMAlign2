@@ -573,9 +573,10 @@ void* parallel_align(void* arg) {
     // Call the align_fasta function to align the sequences in the file
     std::string res_file_name = align_fasta(file_name);
 
+
     std::vector<std::string> aligned_seq;
     std::vector<std::string> aligned_name;
-    read_data(res_file_name.c_str(), aligned_seq, aligned_name, false);
+    read_data(res_file_name.c_str(), aligned_seq, aligned_name, true);
     std::vector<std::string> final_aligned_seq(seq_num, "");
     // Map the aligned sequences back to their original indices in the input data vector
     for (uint_t i = 0; i < aligned_seq_index.size(); i++) {
