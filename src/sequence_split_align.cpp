@@ -625,12 +625,21 @@ std::string align_fasta(std::string file_name) {
         cmnd.append(" 2> NUL");   
 #endif
     }
-    // Execute the command and check for errors
-    int res = system(cmnd.c_str());
-    if (res != 0) {
-        std::string out = "Warning: Parallel alignment may result in errors and may produce invalid results.";
-        print_table_line(out);
+
+    try {
+        // Execute the command and check for errors
+        int res = system(cmnd.c_str());
+        if (res != 0) {
+            std::string out = "Warning: Parallel alignment may result in errors and may produce invalid results.";
+            print_table_line(out);
+        }
     }
+    catch (const std::bad_alloc& e) { // Catch any bad allocations and print an error message.
+        std::cerr << "Error: " << e.what() << std::endl;
+        std::cout << "Program Exit!" << std::endl;
+        exit(1);
+    }
+    
     return res_file_name;
 }
 
