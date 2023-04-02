@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
     parser.add_argument_help("in", "The path to the input file.");
     parser.add_argument("t", false, "cpu_num");
     parser.add_argument_help("t", "The maximum number of threads that the program runs, the recommended setting is the number of CPUs.");
-    parser.add_argument("l", false, "200");
+    parser.add_argument("l", false, "square root of mean length");
     parser.add_argument_help("l", "The minimum length of MEM.");
     parser.add_argument("c", false, "0.7");
     parser.add_argument_help("c", "A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1.");
@@ -61,8 +61,14 @@ int main(int argc, char** argv) {
         else {
             global_args.thread = std::stoi(tmp_thread);
         }
-      
-        global_args.min_mem_length = std::stoi(parser.get("l"));      
+        std::string tmp_len = parser.get("l");
+        if (tmp_len != "square root of mean length") {
+            global_args.min_mem_length = std::stoi(parser.get("l"));
+        }
+        else {
+            global_args.min_mem_length = -1;
+        }
+              
 
         global_args.min_seq_coverage = std::stof(parser.get("c"));
         if (global_args.min_seq_coverage < 0 || global_args.min_seq_coverage > 1) {

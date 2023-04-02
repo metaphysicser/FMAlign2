@@ -630,6 +630,28 @@ std::string align_fasta(std::string file_name) {
     if (res != 0) {
         std::string out = "Warning: Parallel alignment may result in errors and may produce invalid results.";
         print_table_line(out);
+        cmnd = "";
+#if (defined(__linux__))
+        cmnd.append("./FMAlign2 ")
+            .append("--in ").append(file_name)
+            .append(" --o ").append(res_file_name)
+            .append(" --c ").append(std::to_string(global_args.min_seq_coverage))
+            .append(" --t 1");
+        cmnd.append(" &> /dev/null");
+#else
+        cmnd.append("./FMAlign2.exe ")
+            .append("--in ").append(file_name)
+            .append(" --o ").append(res_file_name)
+            .append(" --c ").append(std::to_string(global_args.min_seq_coverage))
+            .append(" --t 1");
+        cmnd.append(" &> NUL");
+#endif
+        res = system(cmnd.c_str());
+        if (res != 0) {
+            std::string out = "Error: Parallel alignment may result in errors and may produce invalid results.";
+            print_table_line(out);
+            exit(1);
+        }
     }
     return res_file_name;
 }

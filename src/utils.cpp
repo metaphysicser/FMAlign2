@@ -280,7 +280,14 @@ void print_algorithm_info() {
     std::string thread_output = "Thread: " + std::to_string(global_args.thread);
     print_table_line(thread_output);
 
-    std::string l_output = "Minimum MEM length: " + std::to_string(global_args.min_mem_length);
+    std::string l_output;
+    if (global_args.min_mem_length < 0) {
+        l_output = "Minimum MEM length: square root of mean length";
+    }
+    else {
+        l_output = "Minimum MEM length: " + std::to_string(global_args.min_mem_length);
+    }
+    
     print_table_line(l_output);
 
     std::stringstream s;

@@ -164,6 +164,16 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     uint_t n = 0;
 
     unsigned char* concat_data = concat_strings(data, n); 
+
+    if (global_args.min_mem_length < 0) {
+        int_t l = ceil(sqrt(n/data.size()));
+        l = l > 30 ? l : 30;
+        l = l < 2000 ? l : 2000;
+
+        global_args.min_mem_length = l;
+        output = "Minimal MEM length is set to " + std::to_string(l);
+        print_table_line(output);
+    }
     
     uint_t *SA = NULL;
     SA = (uint_t*) malloc(n*sizeof(uint_t));
@@ -269,23 +279,14 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
  * @note The returned string must be deleted by the caller.
 */
 unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n) {
-    std::string output;
     // Calculate total length of concatenated string
     uint_t total_length = 0;
     for (uint_t i = 0; i < strings.size(); i++) {
         total_length += strings[i].length() + 1;
     }
-    
-     // Calculate total length of concatenated string
-    /*uint_t total_length = std::accumulate(strings.begin(), strings.end(), 0,
-                                          [](uint_t sum, const std::string& s) { return sum + s.length() + 1; });*/
-
+   
     total_length++;  // Add 1 for the terminating 0
-#if DEBUG
-    std::cout << total_length << std::endl;
-    output = "data is joined\n";
-    print_table_line(output);
-#endif
+
     // Allocate memory for concatenated string
     unsigned char* concat_data = new unsigned char[total_length];
 
@@ -294,10 +295,7 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
         print_table_line(out);
         exit(1);
     }
-#if DEBUG
-    output = "data is joining...\n";
-    print_table_line(output);
-#endif
+
     // Concatenate all strings with 1 as separator
     uint_t index = 0;
     for (const auto& s : strings) {
