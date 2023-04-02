@@ -636,6 +636,7 @@ std::string align_fasta(std::string file_name) {
             .append("--in ").append(file_name)
             .append(" --o ").append(res_file_name)
             .append(" --c ").append(std::to_string(global_args.min_seq_coverage))
+            .append(" --p ").append(global_args.package)
             .append(" --t 1");
         cmnd.append(" &> /dev/null");
 #else
@@ -643,6 +644,7 @@ std::string align_fasta(std::string file_name) {
             .append("--in ").append(file_name)
             .append(" --o ").append(res_file_name)
             .append(" --c ").append(std::to_string(global_args.min_seq_coverage))
+            .append(" --p ").append(global_args.package)
             .append(" --t 1");
         cmnd.append(" &> NUL");
 #endif
