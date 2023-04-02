@@ -57,19 +57,19 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
     std::string output = "";
     std::string str_data_path = data_path;
     // check weather the input path could be accessed 
-    if (verbose) {
-        if (access_file(data_path)) {
-            output = str_data_path + " could be accessed";
-            print_table_line(output);
-        }
-        else {
-            print_table_bound();
-            output = "Error:" + str_data_path + " could not be accessed, Please check if the path of the input data is correct or if the data exists!";
-            std::cerr << output << std::endl;
-            std::cerr << "Program Exit!" << std::endl;
-            exit(1);
-        }
+
+    if (access_file(data_path) && verbose) {
+        output = str_data_path + " could be accessed";
+        print_table_line(output);
     }
+    else {
+        print_table_bound();
+        output = "Error:" + str_data_path + " could not be accessed, Please check if the path of the input data is correct or if the data exists!";
+        std::cerr << output << std::endl;
+        std::cerr << "Program Exit!" << std::endl;
+        exit(1);
+    }
+    
 
     FILE* f_pointer = fopen(data_path, "r");
     kseq_t* file_t = kseq_init(fileno(f_pointer));

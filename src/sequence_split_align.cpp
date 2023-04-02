@@ -576,7 +576,7 @@ void* parallel_align(void* arg) {
 
     std::vector<std::string> aligned_seq;
     std::vector<std::string> aligned_name;
-    read_data(res_file_name.c_str(), aligned_seq, aligned_name, true);
+    read_data(res_file_name.c_str(), aligned_seq, aligned_name, false);
     std::vector<std::string> final_aligned_seq(seq_num, "");
     // Map the aligned sequences back to their original indices in the input data vector
     for (uint_t i = 0; i < aligned_seq_index.size(); i++) {
