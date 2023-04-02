@@ -635,8 +635,8 @@ std::string align_fasta(std::string file_name) {
             throw "Fail to run exe";
         }
     }
-    catch (const std::bad_alloc& e) { // Catch any bad allocations and print an error message.
-        std::cerr << "Error: " << e.what() << std::endl;
+    catch (const char* e) { // Catch any bad allocations and print an error message.
+        std::cerr << "Error: " << e << std::endl;
         std::cout << "Program Exit!" << std::endl;
         exit(1);
     }
