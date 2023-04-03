@@ -108,24 +108,31 @@ std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem> &m
             if (cur_pos < 0) {
                 continue;
             }
-            // If the current split point is after the last split point that was used,
-            // update the index of the last split point used to the current index
-            if (cur_pos >= split_point_on_sequence[i][last_end_index].first + split_point_on_sequence[i][last_end_index].second) {
-                last_end_index = j;
-            }
-            // If the current split point conflicts with the last split point used,
-            // choose the split point with the shortest length and mark the other one as invalid
-            else {
-                if (split_point_on_sequence[i][last_end_index].second > cur_len) {
-                    split_point_on_sequence[i][j].first = -1;
-                    split_point_on_sequence[i][j].second = -1;
-                }
-                else {
-                    split_point_on_sequence[i][last_end_index].first = -1;
-                    split_point_on_sequence[i][last_end_index].second = -1;
+            if (cur_pos >= split_point_on_sequence[i][last_end_index].first && (j == split_point_on_sequence[0].size() - 1 || cur_pos <= split_point_on_sequence[i][j + 1].first)) {
+                if (cur_pos >= split_point_on_sequence[i][last_end_index].first + split_point_on_sequence[i][last_end_index].second) {
                     last_end_index = j;
                 }
+                // If the current split point conflicts with the last split point used,
+                // choose the split point with the shortest length and mark the other one as invalid
+                else {
+                    if (split_point_on_sequence[i][last_end_index].second > cur_len) {
+                        split_point_on_sequence[i][j].first = -1;
+                        split_point_on_sequence[i][j].second = -1;
+                    }
+                    else {
+                        split_point_on_sequence[i][last_end_index].first = -1;
+                        split_point_on_sequence[i][last_end_index].second = -1;
+                        last_end_index = j;
+                    }
+                }
             }
+            else {
+                split_point_on_sequence[i][j].first = -1;
+                split_point_on_sequence[i][j].second = -1;
+            }
+            // If the current split point is after the last split point that was used,
+            // update the index of the last split point used to the current index
+            
         }
     }
     // remove column that too much -1
