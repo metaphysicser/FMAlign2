@@ -58,9 +58,11 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
     std::string str_data_path = data_path;
     // check weather the input path could be accessed 
 
-    if (access_file(data_path) && verbose) {
-        output = str_data_path + " could be accessed";
-        print_table_line(output);
+    if (access_file(data_path)) {
+        if (verbose) {
+            output = str_data_path + " could be accessed";
+            print_table_line(output);
+        }
     }
     else {
         print_table_bound();
