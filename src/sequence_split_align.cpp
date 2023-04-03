@@ -52,17 +52,7 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
         expand_chain(&params[i]);
     }
     params.clear();
-
-#if DEBUG   
-    for (uint_t j = 0; j < chain_num; ++j) {
-        uint_t len = chain_string[j][0].length();
-        for (uint_t i = 1; i < seq_num; ++i) {
-            if (chain_string[j][i].length() != len) {
-                std::cout <<"chain_index: " << j << " seq_index: " << i << " " << chain_string[j][i].length() << "!=" << len << std::endl;
-            }
-        }
-    }
-#endif    
+ 
     // Calculate SW expand time and print status message
     double SW_time = timer.elapsed_time();
     std::stringstream s;
@@ -333,9 +323,7 @@ void* expand_chain(void* arg) {
         }
     }
     *(ptr->result_store) = aligned_fragment;
-#if DEBUG
-    std::cout << chain_index << '\n';
-#endif    
+ 
     return NULL;
 }
 
@@ -587,7 +575,9 @@ void* parallel_align(void* arg) {
     }
     // Store the aligned sequences in the result storage
     *(ptr->result_store) = final_aligned_seq;
-   
+#if DEBUG
+    std::cout << task_id << std::endl;
+#endif
     return NULL;
 }
 /**
