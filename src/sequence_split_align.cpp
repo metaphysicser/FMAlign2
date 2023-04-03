@@ -576,7 +576,7 @@ void* parallel_align(void* arg) {
     // Store the aligned sequences in the result storage
     *(ptr->result_store) = final_aligned_seq;
 #if DEBUG
-    std::cout << task_id << std::endl;
+    std::cout << task_index << std::endl;
 #endif
     return NULL;
 }
