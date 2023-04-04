@@ -60,6 +60,10 @@ struct IntervalToMemConversionParams {
     std::vector<uint_t> joined_sequence_bound;
 };
 
+struct FindOptimalChainParams {
+    std::vector<std::vector<std::pair<int_t, int_t>>>::iterator chains;
+};
+
 /**
 * @brief Filter out overlapping memory regions and generate split points for each sequence.
 * Given a vector of memory regions and the number of sequences, this function removes any
@@ -68,7 +72,17 @@ struct IntervalToMemConversionParams {
 * @param sequence_num Number of sequences.
 * @return Vector of split points for each sequence.
 */
-std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem>& mems, uint_t sequence_num);
+std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem_fast(std::vector<mem>& mems, uint_t sequence_num);
+
+/**
+* @brief Filter out overlapping memory regions and generate split points for each sequence.
+* Given a vector of memory regions and the number of sequences, this function removes any
+* overlapping memory regions and generates split points for each sequence based on the non-overlapping regions.
+* @param mems Vector of memory regions.
+* @param sequence_num Number of sequences.
+* @return Vector of split points for each sequence.
+*/
+std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem_accurate(std::vector<mem>& mems, uint_t sequence_num);
 
 /**
  * @brief Find MEMs in a set of sequences.

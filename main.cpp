@@ -50,7 +50,9 @@ int main(int argc, char** argv) {
     parser.add_argument("o", false, "output.aligned.fasta");
     parser.add_argument_help("o", "The path to the output file.");
     parser.add_argument("d", false, "0");
-    parser.add_argument_help("o", "depth of recursion");
+    parser.add_argument_help("d", "depth of recursion");
+    parser.add_argument("f", false, "fast");
+    parser.add_argument_help("f", "filter MEM mode");
 
     // Add command line arguments to the ArgParser object.
     try {
@@ -71,6 +73,13 @@ int main(int argc, char** argv) {
             global_args.min_mem_length = -1;
         }
         
+        std::string tmp_filter_mode = parser.get("f");
+        if (tmp_filter_mode == "fast" || tmp_filter_mode == "accurate") {
+            global_args.filter_mode = tmp_filter_mode;
+        }
+        else {
+            throw "filer mode --f parameter should be fast or accurate!";
+        }
 
         global_args.degree = std::stoi(parser.get("d"));
         if (global_args.degree > 1) {

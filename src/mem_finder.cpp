@@ -20,6 +20,56 @@
 
 #include "../include/mem_finder.h"
 
+void* find_optimal_chain(void* arg) {
+    FindOptimalChainParams* ptr = static_cast<FindOptimalChainParams*>(arg);
+    std::vector<std::pair<int_t, int_t>> chains = *(ptr->chains);
+    std::vector<std::pair<int_t, int_t>> new_chains;
+
+    uint_t chain_num = chains.size();
+    std::vector<double> dp(chain_num, 0);
+    std::vector<int_t> prev(chain_num, -1);
+    // Iterate over all "mem" objects and calculate their size and update dynamic programming tables
+    for (uint_t i = 0; i < chain_num; i++) {
+        double len = chains[i].second;
+        dp[i] += len;
+        for (uint_t j = i + 1; j < chain_num; j++) {
+            if (chains[i].first + len < chains[j].first && dp[i] > dp[j]) {
+                dp[j] = dp[i];
+                prev[j] = i;
+            }
+        }
+    }
+    // Find the index of the last "mem" object in the longest non-conflicting sequence
+    double max_size = 0;
+    int_t end_index = 0;
+    for (uint_t i = 0; i < chain_num; i++) {
+        if (dp[i] > max_size) {
+            max_size = dp[i];
+            end_index = i;
+        }
+    }
+    // Retrieve the indices of all non-conflicting "mem" objects in the longest sequence
+    std::vector<bool> selected_chain(chain_num, false);
+    while (end_index > 0) {
+        selected_chain[end_index]=true;
+        end_index = prev[end_index];
+    }
+    
+    for (uint_t i = 0; i < chain_num; i++) {
+        if (selected_chain[i]) {
+            new_chains.push_back(chains[i]);
+        }
+        else {
+            new_chains.push_back(std::make_pair(-1,-1));
+        }
+
+    }
+
+    *(ptr->chains) = new_chains;
+    
+    return NULL;
+}
+
 /**
 * @brief Filter out overlapping memory regions and generate split points for each sequence.
 * Given a vector of memory regions and the number of sequences, this function removes any
@@ -28,7 +78,90 @@
 * @param sequence_num Number of sequences.
 * @return Vector of split points for each sequence.
 */
-std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem(std::vector<mem> &mems, uint_t sequence_num) {
+std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem_accurate(std::vector<mem>& mems, uint_t sequence_num) {
+    // delete MEM full of "-"
+    std::vector<mem>::iterator mem_it = mems.begin();
+    while (mem_it != mems.end()) {
+        mem tmp_mem = *mem_it;
+        if (tmp_mem.mem_length <= 0) {
+            mem_it = mems.erase(mem_it);
+        }
+        else {
+            mem_it++;
+        }
+    }
+    uint_t mem_num = mems.size();
+    // Initialize a vector of vectors of pairs of integers to represent the split points for each sequence
+    std::vector<std::vector<std::pair<int_t, int_t>>> split_point_on_sequence(sequence_num, std::vector<std::pair<int_t, int_t>>(mem_num, std::make_pair(-1, -1)));
+    // Loop through each non-conflicting MEM in the input
+    for (uint_t i = 0; i < mem_num; i++) {
+        // Get the current MEM and its substring positions
+        mem tmp_mem = mems[i];
+        // Loop through each substring of the current MEM
+        for (uint_t j = 0; j < tmp_mem.substrings.size(); j++) {
+            // Create a pair of the substring position and the length of the MEM
+            std::pair<int_t, int_t> p(tmp_mem.substrings[j].position, tmp_mem.mem_length);
+            // If this split point is already set for this sequence and it is farther from the average position,
+            // skip this split point and move to the next one
+            if (split_point_on_sequence[tmp_mem.substrings[j].sequence_index][i].first != -1) {
+                if (abs(p.first - tmp_mem.avg_pos) > abs(split_point_on_sequence[tmp_mem.substrings[j].sequence_index][i].first - tmp_mem.avg_pos)) {
+                    continue;
+                }
+            }
+            // Set this split point for this sequence to the current substring position and MEM length
+            split_point_on_sequence[tmp_mem.substrings[j].sequence_index][i] = p;
+        }
+    }
+
+    std::vector<FindOptimalChainParams> find_optimal_chain_params(sequence_num);
+#if (defined(__linux__))
+    threadpool pool;
+    threadpool_init(&pool, global_args.thread);
+    for (uint_t i = 0; i < sequence_num; i++) {
+        find_optimal_chain_params[i].chains = split_point_on_sequence.begin() + i;
+        threadpool_add_task(&pool, find_optimal_chain, &find_optimal_chain_params[i]);
+    }
+    threadpool_destroy(&pool);
+#else // Otherwise, use OpenMP for parallel execution
+#pragma omp parallel for num_threads(global_args.thread)
+    for (uint_t i = 0; i < sequence_num; i++) {
+        find_optimal_chain_params[i].chains = split_point_on_sequence.begin() + i;
+        find_optimal_chain(&find_optimal_chain_params[i]);
+    }
+#endif
+
+
+    // remove column that too much -1
+    std::vector<int_t> selected_cols;
+    for (uint_t j = 0; j < split_point_on_sequence[0].size(); j++) {
+        int_t count = 0;
+        for (uint_t i = 0; i < split_point_on_sequence.size(); i++) {
+            if (split_point_on_sequence[i][j].first == -1) {
+                count++;
+            }
+        }
+        if (count <= floor(sequence_num * (1 - global_args.min_seq_coverage))) {
+            selected_cols.push_back(j);
+        }
+    }
+    std::vector<std::vector<std::pair<int_t, int_t>>> chain(sequence_num);
+    for (uint_t i = 0; i < selected_cols.size(); i++) {
+        for (uint_t j = 0; j < split_point_on_sequence.size(); j++) {
+            chain[j].push_back(split_point_on_sequence[j][selected_cols[i]]);
+        }
+    }
+    return chain;
+}
+
+/**
+* @brief Filter out overlapping memory regions and generate split points for each sequence.
+* Given a vector of memory regions and the number of sequences, this function removes any
+* overlapping memory regions and generates split points for each sequence based on the non-overlapping regions.
+* @param mems Vector of memory regions.
+* @param sequence_num Number of sequences.
+* @return Vector of split points for each sequence.
+*/
+std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem_fast(std::vector<mem> &mems, uint_t sequence_num) {
     // delete MEM full of "-"
     std::vector<mem>::iterator mem_it = mems.begin();
     while (mem_it != mems.end()) {
@@ -265,7 +398,14 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     delete[] params;
 
     uint_t sequence_num = data.size();
-    std::vector<std::vector<std::pair<int_t, int_t>>> split_point_on_sequence =  filter_mem(mems, sequence_num);
+    std::vector<std::vector<std::pair<int_t, int_t>>> split_point_on_sequence;
+    if (global_args.filter_mode == "fast") {
+        split_point_on_sequence = filter_mem_fast(mems, sequence_num);
+    }
+    else {
+        split_point_on_sequence = filter_mem_accurate(mems, sequence_num);
+    }
+    
     double mem_process_time = timer.elapsed_time();
     output = "Sequence divide parts: " + std::to_string(split_point_on_sequence[0].size()+1);
     print_table_line(output);
