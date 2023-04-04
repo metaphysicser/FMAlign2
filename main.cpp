@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
     parser.add_argument("t", false, "cpu_num");
     parser.add_argument_help("t", "The maximum number of threads that the program runs, the recommended setting is the number of CPUs.");
     parser.add_argument("l", false, "square root of mean length");
-    parser.add_argument_help("l", "The minimum length of MEM.");
+    parser.add_argument_help("l", "The minimum length of MEM, the default value is square root of mean length.");
     parser.add_argument("c", false, "0.7");
     parser.add_argument_help("c", "A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1.");
     parser.add_argument("p", false, "halign");
@@ -51,8 +51,8 @@ int main(int argc, char** argv) {
     parser.add_argument_help("o", "The path to the output file.");
     parser.add_argument("d", false, "0");
     parser.add_argument_help("d", "depth of recursion");
-    parser.add_argument("f", false, "fast");
-    parser.add_argument_help("f", "filter MEM mode");
+    parser.add_argument("f", false, "default");
+    parser.add_argument_help("f", "The filter MEM mode. The default setting is that if sequence number less 100, accurate mode otherwise fast mode.");
 
     // Add command line arguments to the ArgParser object.
     try {
@@ -74,10 +74,11 @@ int main(int argc, char** argv) {
         }
         
         std::string tmp_filter_mode = parser.get("f");
-        if (tmp_filter_mode == "fast" || tmp_filter_mode == "accurate") {
+        if (tmp_filter_mode == "default") {
             global_args.filter_mode = tmp_filter_mode;
-        }
-        else {
+        } else if (tmp_filter_mode == "fast" || tmp_filter_mode == "accurate") {
+            global_args.filter_mode = tmp_filter_mode;
+        } else {
             throw "filer mode --f parameter should be fast or accurate!";
         }
 
@@ -87,23 +88,18 @@ int main(int argc, char** argv) {
         }
         global_args.min_seq_coverage = std::stof(parser.get("c"));
         if (global_args.min_seq_coverage < 0 || global_args.min_seq_coverage > 1) {
-            std::string output = "Error: min_seq_coverage should be ranged from 0 to 1!";
-            std::cerr << output << std::endl;
-            std::cerr << "Program Exit!" << std::endl;
-            exit(1);
+            throw "Error: min_seq_coverage should be ranged from 0 to 1!";
         }
         global_args.package = parser.get("p");
         if (global_args.package != "halign" && global_args.package != "mafft") {
-            std::string output = "Error: " + global_args.package + " is a invalid method!";
-            std::cerr << output << std::endl;
-            std::cerr << "Program Exit!" << std::endl;
-            exit(1);
+            throw ("Error: " + global_args.package + " is a invalid method!");
         }
 
         global_args.output_path = parser.get("o");
     } // Catch any invalid arguments and print the help message.
     catch (const std::invalid_argument& e) {
         std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "Program Exit!" << std::endl;
         parser.print_help();
         return 1;
     }

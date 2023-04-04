@@ -65,7 +65,7 @@ struct FindOptimalChainParams {
 };
 
 /**
-* @brief Filter out overlapping memory regions and generate split points for each sequence.
+* @brief DP Only Once!Filter out overlapping memory regions and generate split points for each sequence.
 * Given a vector of memory regions and the number of sequences, this function removes any
 * overlapping memory regions and generates split points for each sequence based on the non-overlapping regions.
 * @param mems Vector of memory regions.
@@ -75,7 +75,7 @@ struct FindOptimalChainParams {
 std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem_fast(std::vector<mem>& mems, uint_t sequence_num);
 
 /**
-* @brief Filter out overlapping memory regions and generate split points for each sequence.
+* @brief DP sequence number times!Filter out overlapping memory regions and generate split points for each sequence.
 * Given a vector of memory regions and the number of sequences, this function removes any
 * overlapping memory regions and generates split points for each sequence based on the non-overlapping regions.
 * @param mems Vector of memory regions.

@@ -71,7 +71,7 @@ void* find_optimal_chain(void* arg) {
 }
 
 /**
-* @brief Filter out overlapping memory regions and generate split points for each sequence.
+* @brief DP sequence number times! Filter out overlapping memory regions and generate split points for each sequence.
 * Given a vector of memory regions and the number of sequences, this function removes any
 * overlapping memory regions and generates split points for each sequence based on the non-overlapping regions.
 * @param mems Vector of memory regions.
@@ -154,7 +154,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem_accurate(std::vecto
 }
 
 /**
-* @brief Filter out overlapping memory regions and generate split points for each sequence.
+* @brief DP only Once!Filter out overlapping memory regions and generate split points for each sequence.
 * Given a vector of memory regions and the number of sequences, this function removes any
 * overlapping memory regions and generates split points for each sequence based on the non-overlapping regions.
 * @param mems Vector of memory regions.
@@ -312,6 +312,17 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
 
         global_args.min_mem_length = l;
         output = "Minimal MEM length is set to " + std::to_string(l);
+        print_table_line(output);
+    }
+
+    if (global_args.filter_mode == "default") {
+        if (data.size() < 100) {
+            global_args.filter_mode = "accurate";
+        }
+        else {
+            global_args.filter_mode = "fast";
+        }
+        output = "Filter mode is set to " + global_args.filter_mode;
         print_table_line(output);
     }
     
