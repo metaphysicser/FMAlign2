@@ -31,7 +31,10 @@
 #include "thread_pool.h"
 #else
 #include <omp.h>
+#include <windows.h>
 #endif
+#include <iomanip>
+#include <thread>
 
 #ifndef M64
 	#define M64 0

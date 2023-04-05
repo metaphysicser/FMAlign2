@@ -19,7 +19,16 @@
 // Created: 2023-02-25
 
 #include "../include/sequence_split_align.h"
+/**
+* @brief Generates a random string of the specified length.
+* This function generates a random string of the specified length. The generated string
+* consists of lowercase English letters ('a' to 'z') for Linux platforms, and random bytes
+* for Windows platforms.
+* @param length The length of the generated string.
+* @return A random string of the specified length, or an empty string if an error occurs.
+*/
 std::string generateRandomString(int length) {
+#if (defined(__linux__))
     static thread_local std::random_device rd;
     static thread_local std::mt19937 gen(rd());
 
@@ -30,6 +39,27 @@ std::string generateRandomString(int length) {
         ss << static_cast<char>(dis(gen));
     }
     return ss.str();
+#else
+    HCRYPTPROV hCryptProv;
+    if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+        std::cerr << "CryptAcquireContext failed, error code: " << GetLastError() << std::endl;
+        return "";
+    }
+
+    std::stringstream ss;
+    BYTE buffer;
+    for (int i = 0; i < length; ++i) {
+        if (!CryptGenRandom(hCryptProv, sizeof(BYTE), &buffer)) {
+            std::cerr << "CryptGenRandom failed, error code: " << GetLastError() << std::endl;
+            CryptReleaseContext(hCryptProv, 0);
+            return "";
+        }
+        ss << static_cast<int>(buffer);
+    }
+
+    CryptReleaseContext(hCryptProv, 0);
+    return ss.str();
+#endif
 }
 /**
 * @brief Split and parallel align multiple sequences using a vector of chain pairs.
@@ -42,15 +72,14 @@ std::string generateRandomString(int length) {
 * @param chain A vector of chain pairs representing initial pairwise alignments between sequences
 * @return void
 */
+std::string random_file_end;
+
 void split_and_parallel_align(std::vector<std::string> data, std::vector<std::string> name, std::vector<std::vector<std::pair<int_t, int_t>>> chain){
     // Print status message
     std::cout << "#                Parallel Aligning...                       #" << std::endl;
     print_table_divider();
-    srand(time(0));
-    std::string random_file_end = generateRandomString(10);
-    std::cout << random_file_end << std::endl;
+    
     random_file_end = generateRandomString(10);
-    std::cout << random_file_end << std::endl;
     std::string output = "";
     Timer timer;
     uint_t chain_num = chain[0].size();
@@ -572,7 +601,7 @@ void* parallel_align(void* arg) {
     const uint_t task_index = ptr->task_index;
     // Get the number of sequences in the data vector and the number of chains in the current chain
     uint_t seq_num = data.size();
-    std::string file_name = TMP_FOLDER + "task-" + std::to_string(task_index) + ".fasta";
+    std::string file_name = TMP_FOLDER + "task-" + std::to_string(task_index)+"_"+ random_file_end + ".fasta";
     std::ofstream file;
     file.open(file_name);
 
@@ -698,8 +727,8 @@ std::string align_fasta(std::string file_name) {
 */
 void delete_tmp_folder(uint_t task_count) {
     for (uint_t i = 0; i < task_count; i++) {
-        std::string file_name = TMP_FOLDER +"task-" + std::to_string(i) + ".fasta";
-        std::string res_file_name = TMP_FOLDER + "task-" + std::to_string(i) + ".aligned.fasta";
+        std::string file_name = TMP_FOLDER +"task-" + std::to_string(i) + "_" + random_file_end + ".fasta";
+        std::string res_file_name = TMP_FOLDER + "task-" + std::to_string(i) + "_" + random_file_end + ".aligned.fasta";
         if (remove(file_name.c_str()) != 0) {
             std::cerr << "Error deleting file " << file_name << std::endl;
         }
@@ -842,7 +871,7 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
         
         return concat_string.begin() + right_index + 1;
     }
-    std::string seq_file_name = TMP_FOLDER + "seq-" + std::to_string(seq_index) + ".fasta";
+    std::string seq_file_name = TMP_FOLDER + "seq-" + std::to_string(seq_index) + "_" + random_file_end + ".fasta";
     std::ofstream file;
     file.open(seq_file_name);
     if (!file.is_open()) {
@@ -858,7 +887,7 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
 
     // create a file to store the profile of the sequences.
     sstream.str("");
-    std::string profile_file_name = TMP_FOLDER + "profile-" + std::to_string(seq_index) + ".fasta";
+    std::string profile_file_name = TMP_FOLDER + "profile-" + std::to_string(seq_index) + "_" + random_file_end + ".fasta";
 
     file.open(profile_file_name);
 

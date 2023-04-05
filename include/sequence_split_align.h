@@ -49,6 +49,17 @@ struct ParallelAlignParams {
 	uint_t task_index;
 	std::vector<std::vector<std::string>>::iterator result_store;
 };
+
+/**
+* @brief Generates a random string of the specified length.
+* This function generates a random string of the specified length. The generated string
+* consists of lowercase English letters ('a' to 'z') for Linux platforms, and random bytes
+* for Windows platforms.
+* @param length The length of the generated string.
+* @return A random string of the specified length, or an empty string if an error occurs.
+*/
+std::string generateRandomString(int length);
+
 /**
 * @brief Split and parallel align multiple sequences using a vector of chain pairs.
 * This function takes in three parameters: a vector of input sequences (data), a vector of sequence names (name),
