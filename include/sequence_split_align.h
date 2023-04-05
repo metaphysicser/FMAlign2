@@ -27,16 +27,11 @@
 #include "utils.h"
 #include <algorithm>
 #include <sstream>
-#include <random>
 #ifdef __linux__
 #include <sys/stat.h>
 #else
 #include <direct.h>
 #endif
-
-std::random_device rd;
-std::mt19937 mt(rd());
-const int random_file_end = mt();
 
 const std::string TMP_FOLDER = "./tmp/";
 

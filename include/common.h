@@ -32,6 +32,11 @@
 #else
 #include <omp.h>
 #endif
+#include <random>
+
+std::random_device rd;
+std::mt19937 mt(rd());
+const int random_file_end = mt();
 
 #ifndef M64
 	#define M64 0
