@@ -32,6 +32,11 @@
 #else
 #include <direct.h>
 #endif
+#include <random>
+
+std::random_device rd;
+std::mt19937 mt(rd());
+const int random_file_end = mt();
 
 const std::string TMP_FOLDER = "./tmp/";
 
