@@ -19,6 +19,18 @@
 // Created: 2023-02-25
 
 #include "../include/sequence_split_align.h"
+std::string generateRandomString(int length) {
+    static thread_local std::random_device rd;
+    static thread_local std::mt19937 gen(rd());
+
+    std::uniform_int_distribution<> dis('a', 'z');
+
+    std::stringstream ss;
+    for (int i = 0; i < length; ++i) {
+        ss << static_cast<char>(dis(gen));
+    }
+    return ss.str();
+}
 /**
 * @brief Split and parallel align multiple sequences using a vector of chain pairs.
 * This function takes in three parameters: a vector of input sequences (data), a vector of sequence names (name),
@@ -34,7 +46,10 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
     // Print status message
     std::cout << "#                Parallel Aligning...                       #" << std::endl;
     print_table_divider();
-    
+    srand(time(0));
+    std::string random_file_end = generateRandomString(10);
+    std::cout << random_file_end << std::endl;
+    random_file_end = generateRandomString(10);
     std::cout << random_file_end << std::endl;
     std::string output = "";
     Timer timer;
