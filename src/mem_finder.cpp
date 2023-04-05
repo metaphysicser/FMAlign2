@@ -325,6 +325,17 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
         output = "Filter mode is set to " + global_args.filter_mode;
         print_table_line(output);
     }
+
+    if (global_args.min_seq_coverage < 0) {
+        if (data.size() < 100) {
+            global_args.min_seq_coverage = 1;
+        }
+        else {
+            global_args.min_seq_coverage = 0.7;
+        }
+        output = "Minimal sequence coverage is set to " + std::to_string(global_args.min_seq_coverage);
+        print_table_line(output);
+    }
     
     uint_t *SA = NULL;
     SA = (uint_t*) malloc(n*sizeof(uint_t));

@@ -41,16 +41,17 @@ int main(int argc, char** argv) {
     parser.add_argument_help("in", "The path to the input file.");
     parser.add_argument("t", false, "cpu_num");
     parser.add_argument_help("t", "The maximum number of threads that the program runs, the recommended setting is the number of CPUs.");
-    parser.add_argument("l", false, "square root of mean length");
+    parser.add_argument("l", false, "default");
     parser.add_argument_help("l", "The minimum length of MEM, the default value is square root of mean length.");
-    parser.add_argument("c", false, "0.7");
-    parser.add_argument_help("c", "A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1.");
+    parser.add_argument("c", false, "default");
+    parser.add_argument_help("c", "A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1. The default \
+setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7.");
     parser.add_argument("p", false, "halign");
     parser.add_argument_help("p", "The MSA method used in parallel align. for example, halign, mafft and so on.");
     parser.add_argument("o", false, "output.aligned.fasta");
     parser.add_argument_help("o", "The path to the output file.");
     parser.add_argument("d", false, "0");
-    parser.add_argument_help("d", "depth of recursion");
+    parser.add_argument_help("d", "Depth of recursion, you could ignore it.");
     parser.add_argument("f", false, "default");
     parser.add_argument_help("f", "The filter MEM mode. The default setting is that if sequence number less 100, accurate mode otherwise fast mode.");
 
@@ -66,7 +67,7 @@ int main(int argc, char** argv) {
             global_args.thread = std::stoi(tmp_thread);
         }
         std::string tmp_len = parser.get("l");
-        if (tmp_len != "square root of mean length") {
+        if (tmp_len != "default") {
             global_args.min_mem_length = std::stoi(parser.get("l"));
         }
         else {
@@ -83,13 +84,21 @@ int main(int argc, char** argv) {
         }
 
         global_args.degree = std::stoi(parser.get("d"));
-        if (global_args.degree > 1) {
+        if (global_args.degree > 2) {
             exit(1);
         }
-        global_args.min_seq_coverage = std::stof(parser.get("c"));
-        if (global_args.min_seq_coverage < 0 || global_args.min_seq_coverage > 1) {
-            throw "Error: min_seq_coverage should be ranged from 0 to 1!";
+
+        std::string tmp_c = parser.get("c");
+        if (tmp_c == "default") {
+            global_args.min_seq_coverage = -1;
         }
+        else {
+            global_args.min_seq_coverage = std::stof(parser.get("c"));
+            if (global_args.min_seq_coverage < 0 || global_args.min_seq_coverage > 1) {
+                throw "Error: min_seq_coverage should be ranged from 0 to 1!";
+            }
+        }
+        
         global_args.package = parser.get("p");
         if (global_args.package != "halign" && global_args.package != "mafft") {
             throw ("Error: " + global_args.package + " is a invalid method!");

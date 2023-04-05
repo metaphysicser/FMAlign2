@@ -621,7 +621,7 @@ std::string align_fasta(std::string file_name) {
         // Execute the command and check for errors
         int res = system(cmnd.c_str());
         if (res != 0) {
-            std::string out = "Warning: Parallel alignment may result in errors and may produce invalid results.";
+            std::string out = "Warning: Parallel alignment may result in errors and starts calling FMAlign2 recursively.";
             print_table_line(out);
             cmnd = "";
 #if (defined(__linux__))
@@ -632,7 +632,7 @@ std::string align_fasta(std::string file_name) {
                 .append(" --p ").append(global_args.package)
                 .append(" --t 1")
                 .append(" --d ").append(std::to_string(global_args.degree+1));
-            cmnd.append(" 2> /dev/null");
+            cmnd.append(" &> /dev/null");
 #else
             cmnd.append("./FMAlign2.exe ")
                 .append("--in ").append(file_name)
@@ -641,12 +641,11 @@ std::string align_fasta(std::string file_name) {
                 .append(" --p ").append(global_args.package)
                 .append(" --t 1")
                 .append(" --d ").append(std::to_string(global_args.degree+1));
-            cmnd.append(" 2> NUL");
+            cmnd.append(" &> NUL");
 #endif
             res = system(cmnd.c_str());
             if (res != 0) {
-                throw "Fail to align in parallel!";
-                
+                throw "Fail to align in parallel!";       
             }
         }
     }
@@ -849,7 +848,6 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
                 cur_fragment_is_missing = true;
                 break;
             }
-
         }
         if (cur_fragment_is_missing) {
             sstream.str("");
