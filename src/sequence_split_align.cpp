@@ -48,9 +48,27 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
         params[i].result_store = chain_string.begin() + i;
     }
     // Expand each chain pair and store the resulting aligned sequences
-    for (uint_t i = 0; i < chain_num; i++) {
-        expand_chain(&params[i]);
+    if (global_args.min_seq_coverage == 1) {
+#if (defined(__linux__))
+        threadpool pool;
+        threadpool_init(&pool, global_args.thread);
+        for (uint_t i = 0; i < chain_num; i++) {
+            threadpool_add_task(&pool, expand_chain, &params[i]);
+        }
+        threadpool_destroy(&pool);
+#else // Otherwise, use OpenMP for parallel execution
+#pragma omp parallel for num_threads(global_args.thread)
+        for (uint_t i = 0; i < chain_num; i++) {
+            expand_chain(&params[i]);
+        }
+#endif
+    } else {
+        for (uint_t i = 0; i < chain_num; i++) {
+            expand_chain(&params[i]);
+        }
     }
+    
+
     params.clear();
  
     // Calculate SW expand time and print status message
@@ -621,7 +639,7 @@ std::string align_fasta(std::string file_name) {
         // Execute the command and check for errors
         int res = system(cmnd.c_str());
         if (res != 0) {
-            std::string out = "Warning: Parallel alignment may result in errors and starts calling FMAlign2 recursively.";
+            std::string out = "Warning: Starts calling FMAlign2 recursively to align " + file_name;
             print_table_line(out);
             cmnd = "";
 #if (defined(__linux__))
