@@ -35,7 +35,6 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
     std::cout << "#                Parallel Aligning...                       #" << std::endl;
     print_table_divider();
     
-    std::cout << random_file_end << std::endl;
     std::string output = "";
     Timer timer;
     uint_t chain_num = chain[0].size();
