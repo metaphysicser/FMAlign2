@@ -686,7 +686,7 @@ std::string align_fasta(std::string file_name) {
             .append(" -i ").append(file_name)
             .append(" -o ").append(res_file_name)
             .append(" -T 1")
-            .append(" -t ").append("./swap_" + random_file_end+"/")
+            .append(" -t ").append("./swap_" + generateRandomString(5) + "/")
             .append(" -c 0.9");
             
             
