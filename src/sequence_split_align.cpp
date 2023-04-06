@@ -685,6 +685,7 @@ std::string align_fasta(std::string file_name) {
         cmnd.append("./ext/wmsa/linux/exec/wmsa")
             .append(" -i ").append(file_name)
             .append(" -o ").append(res_file_name)
+            .append(" -D ")
             .append(" -T 1")
             .append(" -c 0.9");
             

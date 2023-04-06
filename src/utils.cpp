@@ -294,7 +294,15 @@ void print_algorithm_info() {
 
     std::stringstream s;
     s << std::fixed << std::setprecision(2) << global_args.min_seq_coverage;
-    std::string c_output = "Sequence coverage: " + s.str();
+
+    std::string c_output;
+    if (global_args.min_seq_coverage < 0) {
+        c_output = "Sequence coverage: default";
+    }
+    else {
+        c_output = "Sequence coverage: " + std::to_string(global_args.min_mem_length);
+    }
+
     print_table_line(c_output);
 
     std::string p_output = "Parallel align method: " + global_args.package;

@@ -34,7 +34,7 @@
 #endif
 #include <random>
 
-const std::string TMP_FOLDER = "./tmp/";
+const std::string TMP_FOLDER = "./temp/";
 
 struct ExpandChainParams {
 	std::vector<std::string>* data;
