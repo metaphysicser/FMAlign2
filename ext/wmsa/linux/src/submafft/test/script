@@ -1,0 +1,7 @@
+mafft sample > x
+diff x sample.fftns2 >& /dev/null || exit 1
+
+echo 'OK'
+rm x
+
+exit 0

@@ -1,0 +1,22 @@
+cp test/profilealign-test1/raw test/profilealign-test1/sample # use backup
+./profilealign -p test/profilealign-test1/sample/mt1x_cd-hit.fasta -i test/profilealign-test1/sample/mt1x_cd-hit.list.txt
+
+Arguments:
+-i: sequences file name, every line has a file name without spaces
+-p: center file with FASTA format
+-f, -g, -h: ppenalty, ppenalty_ex(not used), poffset(not used)
+-Q, -V: penalty_shift_factor(not used), ppenalty_dist
+-b: BLOSUM Matrix
+-j: use jtt/kimura model, pamN is needed
+-m: use tm model, pamN is needed
+-D, -P: -D the sequence is DNA, -P the sequence is Protein
+-S: Calcuate SP Scores after alignment
+-z, -w: FFT align arguments: fftthreshold, fftWinSize
+-B: Kband in calcuating DP-matrix during the alignment
+-W: tuplesize on UPGMA (6 or 10, 10 is only for DNA/RNA sequences)
+-X: Use mix method to calcuate the UPGMA cluster, the sub effect is needed, it must be in (0, 1)
+-E: Use average method to calcuate the UPGMA cluster
+-q: Use minimum method to calcuate the UPGMA cluster
+-A: Use Aalign to align sequences
+-F: Use FFT align to align sequences
+-H, -?: Print help message and exit

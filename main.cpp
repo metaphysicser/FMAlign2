@@ -100,7 +100,7 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
         }
         
         global_args.package = parser.get("p");
-        if (global_args.package != "halign" && global_args.package != "mafft") {
+        if (global_args.package != "halign" && global_args.package != "mafft" && global_args.package != "wmsa") {
             throw ("Error: " + global_args.package + " is a invalid method!");
         }
 

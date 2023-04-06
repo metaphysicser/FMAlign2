@@ -1,0 +1,19 @@
+./staralign  -V "-"1.53 -b 62 -g 0 -f "-"1.53 -Q 100.0 -h 0 -S -T 4 -s 2 -i test/staralign-test1/data.fasta -c test/staralign-test1/center.fasta
+
+Arguments:
+-i: common file with FASTA format
+-c: center file with FASTA format
+-f, -g, -h: ppenalty, ppenalty_ex(not used), poffset(not used)
+-Q, -V: penalty_shift_factor(not used), ppenalty_dist
+-b: BLOSUM Matrix
+-j: use jtt/kimura model, pamN is needed
+-m: use tm model, pamN is needed
+-a: 0 is default model, 1 is fmodel, -1 is raw model
+-D, -P: -D the sequence is DNA, -P the sequence is Protein
+-S: Calcuate SP Scores after alignment
+-d: Print Score Matrix fits the common file and exit
+-z, -w: FFT align arguments: fftthreshold, fftWinSize
+-B: Kband in calcuating DP-matrix during the alignment
+-s: nmax shift factor, it means the times of the max length
+-T: Use T threads to run this program
+-H, -?: Print help message and exit
