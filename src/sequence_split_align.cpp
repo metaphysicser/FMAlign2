@@ -688,7 +688,7 @@ std::string align_fasta(std::string file_name) {
             .append(" -T 1")
             .append(" -c 0.9");
             
-        cmnd.append(" 2> /dev/null");
+        // cmnd.append(" 2> /dev/null");
 #else
         cmnd.append(".\\ext\\wmsa\\win\\fragalign.exe")
             .append(" -i ").append(file_name)
