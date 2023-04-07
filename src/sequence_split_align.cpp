@@ -660,12 +660,25 @@ void* parallel_align(void* arg) {
 * @return The name of the resulting aligned FASTA file.
 */
 std::string align_fasta(std::string file_name) {
+
+    std::ifstream file(file_name, std::ios::binary | std::ios::ate);
+    int_t size = file.tellg() / (1024 * 1024);
+    file.close();
+    int_t t_int = 1;
+    if (ceil(size / global_args.avg_file_size) + 1 < global_args.thread) {
+        t_int = (int_t)(ceil(size / global_args.avg_file_size) + 1);
+    }
+    else {
+        t_int = global_args.thread;
+    }
+    std::string t = std::to_string(t_int);
+    // std::cout << size << " "<< global_args.avg_file_size <<" " << t <<std::endl;
     // Construct command string based on selected alignment package and operating system
     std::string cmnd = "";
     std::string res_file_name = file_name.substr(0, file_name.find(".fasta")) + ".aligned.fasta";
     if (global_args.package == "halign") {
          cmnd.append("java -jar ./ext/halign3/share/halign-stmsa.jar ")
-         .append("-t 1").append(" -o ").append(res_file_name).append(" ").append(file_name);
+         .append("-t ").append(t).append(" -o ").append(res_file_name).append(" ").append(file_name);
 #if (defined(__linux__))
          cmnd.append(" > /dev/null");
 #else
@@ -677,14 +690,14 @@ std::string align_fasta(std::string file_name) {
 #if (defined(__linux__))
         cmnd.append("./ext/mafft/linux/usr/libexec/mafft/disttbfast ")
             .append("-q 0 -E 1 -V -1.53 -s 0.0 -W 6 -O -C ")
-            .append("1").append(" -b 62 -g 0 -f -1.53 -Q 100.0 -h 0 -F -X 0.1 -i ")
+            .append(t).append(" -b 62 -g 0 -f -1.53 -Q 100.0 -h 0 -F -X 0.1 -i ")
             .append(file_name).append(" > ")
             .append(res_file_name);
         cmnd.append(" 2> /dev/null");
 #else
         cmnd.append(".\\ext\\mafft\\win\\usr\\lib\\mafft\\disttbfast.exe ")
             .append("-q 0 -E 1 -V -1.53 -s 0.0 -W 6 -O -C ")
-            .append("1").append(" -b 62 -g 0 -f -1.53 -Q 100.0 -h 0 -F -X 0.1 -i ")
+            .append(t).append(" -b 62 -g 0 -f -1.53 -Q 100.0 -h 0 -F -X 0.1 -i ")
             .append(file_name).append(" > ")
             .append(res_file_name);
         cmnd.append(" 2> NUL");   
@@ -695,7 +708,7 @@ std::string align_fasta(std::string file_name) {
         cmnd.append("./ext/wmsa/linux/exec/wmsa")
             .append(" -i ").append(file_name)
             .append(" -o ").append(res_file_name)
-            .append(" -T 1")
+            .append(" -T ").append(t)
             .append(" -t ").append("./swap_" + generateRandomString(5) + "/")
             .append(" -c 0.9");
             
@@ -704,7 +717,7 @@ std::string align_fasta(std::string file_name) {
 #else
         cmnd.append(".\\ext\\wmsa\\win\\fragalign.exe")
             .append(" -i ").append(file_name)
-            .append(" -T 1")
+            .append(" -T ").append(t)
             .append(" -D ")
             .append(" 1>").append(res_file_name);
 
@@ -729,7 +742,7 @@ std::string align_fasta(std::string file_name) {
                 .append("--in ").append(file_name)
                 .append(" --o ").append(res_file_name)
                 .append(" --p ").append(global_args.package)
-                .append(" --t 1")
+                .append(" --t ").append(t)
                 .append(" --v 0")
                 .append(" --d ").append(std::to_string(global_args.degree+1));
             cmnd.append(" &> /dev/null");
@@ -738,7 +751,7 @@ std::string align_fasta(std::string file_name) {
                 .append("--in ").append(file_name)
                 .append(" --o ").append(res_file_name)
                 .append(" --p ").append(global_args.package)
-                .append(" --t 1")
+                .append(" --t ").append(t)
                 .append(" --v 0")
                 .append(" --d ").append(std::to_string(global_args.degree+1));
             cmnd.append(" &> NUL");

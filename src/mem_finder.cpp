@@ -309,7 +309,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     unsigned char* concat_data = concat_strings(data, n); 
 
     if (global_args.min_mem_length < 0) {
-        int_t l = ceil(sqrt(n/data.size()) / (global_args.degree+1));
+        int_t l = ceil(pow(n, 1/(global_args.degree+2)));
         l = l > 30 ? l : 30;
         l = l < 2000 ? l : 2000;
 
@@ -443,6 +443,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
         split_point_on_sequence = filter_mem_accurate(mems, sequence_num);
     }
     
+    global_args.avg_file_size = (n / (split_point_on_sequence[0].size() + 1)) / pow(2, 20);
     double mem_process_time = timer.elapsed_time();
     if (global_args.verbose) {
         output = "Sequence divide parts: " + std::to_string(split_point_on_sequence[0].size() + 1);

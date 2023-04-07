@@ -70,7 +70,9 @@ struct GlobalArgs {
 	int_t degree;
 	std::string filter_mode;
 	int_t verbose;
+	double avg_file_size;
 };
 extern GlobalArgs global_args;
+
 
 #endif
