@@ -54,6 +54,8 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
     parser.add_argument_help("d", "Depth of recursion, you could ignore it.");
     parser.add_argument("f", false, "default");
     parser.add_argument_help("f", "The filter MEM mode. The default setting is that if sequence number less 100, accurate mode otherwise fast mode.");
+    parser.add_argument("v", false, "1");
+    parser.add_argument_help("v", "Verbose option, 0 or 1. You could ignore it.");
 
     // Add command line arguments to the ArgParser object.
     try {
@@ -81,6 +83,11 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
             global_args.filter_mode = tmp_filter_mode;
         } else {
             throw "filer mode --f parameter should be fast or accurate!";
+        }
+
+        global_args.verbose = std::stoi(parser.get("v"));
+        if (global_args.verbose != 0 && global_args.verbose != 1) {
+            throw "verbose should be 1 or 0";
         }
 
         global_args.degree = std::stoi(parser.get("d"));
@@ -112,8 +119,9 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
         parser.print_help();
         return 1;
     }
-
-    print_algorithm_info();
+    if (global_args.verbose) {
+        print_algorithm_info();
+    }
 
     std::vector<std::string> data;
     std::vector<std::string> name;
@@ -135,8 +143,11 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
     double total_time = timer.elapsed_time();
     std::stringstream s;
     s << std::fixed << std::setprecision(2) << total_time;
-    output = "FMAlign2 total time: " + s.str() + " seconds.";
-    print_table_line(output);
-    print_table_bound();
+    if (global_args.verbose) {
+        output = "FMAlign2 total time: " + s.str() + " seconds.";
+        print_table_line(output);
+        print_table_bound();
+    }
+    
     return 0;
 }

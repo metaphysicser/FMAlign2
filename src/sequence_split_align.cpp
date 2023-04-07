@@ -76,9 +76,11 @@ std::string random_file_end;
 
 void split_and_parallel_align(std::vector<std::string> data, std::vector<std::string> name, std::vector<std::vector<std::pair<int_t, int_t>>> chain){
     // Print status message
-    std::cout << "#                Parallel Aligning...                       #" << std::endl;
-    print_table_divider();
-    
+    if (global_args.verbose) {
+        std::cout << "#                Parallel Aligning...                       #" << std::endl;
+        print_table_divider();
+    }
+
     random_file_end = generateRandomString(10);
     std::string output = "";
     Timer timer;
@@ -121,8 +123,11 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
     double SW_time = timer.elapsed_time();
     std::stringstream s;
     s << std::fixed << std::setprecision(2) << SW_time;
-    output = "SW expand time: " + s.str() + " seconds.";
-    print_table_line(output);
+    if (global_args.verbose) {
+        output = "SW expand time: " + s.str() + " seconds.";
+        print_table_line(output);
+    }
+    
     timer.reset();
 
     // Create temporary file folder (if it doesn't already exist)
@@ -171,8 +176,11 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
     double parallel_align_time = timer.elapsed_time();
     s.str("");
     s << std::fixed << std::setprecision(2) << parallel_align_time;
-    output = "Parallel align time: " + s.str() + " seconds.";
-    print_table_line(output);
+    if (global_args.verbose) {
+        output = "Parallel align time: " + s.str() + " seconds.";
+        print_table_line(output);
+    }
+    
     timer.reset();
     // Concatenate the chains and parallel ranges
     std::vector<std::vector<std::pair<int_t, int_t>>> concat_range = concat_chain_and_parallel_range(chain, parallel_align_range);
@@ -182,14 +190,16 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
 
     seq2profile(concat_string, data, concat_range, fragment_len);
     double seq2profile_time = timer.elapsed_time();
-    s.str("");
-    s << std::fixed << std::setprecision(2) << seq2profile_time;
-    output = "Seq-profile time: " + s.str() + " seconds.";
-    print_table_line(output);
 
     concat_alignment(concat_string, name);
 
-    print_table_divider();
+    s.str("");
+    s << std::fixed << std::setprecision(2) << seq2profile_time;
+    if (global_args.verbose) {
+        output = "Seq-profile time: " + s.str() + " seconds.";
+        print_table_line(output);
+        print_table_divider();
+    }
     return;
 }
 
@@ -690,7 +700,7 @@ std::string align_fasta(std::string file_name) {
             .append(" -c 0.9");
             
             
-        // cmnd.append(" 2> /dev/null");
+        cmnd.append(" 2> /dev/null");
 #else
         cmnd.append(".\\ext\\wmsa\\win\\fragalign.exe")
             .append(" -i ").append(file_name)
@@ -720,6 +730,7 @@ std::string align_fasta(std::string file_name) {
                 .append(" --o ").append(res_file_name)
                 .append(" --p ").append(global_args.package)
                 .append(" --t 1")
+                .append(" --v 0")
                 .append(" --d ").append(std::to_string(global_args.degree+1));
             cmnd.append(" &> /dev/null");
 #else
@@ -728,6 +739,7 @@ std::string align_fasta(std::string file_name) {
                 .append(" --o ").append(res_file_name)
                 .append(" --p ").append(global_args.package)
                 .append(" --t 1")
+                .append(" --v 0")
                 .append(" --d ").append(std::to_string(global_args.degree+1));
             cmnd.append(" &> NUL");
 #endif

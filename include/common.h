@@ -69,6 +69,7 @@ struct GlobalArgs {
 	std::string output_path;
 	int_t degree;
 	std::string filter_mode;
+	int_t verbose;
 };
 extern GlobalArgs global_args;
 

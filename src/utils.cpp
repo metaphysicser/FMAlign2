@@ -50,7 +50,7 @@ double Timer::elapsed_time() const {
  * @return multiple sequence stored in vector 
 */
 void read_data(const char* data_path, std::vector<std::string>& data, std::vector<std::string>& name, bool verbose = true){
-    if (verbose) {
+    if (verbose && global_args.verbose) {
         std::cout << "#                   Reading Data...                         #" << std::endl;
         print_table_divider();
     }
@@ -59,7 +59,7 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
     // check weather the input path could be accessed 
 
     if (access_file(data_path)) {
-        if (verbose) {
+        if (verbose && global_args.verbose) {
             output = str_data_path + " could be accessed";
             print_table_line(output);
         }
@@ -91,14 +91,14 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
     kseq_destroy(file_t);
     fclose(f_pointer);
 
-    if(verbose && merged_length + data.size() > UINT32_MAX && M64 == 0){
+    if(verbose&& global_args.verbose && merged_length + data.size() > UINT32_MAX && M64 == 0){
         print_table_bound();
         std::cerr << "Error: The input data is too large and the 32-bit program may not produce correct results. Please compile a 64-bit program using the M64 parameter." << std::endl;
         std::cerr << "Program Exit!" << std::endl;
         exit(1);
     }
     #if M64
-    if (verbose) {
+    if (verbose && global_args.verbose) {
         std::stringstream s;
         s << std::fixed << std::setprecision(2) << merged_length / pow(2, 30);
         output = "Data Memory Usage: " + s.str() + " GB";
@@ -106,14 +106,14 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
     }
     
     #else
-    if (verbose) {
+    if (verbose && global_args.verbose) {
         std::stringstream s;
         s << std::fixed << std::setprecision(2) << merged_length / pow(2, 20);
         output = "Data Memory Usage: " + s.str() + " MB";
         print_table_line(output);
     }
     #endif
-    if (verbose) {
+    if (verbose && global_args.verbose) {
         output = "Sequence Number: " + std::to_string(data.size());
         print_table_line(output);
         print_table_divider();

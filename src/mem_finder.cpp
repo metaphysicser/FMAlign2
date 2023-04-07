@@ -297,8 +297,11 @@ std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem_fast(std::vector<me
  * @return Vector of split points for each sequence.
  */
 std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::string> data){
-    std::cout << "#                    Finding MEM...                         #" << std::endl;
-    print_table_divider();
+    if (global_args.verbose) {
+        std::cout << "#                    Finding MEM...                         #" << std::endl;
+        print_table_divider();
+    }
+    
     std::string output = "";
     Timer timer;
     uint_t n = 0;
@@ -306,13 +309,16 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     unsigned char* concat_data = concat_strings(data, n); 
 
     if (global_args.min_mem_length < 0) {
-        int_t l = ceil(sqrt(n/data.size()));
+        int_t l = ceil(sqrt(n/data.size()) / (global_args.degree+1));
         l = l > 30 ? l : 30;
         l = l < 2000 ? l : 2000;
 
         global_args.min_mem_length = l;
-        output = "Minimal MEM length is set to " + std::to_string(l);
-        print_table_line(output);
+        if (global_args.verbose) {
+            output = "Minimal MEM length is set to " + std::to_string(l);
+            print_table_line(output);
+        }
+        
     }
 
     if (global_args.filter_mode == "default") {
@@ -322,8 +328,11 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
         else {
             global_args.filter_mode = "fast";
         }
-        output = "Filter mode is set to " + global_args.filter_mode;
-        print_table_line(output);
+        if (global_args.verbose) {
+            output = "Filter mode is set to " + global_args.filter_mode;
+            print_table_line(output);
+        }
+        
     }
 
     if (global_args.min_seq_coverage < 0) {
@@ -333,8 +342,11 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
         else {
             global_args.min_seq_coverage = 0.7;
         }
-        output = "Minimal sequence coverage is set to " + std::to_string(global_args.min_seq_coverage);
-        print_table_line(output);
+        if (global_args.verbose) {
+            output = "Minimal sequence coverage is set to " + std::to_string(global_args.min_seq_coverage);
+            print_table_line(output);
+        }
+       
     }
     
     uint_t *SA = NULL;
@@ -353,8 +365,11 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     double suffix_construction_time = timer.elapsed_time();
     std::stringstream s;
     s << std::fixed << std::setprecision(2) << suffix_construction_time;
+    if (global_args.verbose) {
     output = "Suffix construction time: " + s.str() + " seconds";
     print_table_line(output);
+    }
+    
 
     timer.reset();
     int_t min_mem_length = global_args.min_mem_length;
@@ -405,7 +420,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     }
 #endif
 
-    if (mems.size() <= 0) {
+    if (mems.size() <= 0 && global_args.verbose) {
         output = "Warning: There is no MEM, please adjust your paramters.";
         print_table_line(output);
        
@@ -429,13 +444,16 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     }
     
     double mem_process_time = timer.elapsed_time();
-    output = "Sequence divide parts: " + std::to_string(split_point_on_sequence[0].size()+1);
-    print_table_line(output);
-    s.str("");
-    s << std::fixed << std::setprecision(3) << mem_process_time;
-    output = "MEM process time: " + s.str() + " seconds.";
-    print_table_line(output);
-    print_table_divider();
+    if (global_args.verbose) {
+        output = "Sequence divide parts: " + std::to_string(split_point_on_sequence[0].size() + 1);
+        print_table_line(output);
+        s.str("");
+        s << std::fixed << std::setprecision(3) << mem_process_time;
+        output = "MEM process time: " + s.str() + " seconds.";
+        print_table_line(output);
+        print_table_divider();
+    }
+   
 
     return split_point_on_sequence;
 }
@@ -495,9 +513,11 @@ unsigned char* concat_strings(const std::vector<std::string>& strings, uint_t &n
 std::vector<std::pair<uint_t, uint_t>> get_lcp_intervals(int_t* lcp_array, int_t threshold, int_t min_cross_sequence, uint_t n) {
 
     std::vector<std::pair<uint_t, uint_t>> intervals;
-    std::string output = "Minimal cross sequence number: " + std::to_string(min_cross_sequence);
-    print_table_line(output);
-
+    if (global_args.verbose) {
+        std::string output = "Minimal cross sequence number: " + std::to_string(min_cross_sequence);
+        print_table_line(output);
+    }
+    
     int_t left = 0, right = 0;
     bool found = false;
 
