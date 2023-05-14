@@ -676,13 +676,22 @@ std::string align_fasta(std::string file_name) {
     // Construct command string based on selected alignment package and operating system
     std::string cmnd = "";
     std::string res_file_name = file_name.substr(0, file_name.find(".fasta")) + ".aligned.fasta";
-    if (global_args.package == "halign") {
+    if (global_args.package == "halign3") {
          cmnd.append("java -jar ./ext/halign3/share/halign-stmsa.jar ")
-         .append("-t ").append(t).append(" -o ").append(res_file_name).append(" ").append(file_name);
+             .append("-t ").append(t).append(" -o ").append(res_file_name).append(" ").append(file_name);
 #if (defined(__linux__))
          cmnd.append(" > /dev/null");
-#else
+#else 
          cmnd.append(" > NUL");
+#endif
+    } else if (global_args.package == "halign2") {
+        cmnd.append("java -jar ./ext/halign2/HAlign2.1.jar ")
+            .append("-localMSA ").append(file_name).append(" ").append(res_file_name).append(" 3");
+            
+#if (defined(__linux__))
+        cmnd.append(" > /dev/null");
+#else
+        cmnd.append(" > NUL");
 #endif
     }
     else if (global_args.package == "mafft") {

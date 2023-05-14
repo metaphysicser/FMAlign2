@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     parser.add_argument("c", false, "default");
     parser.add_argument_help("c", "A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1. The default \
 setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7.");
-    parser.add_argument("p", false, "halign");
+    parser.add_argument("p", false, "halign3");
     parser.add_argument_help("p", "The MSA method used in parallel align. for example, halign, mafft and so on.");
     parser.add_argument("o", false, "output.aligned.fasta");
     parser.add_argument_help("o", "The path to the output file.");
@@ -75,13 +75,15 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
         else {
             global_args.min_mem_length = -1;
         }
-        
+
         std::string tmp_filter_mode = parser.get("f");
         if (tmp_filter_mode == "default") {
             global_args.filter_mode = tmp_filter_mode;
-        } else if (tmp_filter_mode == "fast" || tmp_filter_mode == "accurate") {
+        }
+        else if (tmp_filter_mode == "fast" || tmp_filter_mode == "accurate") {
             global_args.filter_mode = tmp_filter_mode;
-        } else {
+        }
+        else {
             throw "filer mode --f parameter should be fast or accurate!";
         }
 
@@ -105,9 +107,9 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
                 throw "Error: min_seq_coverage should be ranged from 0 to 1!";
             }
         }
-        
+
         global_args.package = parser.get("p");
-        if (global_args.package != "halign" && global_args.package != "mafft" && global_args.package != "wmsa") {
+        if (global_args.package != "halign2" && global_args.package != "halign3" && global_args.package != "mafft" && global_args.package != "wmsa") {
             throw ("Error: " + global_args.package + " is a invalid method!");
         }
 
@@ -148,6 +150,6 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
         print_table_line(output);
         print_table_bound();
     }
-    
+
     return 0;
 }
