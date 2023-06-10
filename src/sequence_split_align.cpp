@@ -712,32 +712,7 @@ std::string align_fasta(std::string file_name) {
         cmnd.append(" 2> NUL");   
 #endif
     }
-    else if (global_args.package == "wmsa") {
-#if (defined(__linux__))
-        cmnd.append("./ext/wmsa/linux/exec/wmsa")
-            .append(" -i ").append(file_name)
-            .append(" -o ").append(res_file_name)
-            .append(" -T ").append(t)
-            .append(" -t ").append("./swap_" + generateRandomString(5) + "/")
-            .append(" -c 0.9");
-            
-            
-        cmnd.append(" 2> /dev/null");
-#else
-        cmnd.append(".\\ext\\wmsa\\win\\fragalign.exe")
-            .append(" -i ").append(file_name)
-            .append(" -T ").append(t)
-            .append(" -D ")
-            .append(" 1>").append(res_file_name);
-
-        cmnd.append(" 2> NUL");
-#endif
-
-    }
-
-
-
-
+   
 
     try {
         // Execute the command and check for errors

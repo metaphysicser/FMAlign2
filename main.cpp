@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     parser.add_argument("c", false, "default");
     parser.add_argument_help("c", "A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1. The default \
 setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7.");
-    parser.add_argument("p", false, "halign3");
+    parser.add_argument("p", false, "mafft");
     parser.add_argument_help("p", "The MSA method used in parallel align. for example, halign, mafft and so on.");
     parser.add_argument("o", false, "output.aligned.fasta");
     parser.add_argument_help("o", "The path to the output file.");
@@ -109,7 +109,7 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
         }
 
         global_args.package = parser.get("p");
-        if (global_args.package != "halign2" && global_args.package != "halign3" && global_args.package != "mafft" && global_args.package != "wmsa") {
+        if (global_args.package != "halign2" && global_args.package != "halign3" && global_args.package != "mafft") {
             throw ("Error: " + global_args.package + " is a invalid method!");
         }
 
