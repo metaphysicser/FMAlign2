@@ -37,8 +37,8 @@ int main(int argc, char** argv) {
     ArgParser parser;
     std::string output = "";
     // Add command line arguments to the ArgParser object.
-    parser.add_argument("in", true, "data/mt1x.fasta");
-    parser.add_argument_help("in", "The path to the input file.");
+    parser.add_argument("i", true, "data/mt1x.fasta");
+    parser.add_argument_help("i", "The path to the input file.");
     parser.add_argument("t", false, "cpu_num");
     parser.add_argument_help("t", "The maximum number of threads that the program runs, the recommended setting is the number of CPUs.");
     parser.add_argument("l", false, "default");
@@ -60,7 +60,7 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
     // Add command line arguments to the ArgParser object.
     try {
         parser.parse_args(argc, argv);
-        global_args.data_path = parser.get("in");
+        global_args.data_path = parser.get("i");
         std::string tmp_thread = parser.get("t");
         if (tmp_thread == "cpu_num") {
             global_args.thread = std::thread::hardware_concurrency();

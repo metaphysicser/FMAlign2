@@ -186,7 +186,7 @@ void ArgParser::print_help() const {
     std::cout << "Options:\n";
 
     for (const auto& p : args_) {
-        std::cout << "  --" << p.first;
+        std::cout << "  -" << p.first;
 
         if (!p.second.required) {
             std::cout << " (optional)";
@@ -204,47 +204,40 @@ void ArgParser::parse_args(int argc, char** argv) {
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         if (arg[0] == '-') {
-            if (arg[1] == '-') {
-                std::string name = arg.substr(2);
-                if (name == "help" || arg == "h") {
-                    print_help();
-                    exit(0);
-                }
-                if (args_.count(name) == 0) {
-                    throw std::invalid_argument("Invalid argument: " + arg);
-                }
-                Arg& a = args_[name];
-
-                if (a.value != "") {
-                    throw std::invalid_argument("Duplicate argument: " + arg);
-                }
-                if (i == argc - 1 || argv[i + 1][0] == '-') {
-                    if (a.required) {
-                 
-                        throw std::invalid_argument("Missing value for argument: " + arg);
-                    }
-                    a.value = a.default_value;
-                }
-                else {
-                    a.value = argv[++i];
-                }
-            }
-            else {
-                std::cout << "please check the format, for example, --in instead of -in\n";
+            std::string name = arg.substr(1);  // 修改这里，改为从第二个字符开始
+            if (name == "help" || arg == "h") {
                 print_help();
                 exit(0);
+            }
+            if (args_.count(name) == 0) {
+                throw std::invalid_argument("Invalid argument: " + arg);
+            }
+            Arg& a = args_[name];
+
+            if (a.value != "") {
+                throw std::invalid_argument("Duplicate argument: " + arg);
+            }
+            if (i == argc - 1 || argv[i + 1][0] == '-') {
+                if (a.required) {
+                    throw std::invalid_argument("Missing value for argument: " + arg);
+                }
+                a.value = a.default_value;
+            }
+            else {
+                a.value = argv[++i];
             }
         }
     }
     for (auto& p : args_) {
         if (p.second.required && p.second.value == "") {
-            throw std::invalid_argument("Missing required argument: --" + p.first);
+            throw std::invalid_argument("Missing required argument: -" + p.first);  // 修改这里，改为单个破折号
         }
         if (p.second.required == false && p.second.value == "") {
             p.second.value = p.second.default_value;
         }
     }
 }
+
 
 std::string ArgParser::get(const std::string& name) const {
     if (args_.count(name) == 0) {
