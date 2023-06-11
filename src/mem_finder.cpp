@@ -317,7 +317,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
         
     }
     if (global_args.verbose) {
-        output = "Minimal MEM length is set to " + std::to_string(l);
+        output = "Minimal MEM length is set to " + std::to_string(global_args.min_mem_length);
         print_table_line(output);
     }
 
