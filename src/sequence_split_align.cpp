@@ -723,21 +723,21 @@ std::string align_fasta(std::string file_name) {
             cmnd = "";
 #if (defined(__linux__))
             cmnd.append("./FMAlign2 ")
-                .append("--in ").append(file_name)
-                .append(" --o ").append(res_file_name)
-                .append(" --p ").append(global_args.package)
-                .append(" --t ").append(t)
-                .append(" --v 0")
-                .append(" --d ").append(std::to_string(global_args.degree+1));
+                .append("-i ").append(file_name)
+                .append(" -o ").append(res_file_name)
+                .append(" -p ").append(global_args.package)
+                .append(" -t ").append(t)
+                .append(" -v 0")
+                .append(" -d ").append(std::to_string(global_args.degree+1));
             cmnd.append(" &> /dev/null");
 #else
             cmnd.append("./FMAlign2.exe ")
-                .append("--in ").append(file_name)
-                .append(" --o ").append(res_file_name)
-                .append(" --p ").append(global_args.package)
-                .append(" --t ").append(t)
-                .append(" --v 0")
-                .append(" --d ").append(std::to_string(global_args.degree+1));
+                .append("-i ").append(file_name)
+                .append(" -o ").append(res_file_name)
+                .append(" -p ").append(global_args.package)
+                .append(" -t ").append(t)
+                .append(" -v 0")
+                .append(" -d ").append(std::to_string(global_args.degree+1));
             cmnd.append(" &> NUL");
 #endif
             res = system(cmnd.c_str());
