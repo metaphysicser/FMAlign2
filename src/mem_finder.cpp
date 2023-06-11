@@ -314,11 +314,11 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
         l = l < 2000 ? l : 2000;
 
         global_args.min_mem_length = l;
-        if (global_args.verbose) {
-            output = "Minimal MEM length is set to " + std::to_string(l);
-            print_table_line(output);
-        }
         
+    }
+    if (global_args.verbose) {
+        output = "Minimal MEM length is set to " + std::to_string(l);
+        print_table_line(output);
     }
 
     if (global_args.filter_mode == "default") {
@@ -328,11 +328,12 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
         else {
             global_args.filter_mode = "fast";
         }
-        if (global_args.verbose) {
-            output = "Filter mode is set to " + global_args.filter_mode;
-            print_table_line(output);
-        }
         
+    }
+
+    if (global_args.verbose) {
+        output = "Filter mode is set to " + global_args.filter_mode;
+        print_table_line(output);
     }
 
     if (global_args.min_seq_coverage < 0) {
@@ -342,11 +343,11 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
         else {
             global_args.min_seq_coverage = 0.7;
         }
-        if (global_args.verbose) {
-            output = "Minimal sequence coverage is set to " + std::to_string(global_args.min_seq_coverage);
-            print_table_line(output);
-        }
        
+    }
+    if (global_args.verbose) {
+        output = "Minimal sequence coverage is set to " + std::to_string(global_args.min_seq_coverage);
+        print_table_line(output);
     }
     
     uint_t *SA = NULL;
