@@ -686,7 +686,7 @@ std::string align_fasta(std::string file_name) {
 #endif
     } else if (global_args.package == "halign2") {
         cmnd.append("java -jar ./ext/halign2/HAlign2.1.jar ")
-            .append("-localMSA ").append(file_name).append(" ").append(res_file_name).append(" 3");
+            .append("-localMSA ").append(file_name).append(" ").append(res_file_name).append(" 0");
             
 #if (defined(__linux__))
         cmnd.append(" > /dev/null");
