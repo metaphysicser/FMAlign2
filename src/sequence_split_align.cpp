@@ -1021,7 +1021,7 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
         concat_string[left_index][selected_profile_seq_index[i]] = align_res[i];
     }
     concat_string[left_index][seq_index] = align_res[align_res.size()-1];
-#ifdef DEBUG
+#if DEBUG
     std::cout << align_res[align_res.size() - 1] << std::endl;
 #endif // DEBUG
 
