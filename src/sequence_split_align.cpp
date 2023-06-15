@@ -1044,7 +1044,7 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
 */
 std::vector<std::vector<std::string>> concat_chain_and_parallel(std::vector<std::vector<std::string>>& chain_string, std::vector<std::vector<std::string>>& parallel_string) {
     // Determine the number of sequences in each set of data.
-    uint_t seq_num = chain_string[0].size();
+    uint_t seq_num = parallel_string[0].size();
     // Determine the number of sets of chain and parallel data.
     uint_t chain_num = chain_string.size();
     uint_t parallel_num = parallel_string.size();
