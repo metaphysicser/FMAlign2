@@ -866,7 +866,7 @@ void seq2profile(std::vector<std::vector<std::string>>& concat_string, std::vect
         std::vector<std::vector<std::string>>::iterator cur_it = concat_string.begin();
         for (; cur_it != concat_string.end(); cur_it++) {
             std::vector<std::string>cur_vec = *cur_it;
-            std::cout << cur_vec[seq_index].length() << " " << fragment_len[cur_it - concat_string.begin()] << " " << concat_range[cur_it - concat_string.begin()][seq_index].first << std::endl;
+            // std::cout << cur_vec[seq_index].length() << " " << fragment_len[cur_it - concat_string.begin()] << " " << concat_range[cur_it - concat_string.begin()][seq_index].first << std::endl;
             // if (cur_vec[seq_index].length() != fragment_len[cur_it - concat_string.begin()]) {
             if (concat_range[cur_it - concat_string.begin()][seq_index].first == -1) {
                 if (!if_start) {
