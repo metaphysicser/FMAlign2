@@ -846,6 +846,12 @@ void seq2profile(std::vector<std::vector<std::string>>& concat_string, std::vect
 
     // Sort the vector of pairs by the number of missing fragments in ascending order.
     std::sort(missing_fragment_count.begin(), missing_fragment_count.end(), cmp);
+#ifdef DEBUG
+    for (int_t i = 0; i < missing_fragment_count.size(); i++) {
+        std::cout << missing_fragment_count[i].first << " " << missing_fragment_count[i].second << std::endl;
+    }
+#endif // 
+
     // For each sequence with missing fragments, align the missing fragments with existing fragments.
     for (uint_t i = 0; i < seq_num; i++) {
         uint_t seq_index = missing_fragment_count[i].first;
@@ -860,7 +866,8 @@ void seq2profile(std::vector<std::vector<std::string>>& concat_string, std::vect
         for (; cur_it != concat_string.end(); cur_it++) {
             std::vector<std::string>cur_vec = *cur_it;
             
-            if (cur_vec[seq_index].length() != fragment_len[cur_it - concat_string.begin()]) {
+            // if (cur_vec[seq_index].length() != fragment_len[cur_it - concat_string.begin()]) {
+            if (concat_range[cur_it - concat_string.begin()][seq_index].first == -1) {
                 if (!if_start) {
                     left_it = cur_it;
                     if_start = true;
@@ -899,26 +906,26 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
     // determine the start position of the sequence, if there is a sequence on the left side, take the end of the last one.
     if (left_index >= 1) {
         seq_begin = concat_range[left_index-1][seq_index].first + concat_range[left_index - 1][seq_index].second;
-        std::cout << concat_range[left_index - 1][seq_index].first << " " << concat_range[left_index - 1][seq_index].second << std::endl;
     }
-    int_t seq_end = data[seq_index].length() -1;
+    int_t seq_end = data[seq_index].length();
     // determine the end position of the sequence, if there is a sequence on the right side, take the start position of the next one.
     if (right_index + 1 < concat_range.size()) {
         seq_end = concat_range[right_index+1][seq_index].first;
-        std::cout << concat_range[right_index + 1][seq_index].first << std::endl;
     }
     // create a file to store the sequence content.
+
+    std::string seq_content = data[seq_index].substr(seq_begin, seq_end - seq_begin);
 #ifdef DEBUG
+    std::cout << seq_content << std::endl;
     std::cout << concat_range.size() << " " << concat_range[0].size() << std::endl;
     std::cout << left_index << " " << right_index << " " << seq_index << std::endl;
     std::cout << seq_end << " " << seq_begin << " " << data[seq_index].length() << std::endl;
-    for(int i = 0; i < 4; ++ i, std::cout << std::endl)
+    for (int i = 0; i < 7; ++i, std::cout << std::endl)
         for (int j = 0; j < concat_range[i].size(); ++j)
         {
             std::cout << concat_range[i][j].first << " " << concat_range[i][j].second << " ";
         }
 #endif // DEBUG
-    std::string seq_content = data[seq_index].substr(seq_begin, seq_end - seq_begin+1);
 
     if (seq_content.length() == 0) {
         for (uint_t i = left_index; i <= right_index; i++) {
