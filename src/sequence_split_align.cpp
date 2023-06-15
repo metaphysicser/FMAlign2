@@ -846,7 +846,7 @@ void seq2profile(std::vector<std::vector<std::string>>& concat_string, std::vect
 
     // Sort the vector of pairs by the number of missing fragments in ascending order.
     std::sort(missing_fragment_count.begin(), missing_fragment_count.end(), cmp);
-#ifdef DEBUG
+#if DEBUG
     for (int_t i = 0; i < missing_fragment_count.size(); i++) {
         std::cout << missing_fragment_count[i].first << " " << missing_fragment_count[i].second << std::endl;
     }
@@ -915,7 +915,7 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
     // create a file to store the sequence content.
 
     std::string seq_content = data[seq_index].substr(seq_begin, seq_end - seq_begin);
-#ifdef DEBUG
+#if DEBUG
     std::cout << seq_content << std::endl;
     std::cout << concat_range.size() << " " << concat_range[0].size() << std::endl;
     std::cout << left_index << " " << right_index << " " << seq_index << std::endl;
