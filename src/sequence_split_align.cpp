@@ -848,7 +848,7 @@ void seq2profile(std::vector<std::vector<std::string>>& concat_string, std::vect
     std::sort(missing_fragment_count.begin(), missing_fragment_count.end(), cmp);
 #if DEBUG
     for (int_t i = 0; i < missing_fragment_count.size(); i++) {
-        std::cout << missing_fragment_count[i].first << " " << missing_fragment_count[i].second << std::endl;
+        std::cout << missing_fragment_count[i].first << " "  << missing_fragment_count[i].second << std::endl;
     }
 #endif // 
 
@@ -859,13 +859,14 @@ void seq2profile(std::vector<std::vector<std::string>>& concat_string, std::vect
         if (missing_count <= 0) {
             continue;
         }
+        std::cout << seq_index << std::endl;
         bool if_start = false;
         std::vector<std::vector<std::string>>::iterator left_it = concat_string.begin();
         std::vector<std::vector<std::string>>::iterator right_it = concat_string.begin();
         std::vector<std::vector<std::string>>::iterator cur_it = concat_string.begin();
         for (; cur_it != concat_string.end(); cur_it++) {
             std::vector<std::string>cur_vec = *cur_it;
-            
+            std::cout << cur_vec[seq_index].length() << " " << fragment_len[cur_it - concat_string.begin()] << " " << concat_range[cur_it - concat_string.begin()][seq_index].first << std::endl;
             // if (cur_vec[seq_index].length() != fragment_len[cur_it - concat_string.begin()]) {
             if (concat_range[cur_it - concat_string.begin()][seq_index].first == -1) {
                 if (!if_start) {
@@ -915,16 +916,11 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
     // create a file to store the sequence content.
 
     std::string seq_content = data[seq_index].substr(seq_begin, seq_end - seq_begin);
-#if DEBUG
+#ifdef DEBUG
     std::cout << seq_content << std::endl;
     std::cout << concat_range.size() << " " << concat_range[0].size() << std::endl;
     std::cout << left_index << " " << right_index << " " << seq_index << std::endl;
     std::cout << seq_end << " " << seq_begin << " " << data[seq_index].length() << std::endl;
-    for (int i = 0; i < 7; ++i, std::cout << std::endl)
-        for (int j = 0; j < concat_range[i].size(); ++j)
-        {
-            std::cout << concat_range[i][j].first << " " << concat_range[i][j].second << " ";
-        }
 #endif // DEBUG
 
     if (seq_content.length() == 0) {
@@ -1025,6 +1021,10 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
         concat_string[left_index][selected_profile_seq_index[i]] = align_res[i];
     }
     concat_string[left_index][seq_index] = align_res[align_res.size()-1];
+#ifdef DEBUG
+    std::cout << align_res[align_res.size() - 1] << std::endl;
+#endif // DEBUG
+
     // Loop through missing profile sequence indices and update concat_string accordingly
     for (uint_t i = 0; i < missing_profile_seq_index.size(); i++) {
         for (uint_t j = left_index + 1; j <= right_index; j++) {
@@ -1035,6 +1035,17 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
     fragment_len[left_index] = concat_string[left_index][seq_index].length();
     // Update concat_range for all indices
     for (uint_t i = 0; i < data.size(); i++) {
+        bool flag = false;
+        for (uint_t j = left_index; j <= right_index; j++) {
+            if (concat_range[j][i].first == -1) {
+                flag = true;
+            }
+        }
+        if (flag) {
+            concat_range[left_index][i].first = -1;
+            concat_range[left_index][i].second = -1;
+            continue;
+        }
         if (left_index > 0) {
             concat_range[left_index][i].first = concat_range[left_index - 1][i].first + concat_range[left_index - 1][i].second;         
         }
@@ -1067,7 +1078,7 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
     if (remove(profile_file_name.c_str()) != 0) {
         std::cerr << "Error deleting file " << profile_file_name << std::endl;
     }
-    return str_it;
+    return concat_string.begin() + left_index;
 }
 
 /**
