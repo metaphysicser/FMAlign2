@@ -423,6 +423,7 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
     int_t ref_end = alignment.ref_end;
 
     uint_t query_begin = 0;
+    int_t query_end = alignment.query_end;
 
     std::string aligned_result = "";
     // If the alignment failed, return (-1,-1)
@@ -433,8 +434,10 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
 
     int_t S_count = 0;
     int_t total_length = alignment.query_end;
+    int_t new_ref_begin = ref_begin;
     if (cigar_int_to_op(cigar[0]) == 'S') {
         S_count += cigar_int_to_len(cigar[0]);
+        new_ref_begin = max(new_ref_begin - cigar_int_to_len(cigar[0]), 0);
     }
     if (cigar_int_to_op(cigar[cigar.size() - 1]) == 'S') {
         S_count += cigar_int_to_len(cigar[cigar.size() - 1]);
@@ -529,7 +532,7 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
     }
     res_store[seq_index] = aligned_result;
 
-    std::pair<int, int> p(ref_begin, ref_end - ref_begin + 1);
+    std::pair<int, int> p(new_ref_begin, query_end);
     return p;
 }
 
