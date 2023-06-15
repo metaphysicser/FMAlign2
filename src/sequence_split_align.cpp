@@ -423,7 +423,6 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
     int_t ref_end = alignment.ref_end;
 
     uint_t query_begin = 0;
-    int_t query_end = alignment.query_end;
 
     std::string aligned_result = "";
     // If the alignment failed, return (-1,-1)
@@ -435,6 +434,7 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
     int_t S_count = 0;
     int_t total_length = alignment.query_end;
     int_t new_ref_begin = ref_begin;
+    int_t new_ref_end = ref_end;
     if (cigar_int_to_op(cigar[0]) == 'S') {
         S_count += cigar_int_to_len(cigar[0]);
         if (new_ref_begin - cigar_int_to_len(cigar[0]) < 0) {
@@ -448,6 +448,12 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
     if (cigar_int_to_op(cigar[cigar.size() - 1]) == 'S') {
         S_count += cigar_int_to_len(cigar[cigar.size() - 1]);
         total_length += cigar_int_to_len(cigar[cigar.size() - 1]);
+        if (new_ref_end + cigar_int_to_len(cigar[cigar.size() - 1]) > ref.length() - 1) {
+            new_ref_end = ref.length() - 1;
+        }
+        else {
+            new_ref_end = new_ref_end + cigar_int_to_len(cigar[cigar.size() - 1]);
+        }
     }
 
     if (S_count > ceil(0.8 * total_length)) {
@@ -479,7 +485,7 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
             }
             else {
                 int_t tmp_len = len;
-                for (uint_t j = ref_end; j < ref.length() && tmp_len > 0; j++) {
+                for (uint_t j = ref_end+1; j < ref.length() && tmp_len > 0; j++) {
                     aligned_result += ref[j];
                     tmp_len--;
                 }
@@ -538,7 +544,7 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
     }
     res_store[seq_index] = aligned_result;
 
-    std::pair<int, int> p(new_ref_begin, query_end);
+    std::pair<int, int> p(new_ref_begin, new_ref_end - new_ref_begin + 1);
     return p;
 }
 
@@ -658,9 +664,7 @@ void* parallel_align(void* arg) {
     }
     // Store the aligned sequences in the result storage
     *(ptr->result_store) = final_aligned_seq;
-#if DEBUG
-    std::cout << task_index << std::endl;
-#endif
+
     return NULL;
 }
 /**
@@ -838,6 +842,8 @@ void seq2profile(std::vector<std::vector<std::string>>& concat_string, std::vect
         }
         missing_fragment_count[i] = std::make_pair(i, count);
     }
+
+
     // Sort the vector of pairs by the number of missing fragments in ascending order.
     std::sort(missing_fragment_count.begin(), missing_fragment_count.end(), cmp);
     // For each sequence with missing fragments, align the missing fragments with existing fragments.
@@ -893,14 +899,26 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
     // determine the start position of the sequence, if there is a sequence on the left side, take the end of the last one.
     if (left_index >= 1) {
         seq_begin = concat_range[left_index-1][seq_index].first + concat_range[left_index - 1][seq_index].second;
+        std::cout << concat_range[left_index - 1][seq_index].first << " " << concat_range[left_index - 1][seq_index].second << std::endl;
     }
-    int_t seq_end = data[seq_index].length() - 1;
+    int_t seq_end = data[seq_index].length() -1;
     // determine the end position of the sequence, if there is a sequence on the right side, take the start position of the next one.
     if (right_index + 1 < concat_range.size()) {
         seq_end = concat_range[right_index+1][seq_index].first;
+        std::cout << concat_range[right_index + 1][seq_index].first << std::endl;
     }
-    // create a file to store the sequence content. 
-    std::string seq_content = data[seq_index].substr(seq_begin, seq_end - seq_begin);
+    // create a file to store the sequence content.
+#ifdef DEBUG
+    std::cout << concat_range.size() << " " << concat_range[0].size() << std::endl;
+    std::cout << left_index << " " << right_index << " " << seq_index << std::endl;
+    std::cout << seq_end << " " << seq_begin << " " << data[seq_index].length() << std::endl;
+    for(int i = 0; i < 4; ++ i, std::cout << std::endl)
+        for (int j = 0; j < concat_range[i].size(); ++j)
+        {
+            std::cout << concat_range[i][j].first << " " << concat_range[i][j].second << " ";
+        }
+#endif // DEBUG
+    std::string seq_content = data[seq_index].substr(seq_begin, seq_end - seq_begin+1);
 
     if (seq_content.length() == 0) {
         for (uint_t i = left_index; i <= right_index; i++) {
