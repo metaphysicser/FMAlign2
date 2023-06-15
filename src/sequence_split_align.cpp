@@ -859,7 +859,7 @@ void seq2profile(std::vector<std::vector<std::string>>& concat_string, std::vect
         if (missing_count <= 0) {
             continue;
         }
-        std::cout << seq_index << std::endl;
+        // std::cout << seq_index << std::endl;
         bool if_start = false;
         std::vector<std::vector<std::string>>::iterator left_it = concat_string.begin();
         std::vector<std::vector<std::string>>::iterator right_it = concat_string.begin();
