@@ -916,7 +916,7 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
     // create a file to store the sequence content.
 
     std::string seq_content = data[seq_index].substr(seq_begin, seq_end - seq_begin);
-#ifdef DEBUG
+#if DEBUG
     std::cout << seq_content << std::endl;
     std::cout << concat_range.size() << " " << concat_range[0].size() << std::endl;
     std::cout << left_index << " " << right_index << " " << seq_index << std::endl;
