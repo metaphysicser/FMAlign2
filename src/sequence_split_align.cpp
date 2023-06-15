@@ -437,7 +437,13 @@ std::pair<int_t, int_t> store_sw_alignment(StripedSmithWaterman::Alignment align
     int_t new_ref_begin = ref_begin;
     if (cigar_int_to_op(cigar[0]) == 'S') {
         S_count += cigar_int_to_len(cigar[0]);
-        new_ref_begin = max(new_ref_begin - cigar_int_to_len(cigar[0]), 0);
+        if (new_ref_begin - cigar_int_to_len(cigar[0]) < 0) {
+            new_ref_begin = 0;
+        }
+        else {
+            new_ref_begin = new_ref_begin - cigar_int_to_len(cigar[0]);
+        }
+
     }
     if (cigar_int_to_op(cigar[cigar.size() - 1]) == 'S') {
         S_count += cigar_int_to_len(cigar[cigar.size() - 1]);
