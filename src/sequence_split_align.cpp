@@ -1081,35 +1081,55 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
     return concat_string.begin() + left_index;
 }
 
+/**
+ * Refines the given data by removing leading and trailing spaces.
+ *
+ * This function performs refinement on the given data, where the refinement process involves removing a certain
+ * number of leading and trailing spaces (represented by '-') from the start and end of each string in the data. The
+ * number of spaces to remove is determined by the string in the data with the smallest sum of leading and trailing
+ * spaces.
+ *
+ * @param data1 A reference to the first vector of strings to refine.
+ * @param data2 A reference to the second vector of strings to refine.
+ */
 void refinement(std::vector<std::string>& data1, std::vector<std::string>& data2) {
+    // The number of spaces to remove from each string.
     int spaceToRemove = INT_MAX;
 
+    // Determine the minimum number of spaces to remove.
     for (uint_t i = 0; i < data1.size(); ++i) {
         std::string& str1 = data1[i];
         std::string& str2 = data2[i];
         int spaceCount1 = 0, spaceCount2 = 0;
 
+        // Count the number of trailing spaces in str1.
         while (str1.size() > 0 && str1[str1.size() - 1 - spaceCount1] == '-') {
             ++spaceCount1;
         }
+        // Count the number of leading spaces in str2.
         while (str2.size() > 0 && str2[spaceCount2] == '-') {
             ++spaceCount2;
         }
 
+        // The total number of leading and trailing spaces in str1 and str2.
         int totalSpace = spaceCount1 + spaceCount2;
+        // Update the number of spaces to remove if necessary.
         spaceToRemove = spaceToRemove < totalSpace ? spaceToRemove : totalSpace;
     }
 
+    // Perform the refinement process on each string in the data.
     for (uint_t i = 0; i < data1.size(); ++i) {
         std::string& str1 = data1[i];
         std::string& str2 = data2[i];
         int removedSpace = 0;
 
+        // Remove trailing spaces from str1.
         while (str1.size() > 0 && removedSpace < spaceToRemove) {
             if (str1[str1.size() - 1] != '-') break;
             str1.pop_back();
             ++removedSpace;
         }
+        // Remove leading spaces from str2.
         while (str2.size() > 0 && removedSpace < spaceToRemove) {
             if (str2[0] != '-') break;
             str2.erase(0, 1);
@@ -1117,6 +1137,7 @@ void refinement(std::vector<std::string>& data1, std::vector<std::string>& data2
         }
     }
 }
+
 
 
 /**
