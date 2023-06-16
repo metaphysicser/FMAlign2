@@ -1081,6 +1081,44 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
     return concat_string.begin() + left_index;
 }
 
+void refinement(std::vector<std::string>& data1, std::vector<std::string>& data2) {
+    int spaceToRemove = INT_MAX;
+
+    for (uint_t i = 0; i < data1.size(); ++i) {
+        std::string& str1 = data1[i];
+        std::string& str2 = data2[i];
+        int spaceCount1 = 0, spaceCount2 = 0;
+
+        while (str1.size() > 0 && str1[str1.size() - 1 - spaceCount1] == '-') {
+            ++spaceCount1;
+        }
+        while (str2.size() > 0 && str2[spaceCount2] == '-') {
+            ++spaceCount2;
+        }
+
+        int totalSpace = spaceCount1 + spaceCount2;
+        spaceToRemove = spaceToRemove < totalSpace ? spaceToRemove : totalSpace;
+    }
+
+    for (uint_t i = 0; i < data1.size(); ++i) {
+        std::string& str1 = data1[i];
+        std::string& str2 = data2[i];
+        int removedSpace = 0;
+
+        while (str1.size() > 0 && removedSpace < spaceToRemove) {
+            if (str1[str1.size() - 1] != '-') break;
+            str1.pop_back();
+            ++removedSpace;
+        }
+        while (str2.size() > 0 && removedSpace < spaceToRemove) {
+            if (str2[0] != '-') break;
+            str2.erase(0, 1);
+            ++removedSpace;
+        }
+    }
+}
+
+
 /**
 * @brief Concatenate two sets of sequence data (chain and parallel) into a single set of concatenated data.
 * @param chain_string A vector of vectors containing the chain sequence data.
@@ -1105,6 +1143,9 @@ std::vector<std::vector<std::string>> concat_chain_and_parallel(std::vector<std:
             }
         }
         count += 2;
+    }
+    for (uint_t i = 0; i < chain_num + parallel_num-1; i++) {
+        refinement(concated_data[i], concated_data[i + 1]);
     }
     return concated_data;
 }
