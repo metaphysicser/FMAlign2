@@ -159,10 +159,6 @@ std::string clean_sequence(std::string sequence){
         } else if (c == 't' || c == 'T') {
             c = 'T';
             result.push_back(c);
-        } else {
-            c = '-';
-            result.push_back(c);
-        }
     }
     return result;
 }
