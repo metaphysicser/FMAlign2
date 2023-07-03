@@ -28,10 +28,10 @@ The program is supported both on Linux and Windows. The difference between them 
 
    Parameters Details:
 
-   - --in [file path] [required] The path to the input file.
-   - --o [output path] [default: ouput.aligned.fasta] The path to the output file.
-   - --t [int] [default: cpu number]  The maximum number of threads that the program runs, the recommended setting is the number of CPUs.
-   - --l [int] [default: square root of mean length] The minimum length of MEM, the default value is square root of mean length.
-   - --c [float] [default: 0.7] A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1.
-   - --f [mode] [default: fast or accurate] The filter MEM mode. The default setting is that if sequence number less 100, accurate mode otherwise fast mode.
-   - --d [int] [default:0] Depth of recursion, you could ignore it.
+   - -in [file path] [required] The path to the input file.
+   - -o [output path] [default: ouput.aligned.fasta] The path to the output file.
+   - -t [int] [default: cpu number]  The maximum number of threads that the program runs, the recommended setting is the number of CPUs.
+   - -l [int] [default: square root of mean length] The minimum length of MEM, the default value is square root of mean length.
+   - -c [float] [default: 0.7] A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1.
+   - -f [mode] [default: fast or accurate] The filter MEM mode. The default setting is that if sequence number less 100, accurate mode otherwise fast mode.
+   - -d [int] [default:0] Depth of recursion, you could ignore it.
