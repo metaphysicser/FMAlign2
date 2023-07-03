@@ -159,7 +159,12 @@ std::string clean_sequence(std::string sequence){
         } else if (c == 't' || c == 'T') {
             c = 'T';
             result.push_back(c);
-        } else {
+        }
+        else if (c == 'u' || c == 'U') {
+            c = 'U';
+            result.push_back(c);
+        }
+        else {
             c = '-';
             result.push_back(c);
         }
@@ -204,8 +209,8 @@ void ArgParser::parse_args(int argc, char** argv) {
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         if (arg[0] == '-') {
-            std::string name = arg.substr(1);  // 修改这里，改为从第二个字符开始
-            if (name == "help" || arg == "h") {
+            std::string name = arg.substr(1); 
+            if (name == "help" || name == "h") {
                 print_help();
                 exit(0);
             }

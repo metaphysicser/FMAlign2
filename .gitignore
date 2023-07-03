@@ -32,3 +32,6 @@
 /exp
 /temp
 /test
+/src/gsacak.o
+*.o
+/bug

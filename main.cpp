@@ -56,6 +56,8 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
     parser.add_argument_help("f", "The filter MEM mode. The default setting is that if sequence number less 100, accurate mode otherwise fast mode.");
     parser.add_argument("v", false, "1");
     parser.add_argument_help("v", "Verbose option, 0 or 1. You could ignore it.");
+    parser.add_argument("h", false, "help");
+    parser.add_argument_help("h", "print help information");
 
     // Add command line arguments to the ArgParser object.
     try {
