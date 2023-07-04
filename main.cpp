@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     parser.add_argument_help("c", "A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1. The default \
 setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7.");
     parser.add_argument("p", false, "mafft");
-    parser.add_argument_help("p", "The MSA method used in parallel align. for example, halign, mafft and so on.");
+    parser.add_argument_help("p", "The MSA method used in parallel align. for example, halign3, halign2 and mafft.");
     parser.add_argument("o", false, "output.fmaligned2.fasta");
     parser.add_argument_help("o", "The path to the output file.");
     parser.add_argument("d", false, "0");
