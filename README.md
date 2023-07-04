@@ -11,7 +11,7 @@ FMAlign2 is a novel multiple sequence alignment algorithm based on [FMAlign](htt
 - [Citation](#Citation)
 - [License](#License)
 
-## Installation{#Installation}
+## Installation
 
 The program is supported both on Linux and Windows**(Linux is strongly recommended for its convenience and better performance)**. Please make sure your computer meets the following requirements:
 
@@ -95,7 +95,7 @@ To install Java on Linux:
 Once you have Java installed and verified the version, you should be able to use halign2 and halign3 for multiple sequence alignment.
 
 
-## Usage{#Usage}
+## Usage
 
 if you are Linux user:
 
@@ -158,7 +158,7 @@ This command will calculate and print the SP (Sum-of-Pairs) score for the multip
 
 By running this command, you will obtain the SP score, which provides an evaluation of the alignment quality.
 
-## Data{#Data}
+## Data
 
 Data can be assessed in [data](https://github.com/metaphysicser/FMAlign2/tree/master/data) fold. All the data is compressed using xz compression. Before using it, please decompress the files.
 
@@ -188,13 +188,13 @@ Please note that the decompressed files will occupy more disk space. Make sure y
 
 If you need more data, you can visit http://lab.malab.cn/~cjt/MSA/datasets.html for more datasets.
 
-## Issue{#Issue}
+## Issue
 
 FMAlign2 is supported by [ZOU's Lab](https://github.com/malabz). If you have any suggestions or feedback, we encourage you to provide them through the issue page on the project's repository. You can also reach out via email to zpl010720@gmail.com.
 
 We value your input and appreciate your contribution to improving the project. Thank you for taking the time to provide feedback, and we will address your concerns as soon as possible.
 
-## Related{#Related}
+## Related
 
 - [FMAlign](https://github.com/iliuh/FMAlign): a fast multiple nucleotide sequence alignment method based on FM-index
 - [HAlign3](https://github.com/malabz/HAlign-3) and [HAlign2](https://github.com/ShixiangWan/HAlign2.0)
@@ -202,10 +202,10 @@ We value your input and appreciate your contribution to improving the project. T
 - [TPRA](https://github.com/malabz/TPRA): A refinement tool for ensembling different multiple sequence alignment results
 - [MSATOOLS](https://github.com/malabz/MSATOOLS): Some tools for MSA, like SP score, Q score and so on.
 
-## Citation{#Citation}
+## Citation
 
 FMAlign2: A novel fast multiple nucleotide sequence alignment method for ultra-long datasets
 
-## License{#License}
+## License
 
 [Apache 2.0](https://github.com/metaphysicser/FMAlign2/blob/master/LICENSE) © [[MALABZ_UESTC](https://github.com/malabz) [Pinglu Zhang](https://github.com/metaphysicser)]
