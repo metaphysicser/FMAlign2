@@ -13,7 +13,7 @@ FMAlign2 is a novel multiple sequence alignment algorithm based on [FMAlign](htt
 
 ## Installation
 
-The program is supported both on Linux and Windows**(Linux is strongly recommended for its convenience and better performance)**. Please make sure your computer meets the following requirements:
+The program is supported both on Linux and Windows(**Linux is strongly recommended for its convenience and better performance**). Please make sure your computer meets the following requirements:
 
 - To compile the executable program for the entire project, **please ensure that you have the `make` command available.**
 
@@ -38,7 +38,7 @@ The program is supported both on Linux and Windows**(Linux is strongly recommend
 
 ---
 
-If you have ensured that your system meets the requirements mentioned above, you can proceed with the following steps to compile the executable file. **However, you also have the option to directly use the pre-compiled executable file available in the Release.**
+If you have ensured that your system meets the requirements mentioned above, you can proceed with the following steps to compile the executable file. **However, you also have the option to directly use the pre-compiled executable file available in the [Release](https://github.com/metaphysicser/FMAlign2/releases/tag/v1.0).**
 
 1. **DownLoad**
 
