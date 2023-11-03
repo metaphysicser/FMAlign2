@@ -323,10 +323,10 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
 
     if (global_args.filter_mode == "default") {
         if (data.size() < 100) {
-            global_args.filter_mode = "accurate";
+            global_args.filter_mode = "local";
         }
         else {
-            global_args.filter_mode = "fast";
+            global_args.filter_mode = "global";
         }
         
     }
@@ -422,7 +422,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
 #endif
 
     if (mems.size() <= 0 && global_args.verbose) {
-        output = "Warning: There is no MEM, please adjust your paramters.";
+        output = "Warning: There is no MEMs, please adjust your paramters.";
         print_table_line(output);
        
     }
@@ -437,7 +437,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
 
     uint_t sequence_num = data.size();
     std::vector<std::vector<std::pair<int_t, int_t>>> split_point_on_sequence;
-    if (global_args.filter_mode == "fast") {
+    if (global_args.filter_mode == "global") {
         split_point_on_sequence = filter_mem_fast(mems, sequence_num);
     }
     else {

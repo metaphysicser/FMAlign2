@@ -123,7 +123,7 @@ if you want to show the parameters details:
    - -t [int] [default: cpu number]  The maximum number of threads that the program runs, the recommended setting is the number of CPUs.
    - -l [int] [default: square root of mean length] The minimum length of MEMs, the default value is square root of mean length.
    - -c [float] [default: 1] A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1.
-   - -f [mode] [default: fast or accurate] The filter MEMs mode. The default setting is that if sequence number less 100, **accurate** mode otherwise **fast** mode.
+   - -f [mode] [default: global or local] The filter MEMs mode. The default setting is that if sequence number less 100, **accurate** mode otherwise **global** mode.
    - -d [int] [default:0] Depth of recursion, you could ignore it.
    - -v [int] [default:1] Verbose option, 0 or 1. You could ignore it.
    - -h [help] print help information

@@ -53,7 +53,7 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
     parser.add_argument("d", false, "0");
     parser.add_argument_help("d", "Depth of recursion, you could ignore it.");
     parser.add_argument("f", false, "default");
-    parser.add_argument_help("f", "The filter MEM mode. The default setting is that if sequence number less 100, accurate mode otherwise fast mode.");
+    parser.add_argument_help("f", "The filter MEMs mode. The default setting is that if sequence number less 100, accurate mode otherwise global mode.");
     parser.add_argument("v", false, "1");
     parser.add_argument_help("v", "Verbose option, 0 or 1. You could ignore it.");
     parser.add_argument("h", false, "help");
@@ -82,11 +82,11 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
         if (tmp_filter_mode == "default") {
             global_args.filter_mode = tmp_filter_mode;
         }
-        else if (tmp_filter_mode == "fast" || tmp_filter_mode == "accurate") {
+        else if (tmp_filter_mode == "global" || tmp_filter_mode == "local") {
             global_args.filter_mode = tmp_filter_mode;
         }
         else {
-            throw "filer mode --f parameter should be fast or accurate!";
+            throw "filer mode --f parameter should be global or local!";
         }
 
         global_args.verbose = std::stoi(parser.get("v"));
