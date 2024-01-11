@@ -1103,11 +1103,11 @@ void refinement(std::vector<std::string>& data1, std::vector<std::string>& data2
         int spaceCount1 = 0, spaceCount2 = 0;
 
         // Count the number of trailing spaces in str1.
-        while (str1.size() > 0 && str1[str1.size() - 1 - spaceCount1] == '-') {
+        while (str1.size() - 1 - spaceCount1 < str1.size() && str1[str1.size() - 1 - spaceCount1] == '-') {
             ++spaceCount1;
         }
         // Count the number of leading spaces in str2.
-        while (str2.size() > 0 && str2[spaceCount2] == '-') {
+        while (spaceCount2 < str2.size() && str2[spaceCount2] == '-') {
             ++spaceCount2;
         }
 
