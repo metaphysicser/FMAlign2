@@ -1,6 +1,6 @@
 # FMAlign2: A novel fast multiple nucleotide sequence alignment method for ultra-long datasets
 
-FMAlign2 is a novel multiple sequence alignment algorithm based on [FMAlign](https://github.com/iliuh/FMAlign). It is designed to efficiently align ultra-long nucleotide sequences fast and accurately.
+[FMAlign2](https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/btae014/7515251?searchresult=1) is a novel multiple sequence alignment algorithm based on [FMAlign](https://github.com/iliuh/FMAlign). It is designed to efficiently align ultra-long nucleotide sequences fast and accurately.
 
 ## Table of Contents
 - [Installation](#Installation)
@@ -133,7 +133,7 @@ if you want to show the parameters details:
 We will demonstrate with the example data `mt1x.fasta`, assuming you are running on a Linux system.
 
 ```shell
-./FMAlign2 -i ./data/mt1x.fasta -l 20 -c 1 -p mafft -f fast -o output.fmaligned2.fasta
+./FMAlign2 -i ./data/mt1x.fasta -l 20 -c 1 -p mafft -f gloabl -o output.fmaligned2.fasta
 ```
 
 This command specifies the following options:
@@ -141,7 +141,7 @@ This command specifies the following options:
 - Minimum length of MEMs: 20.
 - Sequence coverage of MEMs: 1.
 - Parallel alignment method: mafft
-- Alignment mode: fast mode.
+- Alignment mode: global mode.
 - Output file: `output.fmaligned2.fasta` will be generated in the FMAlign2 directory.
 
 After running this command, you will obtain the aligned output in the `output.fmaligned2.fasta` file.
@@ -204,7 +204,7 @@ We value your input and appreciate your contribution to improving the project. T
 
 ## Citation
 
-FMAlign2: A novel fast multiple nucleotide sequence alignment method for ultra-long datasets
+Pinglu Zhang, Huan Liu, Yanming Wei, Yixiao Zhai, Qinzhong Tian, Quan Zou, FMAlign2: a novel fast multiple nucleotide sequence alignment method for ultralong datasets, *Bioinformatics*, 2024;, btae014, https://doi.org/10.1093/bioinformatics/btae014
 
 ## License
 
