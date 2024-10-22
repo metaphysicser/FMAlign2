@@ -44,6 +44,9 @@ If you have ensured that your system meets the requirements mentioned above, you
 
    ```shell
    git clone https://github.com/metaphysicser/FMAlign2.git
+   cd FMAlign2
+   # for Linux
+   chmod 777 ./ext/mafft/linux/usr/libexec/mafft/disttbfast
    ```
 
 2. **Build**
