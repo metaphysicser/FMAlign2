@@ -100,6 +100,8 @@ Once you have Java installed and verified the version, you should be able to use
 
 ## Usage
 
+> Reminder: Please ensure that all external files (such as MAFFT, HALIGN, etc.) are properly copied to their corresponding directories. Pay close attention to the relative paths between FMAlign2 and the ext folder to avoid issues during execution,
+
 if you are Linux user:
 
    ```shell
