@@ -55,7 +55,7 @@ if you are Windows user:
    - -p [file path] [default: mafft] MSA method (mafft, halign3) or Path to MSA commad file.
    - -t [int] [default: cpu number]  The maximum number of threads that the program runs, the recommended setting is the number of CPUs.
    - -l [int] [default: square root of mean length] The minimum length of MEMs, the default value is square root of mean length.
-   - -f [mode] [default: automatic] The filter MEMs mode. If sequence number < 100 → local mode. Otherwise → global modember
+   - -f [mode] [default: automatic] The filter MEMs mode. If sequence number < 100 → accurate mode. Otherwise → fasta mode
    - -v [int] [default:1] Verbose option, 0 or 1. You could ignore it.
    - -h [help] print help information
 
