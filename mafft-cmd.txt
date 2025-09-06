@@ -1,0 +1,1 @@
+mafft --thread {thread} {input} > {output}

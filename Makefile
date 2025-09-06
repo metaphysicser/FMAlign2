@@ -1,69 +1,84 @@
-CXX = g++
-CXXFLAGS = -Wall -std=c++11
-CC = g++
-CFLAGS = 
+# compilers
+CXX     = g++
+CC      = gcc
 
-SRCS = main.cpp src/utils.cpp src/mem_finder.cpp src/sequence_split_align.cpp ext/SW/ssw.cpp ext/SW/ssw_cpp.cpp
+# flags
+CXXFLAGS = -Wall -std=c++17 -Iinclude -static
+CFLAGS   = -Iinclude
+LDFLAGS  =
+LDLIBS   =
 
+SRCS = main.cpp \
+       src/utils.cpp \
+       src/mem_finder.cpp \
+       src/sequence_split_align.cpp \
+       src/ssw.cpp \
+       src/ssw_cpp.cpp
+
+ifeq ($(STATIC_LINK), 1)
+	LDFLAGS = -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
+else
+	LDFLAGS = -pthread
+endif
+
+# non-Windows extra sources
+ifeq ($(OS),Windows_NT)
+    # OpenMP（按需）
+    CXXFLAGS += -fopenmp
+else
+    SRCS += src/thread_pool.cpp src/thread_condition.cpp
+    # POSIX 线程
+    CXXFLAGS += -pthread
+    LDFLAGS  += -pthread
+    # Linux 专用的 rt 库（macOS 没有）
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+        LDLIBS += -lrt
+    endif
+endif
+
+# C 源单独对象（不要混进 SRCS 以免用错编译器）
+CSRCS = src/gsacak.c
+
+OBJS  = $(SRCS:.cpp=.o) $(CSRCS:.c=.o)
+
+# debug / release
 ifdef DEBUG
-	CXXFLAGS += -O0 -g -DDEBUG
-	CFLAGS += -O0 -g
+    CXXFLAGS += -O0 -g -DDEBUG
+    CFLAGS   += -O0 -g
 else
-	CXXFLAGS += -O2
-	CFLAGS += -O2
+    CXXFLAGS += -O3
+    CFLAGS   += -O3
 endif
 
-ifeq ($(OS),Windows_NT)
-    CXXFLAGS +=  -fopenmp
-else
-	CXXFLAGS += -lpthread -pthread -lrt
-	SRCS += src/thread_pool.cpp src/thread_condition.cpp
-endif
-OBJS = $(SRCS:.cpp=.o)
-OBJS += src/gsacak.o
-
+# 64-bit 宏
 ifdef M64
-	CXXFLAGS += -DM64
-	CFLAGS += -DM64
+    CXXFLAGS += -DM64
+    CFLAGS   += -DM64
 endif
 
-FMAlign2: $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o FMAlign2
+# final target
+fmalign2: $(OBJS)
+	$(CXX) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
-utils.o: src/utils.cpp include/utils.h include/common.h include/kseq.h
-	$(CXX) $(CXXFLAGS) -c src/utils.cpp -o $@
+# generic rules（自动处理带路径的 .o）
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-mem_finder.o: src/mem_finder.cpp include/common.h include/gsacak.h include/thread_pool.h
-	$(CXX) $(CXXFLAGS) -c src/mem_finder.cpp -o $@
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-sequence_split_align.o: src/sequence_split_align.cpp include/common.h
-	$(CXX) $(CXXFLAGS) -c src/sequence_split_align.cpp -o $@
+# 依赖（可选：生成 .d 依赖）
+# CXXFLAGS += -MMD -MP
+# CFLAGS   += -MMD -MP
+# -include $(OBJS:.o=.d)
 
-gsacak.o: src/gsacak.c include/gsacak.h
-	$(C) $(CFLAGS)  -c src/gsacak.c -o $@
-
-ifeq ($(OS),Windows_NT)
-else
-thread_pool.o: src/thread_pool.cpp include/thread_pool.h include/thread_condition.h
-	$(CXX) $(CXXFLAGS) -c src/thread_pool.cpp -o $@
-
-thread_condition.o: src/thread_condition.cpp include/thread_condition.h
-	$(CXX) $(CXXFLAGS) -c src/thread_conition.cpp -o $@
-endif
-
-ssw.o: ext/SW/ssw.cpp ext/SW/ssw.h
-	$(CXX) $(CXXFLAGS) -c ext/SW/ssw.cpp -o $@
-
-ssw_cpp.o: ext/SW/ssw_cpp.cpp ext/SW/ssw_cpp.h ext/SW/ssw.h
-	$(CXX) $(CXXFLAGS) -c ext/SW/ssw_cpp.cpp -o $@
-	
-main.o: main.cpp include/utils.h include/common.h include/mem_finder.h include/sequence_split_align.h
-	$(CXX) $(CXXFLAGS) -c main.cpp -o $@
-
+# clean
+.PHONY: clean
 clean:
 ifeq ($(OS),Windows_NT)
-	del -f $(subst /,\\,$(OBJS)) FMAlign2.exe
+	- del /f $(subst /,\\,$(OBJS)) 2> NUL
+	- del /f fmalign2.exe 2> NUL
 else
-	rm -f $(OBJS) FMAlign2
+	rm -f $(OBJS) fmalign2
 endif
-	

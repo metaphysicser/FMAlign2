@@ -61,6 +61,47 @@ std::string generateRandomString(int length) {
     return ss.str();
 #endif
 }
+
+std::string buildCommand(std::string cmdTemplate,
+    const std::string& inputPath,
+    const std::string& outputPath,
+    int thread) {
+    auto replaceAll = [](std::string& s, const std::string& from, const std::string& to) {
+        size_t pos = 0;
+        while ((pos = s.find(from, pos)) != std::string::npos) {
+            s.replace(pos, from.size(), to);
+            pos += to.size();
+        }
+        };
+
+    // 必须包含 {input} 和 {output}
+    if (cmdTemplate.find("{input}") == std::string::npos) {
+        std::cerr << "Error: -p command template missing {input}\n";
+        std::exit(1);
+    }
+    if (cmdTemplate.find("{output}") == std::string::npos) {
+        std::cerr << "Error: -p command template missing {output}\n";
+        std::exit(1);
+    }
+
+    // 替换必需占位符
+    replaceAll(cmdTemplate, "{input}", inputPath);
+    replaceAll(cmdTemplate, "{output}", outputPath);
+
+    // 可选 {thread}
+    if (cmdTemplate.find("{thread}") != std::string::npos && thread >= 0) {
+        replaceAll(cmdTemplate, "{thread}", std::to_string(thread));
+    }
+
+    // 屏蔽错误输出
+#if defined(__linux__)
+    cmdTemplate.append(" 2> /dev/null");
+#else
+    cmdTemplate.append(" 2> NUL");
+#endif
+
+    return cmdTemplate;
+}
 /**
 * @brief Split and parallel align multiple sequences using a vector of chain pairs.
 * This function takes in three parameters: a vector of input sequences (data), a vector of sequence names (name),
@@ -188,7 +229,7 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
     std::vector<std::vector<std::string>> concat_string = concat_chain_and_parallel(chain_string, parallel_string);
     std::vector<uint_t> fragment_len = get_first_nonzero_lengths(concat_string);
 
-    seq2profile(concat_string, data, concat_range, fragment_len);
+    // seq2profile(concat_string, data, concat_range, fragment_len);
     double seq2profile_time = timer.elapsed_time();
 
     concat_alignment(concat_string, name);
@@ -687,76 +728,21 @@ std::string align_fasta(std::string file_name) {
     std::string t = std::to_string(t_int);
     // std::cout << size << " "<< global_args.avg_file_size <<" " << t <<std::endl;
     // Construct command string based on selected alignment package and operating system
-    std::string cmnd = "";
+    std::string cmd_temp = global_args.package;
+
+
+    
     std::string res_file_name = file_name.substr(0, file_name.find(".fasta")) + ".aligned.fasta";
-    if (global_args.package == "halign3") {
-         cmnd.append("java -jar ./ext/halign3/share/halign-stmsa.jar ")
-             .append("-t ").append(t).append(" -o ").append(res_file_name).append(" ").append(file_name);
-#if (defined(__linux__))
-         cmnd.append(" > /dev/null");
-#else 
-         cmnd.append(" > NUL");
-#endif
-    } else if (global_args.package == "halign2") {
-        cmnd.append("java -jar ./ext/halign2/HAlign2.1.jar ")
-            .append("-localMSA ").append(file_name).append(" ").append(res_file_name).append(" 0");
-            
-#if (defined(__linux__))
-        cmnd.append(" > /dev/null");
-#else
-        cmnd.append(" > NUL");
-#endif
-    }
-    else if (global_args.package == "mafft") {
-        
-#if (defined(__linux__))
-        cmnd.append("./ext/mafft/linux/usr/libexec/mafft/disttbfast ")
-            .append("-q 0 -E 1 -V -1.53 -s 0.0 -W 6 -O -C ")
-            .append(t).append(" -b 62 -g 0 -f -1.53 -Q 100.0 -h 0 -F -X 0.1 -i ")
-            .append(file_name).append(" > ")
-            .append(res_file_name);
-        cmnd.append(" 2> /dev/null");
-#else
-        cmnd.append(".\\ext\\mafft\\win\\usr\\lib\\mafft\\disttbfast.exe ")
-            .append("-q 0 -E 1 -V -1.53 -s 0.0 -W 6 -O -C ")
-            .append(t).append(" -b 62 -g 0 -f -1.53 -Q 100.0 -h 0 -F -X 0.1 -i ")
-            .append(file_name).append(" > ")
-            .append(res_file_name);
-        cmnd.append(" 2> NUL");   
-#endif
-    }
-   
+    std::string cmnd = buildCommand(cmd_temp, file_name, res_file_name, t_int);
 
     try {
         // Execute the command and check for errors
         int res = system(cmnd.c_str());
         if (res != 0) {
-            std::string out = "Warning: Starts calling FMAlign2 recursively to align " + file_name;
-            print_table_line(out);
-            cmnd = "";
-#if (defined(__linux__))
-            cmnd.append("./FMAlign2 ")
-                .append("-i ").append(file_name)
-                .append(" -o ").append(res_file_name)
-                .append(" -p ").append(global_args.package)
-                .append(" -t ").append(t)
-                .append(" -v 0")
-                .append(" -d ").append(std::to_string(global_args.degree+1));
-            cmnd.append(" &> /dev/null");
-#else
-            cmnd.append("./FMAlign2.exe ")
-                .append("-i ").append(file_name)
-                .append(" -o ").append(res_file_name)
-                .append(" -p ").append(global_args.package)
-                .append(" -t ").append(t)
-                .append(" -v 0")
-                .append(" -d ").append(std::to_string(global_args.degree+1));
-            cmnd.append(" &> NUL");
-#endif
-            res = system(cmnd.c_str());
-            if (res != 0) {
-                throw "Fail to align in parallel!";       
-            }
+			std::cerr << "Error: command execution failed with exit code " << res << std::endl;
+            exit(1);
+            
+            
         }
     }
     catch (const char* e) { // Catch any bad allocations and print an error message.

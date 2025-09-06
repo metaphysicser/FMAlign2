@@ -22,8 +22,8 @@
 #define SEQUENCE_SPLIT_ALIGN_H
 
 #include "common.h"
-#include "../ext/SW/ssw_cpp.h"
-#include "../ext/SW/ssw.h"
+#include "ssw_cpp.h"
+#include "ssw.h"
 #include "utils.h"
 #include <algorithm>
 #include <sstream>
@@ -36,6 +36,10 @@
 #include <climits>
 
 const std::string TMP_FOLDER = "./temp/";
+std::string buildCommand(std::string cmdTemplate,
+    const std::string& inputPath,
+    const std::string& outputPath,
+    int thread = 1);
 
 struct ExpandChainParams {
 	std::vector<std::string>* data;

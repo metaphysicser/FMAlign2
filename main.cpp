@@ -28,6 +28,98 @@
 #include "include/thread_pool.h"
 #endif
 #include <thread>
+#include <filesystem>
+namespace fs = std::filesystem;
+
+#include <fstream>
+#include <sstream>
+#include <string>
+
+std::string readFile(const std::string& path) {
+    std::ifstream ifs(path);
+    if (!ifs) {
+        // 打不开文件时，直接返回原字符串（说明它可能本身就是模板）
+        return path;
+    }
+    std::ostringstream buf;
+    buf << ifs.rdbuf();
+    return buf.str();
+}
+
+#include <string>
+#include <stdexcept>
+
+
+
+int test_cmd(const std::string& cmdTemplate, int thread = 1) {
+    const fs::path tempDir = "./temp";
+    const fs::path inPath = tempDir / "tiny.fasta";
+    const fs::path outPath = tempDir / "aligned.fasta";
+
+    int rc = 0;  // 最终返回值（命令退出码或我们的错误码）
+
+    // 用 do{...}while(false) 做“单出口”
+    do {
+        // 1) 创建 ./temp
+        std::error_code ec;
+        fs::create_directories(tempDir, ec);
+        if (ec) {
+            std::cerr << "Failed to create " << tempDir << ": " << ec.message() << "\n";
+            rc = 1; break;
+        }
+
+        // 2) 写一个很小的 FASTA
+        {
+            std::ofstream ofs(inPath);
+            if (!ofs) {
+                std::cerr << "Cannot open " << inPath << " for writing.\n";
+                rc = 1; break;
+            }
+            ofs <<
+                R"(>seq1
+ACGTACGTGA
+>seq2
+ACGTTGCA
+>seq3
+ACGTACGA
+)";
+        }
+
+        // 3) 生成命令
+        std::string cmd = buildCommand(cmdTemplate, inPath.string(), outPath.string(), thread);
+        std::cout << "Running: " << cmd << "\n";
+
+        // 4) 执行（注意 system 返回的是 wait 状态码，简单起见直接用）
+        rc = std::system(cmd.c_str());
+
+        // 5) 打印结果状态 & 预览输出
+        if (rc == 0) {
+            std::cout << "cmd finished successfully.\n";
+        }
+        else {
+            std::cout << "cmd failed with code: " << rc << "\n";
+        }
+
+        if (fs::exists(outPath)) {
+            std::ifstream ifs(outPath);
+            std::string line; int cnt = 0;
+          
+        }
+        else {
+            std::cout << "Output file not found: " << outPath << "\n";
+        }
+
+    } while (false);
+
+    // 统一清理 ./temp（无论上面成功或失败）
+    std::error_code delEc;
+    fs::remove_all("./temp", delEc);
+    if (delEc) {
+        std::cerr << "Warning: failed to remove ./temp: " << delEc.message() << "\n";
+    }
+
+    return rc;
+}
 
 GlobalArgs global_args;
 int main(int argc, char** argv) {
@@ -37,21 +129,19 @@ int main(int argc, char** argv) {
     ArgParser parser;
     std::string output = "";
     // Add command line arguments to the ArgParser object.
-    parser.add_argument("i", true, "data/mt1x.fasta");
+    parser.add_argument("i", true, "/path/to/input.fasta");
     parser.add_argument_help("i", "The path to the input file.");
+    parser.add_argument("o", true, "output.fmaligned2.fasta");
+    parser.add_argument_help("o", "The path to the output file.");
+    parser.add_argument("p", false, "mafft");
+    parser.add_argument_help("p", "MSA method (mafft, halign3) or Path to MSA commad file.");
+
     parser.add_argument("t", false, "cpu_num");
     parser.add_argument_help("t", "The maximum number of threads that the program runs, the recommended setting is the number of CPUs.");
     parser.add_argument("l", false, "default");
     parser.add_argument_help("l", "The minimum length of MEM, the default value is square root of mean length.");
-    parser.add_argument("c", false, "1");
-    parser.add_argument_help("c", "A floating-point parameter that specifies the minimum coverage across all sequences, with values ranging from 0 to 1. The default \
-setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7.");
-    parser.add_argument("p", false, "mafft");
-    parser.add_argument_help("p", "The MSA method used in parallel align. for example, halign3, halign2 and mafft.");
-    parser.add_argument("o", false, "output.fmaligned2.fasta");
-    parser.add_argument_help("o", "The path to the output file.");
-    parser.add_argument("d", false, "0");
-    parser.add_argument_help("d", "Depth of recursion, you could ignore it.");
+   
+
     parser.add_argument("f", false, "default");
     parser.add_argument_help("f", "The filter MEMs mode. The default setting is that if sequence number less 100, local mode otherwise global mode.");
     parser.add_argument("v", false, "1");
@@ -82,38 +172,41 @@ setting is that if sequence number less 100, parameter is set to 1 otherwise 0.7
         if (tmp_filter_mode == "default") {
             global_args.filter_mode = tmp_filter_mode;
         }
-        else if (tmp_filter_mode == "global" || tmp_filter_mode == "local") {
+        else if (tmp_filter_mode == "fast" || tmp_filter_mode == "accurate") {
             global_args.filter_mode = tmp_filter_mode;
         }
         else {
-            throw "filer mode --f parameter should be global or local!";
+            throw "filer mode --f parameter should be accurate or fast!";
         }
 
         global_args.verbose = std::stoi(parser.get("v"));
         if (global_args.verbose != 0 && global_args.verbose != 1) {
             throw "verbose should be 1 or 0";
         }
+        std::string cmd_template;
+        std::string cmd_path = parser.get("p");
+        if (cmd_path == "mafft") {
+			cmd_template = "mafft --thread {thread} {input} > {output}";
+        }
+        else if (cmd_path == "halign3") {
+			cmd_template = "java -jar halign-stmsa.jar -t {thread} -o {output} {input}";
+		}
+        else {
+            cmd_template = readFile(cmd_path);
+        }
 
-        global_args.degree = std::stoi(parser.get("d"));
-        if (global_args.degree > 2) {
+        int return_code = test_cmd(cmd_template);
+        if (return_code != 0) {
+            throw "The command template in " + cmd_path + " is invalid or the MSA software cannot be executed!";
             exit(1);
         }
 
-        std::string tmp_c = parser.get("c");
-        if (tmp_c == "default") {
-            global_args.min_seq_coverage = -1;
-        }
-        else {
-            global_args.min_seq_coverage = std::stof(parser.get("c"));
-            if (global_args.min_seq_coverage < 0 || global_args.min_seq_coverage > 1) {
-                throw "Error: min_seq_coverage should be ranged from 0 to 1!";
-            }
-        }
+        global_args.package = cmd_template;
+        //if (global_args.package != "halign2" && global_args.package != "halign3" && global_args.package != "mafft") {
+        //    throw ("Error: " + global_args.package + " is a invalid method!");
+        //}
 
-        global_args.package = parser.get("p");
-        if (global_args.package != "halign2" && global_args.package != "halign3" && global_args.package != "mafft") {
-            throw ("Error: " + global_args.package + " is a invalid method!");
-        }
+
 
         global_args.output_path = parser.get("o");
     } // Catch any invalid arguments and print the help message.

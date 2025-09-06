@@ -165,7 +165,7 @@ std::string clean_sequence(std::string sequence){
             result.push_back(c);
         }
         else {
-            c = '-';
+            c = 'N';
             result.push_back(c);
         }
     } 
@@ -235,7 +235,7 @@ void ArgParser::parse_args(int argc, char** argv) {
     }
     for (auto& p : args_) {
         if (p.second.required && p.second.value == "") {
-            throw std::invalid_argument("Missing required argument: -" + p.first);  // 修改这里，改为单个破折号
+            throw std::invalid_argument("Missing required argument: -" + p.first);  // 淇敼杩欓噷锛屾敼涓哄崟涓牬鎶樺彿
         }
         if (p.second.required == false && p.second.value == "") {
             p.second.value = p.second.default_value;
@@ -293,13 +293,7 @@ void print_algorithm_info() {
     std::stringstream s;
     s << std::fixed << std::setprecision(2) << global_args.min_seq_coverage;
 
-    std::string c_output;
-    if (global_args.min_seq_coverage < 0) {
-        c_output = "Sequence coverage: default";
-    }
-    else {
-        c_output = "Sequence coverage: " + std::to_string(global_args.min_mem_length);
-    }
+    std::string c_output = "Sequence coverage: 1";
 
     print_table_line(c_output);
 

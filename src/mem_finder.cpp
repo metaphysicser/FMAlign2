@@ -323,10 +323,10 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
 
     if (global_args.filter_mode == "default") {
         if (data.size() < 100) {
-            global_args.filter_mode = "local";
+            global_args.filter_mode = "accurate";
         }
         else {
-            global_args.filter_mode = "global";
+            global_args.filter_mode = "fast";
         }
         
     }
@@ -336,15 +336,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
         print_table_line(output);
     }
 
-    if (global_args.min_seq_coverage < 0) {
-        if (data.size() < 100) {
-            global_args.min_seq_coverage = 1;
-        }
-        else {
-            global_args.min_seq_coverage = 0.7;
-        }
-       
-    }
+    global_args.min_seq_coverage = 1;
     if (global_args.verbose) {
         output = "Minimal sequence coverage is set to " + std::to_string(global_args.min_seq_coverage);
         print_table_line(output);
@@ -437,7 +429,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
 
     uint_t sequence_num = data.size();
     std::vector<std::vector<std::pair<int_t, int_t>>> split_point_on_sequence;
-    if (global_args.filter_mode == "global") {
+    if (global_args.filter_mode == "fast") {
         split_point_on_sequence = filter_mem_fast(mems, sequence_num);
     }
     else {
