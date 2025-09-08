@@ -130,16 +130,16 @@ int main(int argc, char** argv) {
     std::string output = "";
     // Add command line arguments to the ArgParser object.
     parser.add_argument("i", true, "/path/to/input.fasta");
-    parser.add_argument_help("i", "The path to the input file.");
-    parser.add_argument("o", true, "output.fmaligned2.fasta");
-    parser.add_argument_help("o", "The path to the output file.");
+    parser.add_argument_help("i", "The path to the input fasta file.");
+    parser.add_argument("o", true, "/path/to/output.fasta");
+    parser.add_argument_help("o", "The path to the output fasta file.");
     parser.add_argument("p", false, "mafft");
-    parser.add_argument_help("p", "MSA method (mafft, halign3, halign4) or Path to MSA commad file.");
+    parser.add_argument_help("p", "MSA method (mafft, halign3, halign4) or Path to MSA command file.");
 
-    parser.add_argument("t", false, "cpu_num");
+    parser.add_argument("t", false, "max_cpu_num");
     parser.add_argument_help("t", "The maximum number of threads that the program runs, the recommended setting is the number of CPUs.");
-    parser.add_argument("l", false, "default");
-    parser.add_argument_help("l", "The minimum length of MEM, the default value is square root of mean length.");
+    parser.add_argument("l", false, "30");
+    parser.add_argument_help("l", "The minimum length of MEM, the default value is 30.");
    
 
     parser.add_argument("f", false, "accurate");
@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
         parser.parse_args(argc, argv);
         global_args.data_path = parser.get("i");
         std::string tmp_thread = parser.get("t");
-        if (tmp_thread == "cpu_num") {
+        if (tmp_thread == "max_cpu_num") {
             global_args.thread = std::thread::hardware_concurrency();
         }
         else {
