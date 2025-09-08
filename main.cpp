@@ -142,8 +142,8 @@ int main(int argc, char** argv) {
     parser.add_argument_help("l", "The minimum length of MEM, the default value is square root of mean length.");
    
 
-    parser.add_argument("f", false, "default");
-    parser.add_argument_help("f", "The filter MEMs mode. The default setting is that if sequence number less 100, local mode otherwise global mode.");
+    parser.add_argument("f", false, "accurate");
+    parser.add_argument_help("f", "The filter MEMs mode. The default is accurate mode.");
     parser.add_argument("v", false, "1");
     parser.add_argument_help("v", "Verbose option, 0 or 1. You could ignore it.");
     parser.add_argument("h", false, "help");

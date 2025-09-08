@@ -8,11 +8,11 @@ STATIC_LINK ?= 1
 # detect OS
 UNAME_S := $(shell uname -s)
 
-# flags (编译期)
+# flags (compile)
 CXXFLAGS = -Wall -std=c++17 -Iinclude
 CFLAGS   = -Iinclude
 
-# flags (链接期)
+# flags (link)
 LDFLAGS  =
 LDLIBS   =
 
@@ -31,18 +31,18 @@ else
     SRCS += src/thread_pool.cpp src/thread_condition.cpp
     # POSIX 线程
     CXXFLAGS += -pthread
-    # Linux 专用的 rt 库（macOS 没有）
+    # Linux 专用 rt（macOS 没有）
     ifeq ($(UNAME_S),Linux)
         LDLIBS += -lrt
     endif
 endif
 
-# 链接模式：默认静态
+# link mode: default static (Linux)
 ifeq ($(STATIC_LINK),1)
   ifeq ($(UNAME_S),Linux)
-    # 静态链接（glibc 环境需要对应的静态库已安装）
+    # 静态链接（需要对应的静态库已安装）
     LDFLAGS += -static -static-libstdc++ -static-libgcc
-    # pthread 静态：确保被完整吸入
+    # pthread 静态：确保完整吸入
     LDLIBS  += -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
   else
     $(warning Static linking is not supported on $(UNAME_S); falling back to dynamic)
@@ -53,7 +53,7 @@ else
   LDFLAGS += -pthread
 endif
 
-# C 源单独对象
+# C sources
 CSRCS = src/gsacak.c
 
 OBJS  = $(SRCS:.cpp=.o) $(CSRCS:.c=.o)
@@ -67,7 +67,7 @@ else
     CFLAGS   += -O3
 endif
 
-# 64-bit 宏
+# 64-bit macro
 ifdef M64
     CXXFLAGS += -DM64
     CFLAGS   += -DM64
@@ -87,7 +87,21 @@ fmalign2: $(OBJS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# clean
+# ---------- install/uninstall ----------
+PREFIX  ?= /usr/local
+BINDIR  ?= $(PREFIX)/bin
+INSTALL ?= install
+
+.PHONY: install uninstall
+
+install: fmalign2
+	$(INSTALL) -d "$(DESTDIR)$(BINDIR)"
+	$(INSTALL) -m 0755 fmalign2 "$(DESTDIR)$(BINDIR)/fmalign2"
+
+uninstall:
+	rm -f "$(DESTDIR)$(BINDIR)/fmalign2"
+
+# ---------- clean ----------
 .PHONY: clean
 clean:
 ifeq ($(OS),Windows_NT)
