@@ -50,25 +50,165 @@ if you are Windows user:
 * If too few MEMs are found, try lowering `-l` (e.g., below 30).
 * If MEM detection takes too long, consider `-f fast`; it runs faster but may find fewer MEMs.
 
+
+---
+
+
+
+### Integrating Custom MSA Methods with FMAlign2
+
+FMAlign2 can be combined with any MSA method as long as the input and output are in FASTA format. For example, if you want to run MAFFT with additional parameters, you can create a text file (e.g., `mafft-cmd.txt`) containing a command in the following format:
+
+```
+mafft --retree 1 --thread {thread} {input} > {output}
+```
+
+Here, `{input}` and `{output}` are placeholders for the input and output FASTA files, respectively. The `{thread}` placeholder is optional — if omitted, the MSA tool will fall back to its own default number of threads. Compared to the default MAFFT command, this example adds `--retree 1` as a custom parameter to better suit certain use cases.
+
+Importantly, the same mechanism works with any MSA tool, not just MAFFT.
+
+To use a custom command file, simply pass the path to it with the `-p` parameter. For example:
+
+```
+FMAlign2 -i /path/to/input.fasta -o /path/to/output.fasta -p /path/to/mafft-cmd.txt
+```
+
+### Evaluation
 If you want to evaluate the generated alignment results, you can run the `sp.py` script (requires a Python environment) with the following parameters:
 
 ```shell
-python sp.py --input output.fmalign2.fasta --match 0 --mismatch 1 --gap1 2 --gap2 2
+python sp.py --input output.fasta --match 0 --mismatch 1 --gap1 2 --gap2 2
 ```
 
-This command will calculate and print the SP (Sum-of-Pairs) score for the multiple sequence alignment results. The `--input` parameter specifies the input alignment file (`output.fmalign2.fasta` in this case), and the `--match`, `--mismatch`, `--gap1`, and `--gap2` parameters define the scoring scheme for matches, mismatches, and gap penalties.
+This command will calculate and print the SP (Sum-of-Pairs) score for the multiple sequence alignment results. The `--input` parameter specifies the input alignment file (`output.fasta` in this case), and the `--match`, `--mismatch`, `--gap1`, and `--gap2` parameters define the scoring scheme for matches, mismatches, and gap penalties.
 
 By running this command, you will obtain the SP score, which provides an evaluation of the alignment quality.
 
-### Installation from Source
+### Installation from Source (detailed)
 
-Alternatively, you can build FMAlign2 from source with a few simple steps:
+You can build FMAlign2 from source on Linux and Windows (MSYS2/MinGW). Below are step-by-step instructions, optional flags, and install targets.
+
+#### 0) Prerequisites
+
+* **Build tools**: `g++` (GCC ≥ 9), `make`
+* **Recommended runtime tools** (pick any you plan to use):
+
+  * **MAFFT** (for `-p mafft`), writes alignment to **stdout**
+  * **HAlign3 / HAlign4** (for `-p halign3` / `-p halign4`)
+  * **OpenJDK 11** (only needed if you use the HAlign JAR fallback)
+
+Install examples:
+
+**Ubuntu/Debian**
+
+```bash
+sudo apt update
+# Optional runtime:
+sudo apt install -y mafft
+# Or via conda:
+# conda install -c conda-forge -c bioconda mafft halign openjdk=11
+```
+---
+HAlign3 is distributed as a JAR file.
+
+```bash
+# Download and place the JAR
+wget https://github.com/malabz/HAlign-3/releases/download/v3.0.0-rc1/HAlign-3.0.0_rc1.jar
+sudo mv HAlign-3.0.0_rc1.jar /usr/local/bin/
+
+# Create a wrapper script
+sudo tee /usr/local/bin/halign >/dev/null <<'EOF'
+#!/usr/bin/env bash
+exec java -jar /usr/local/bin/HAlign-3.0.0_rc1.jar "$@"
+EOF
+sudo chmod +x /usr/local/bin/halign
+
+# Test
+halign3 -h
+```
+
+---
+
+HAlign4 is a C++ project that needs to be built from source.
+
+```bash
+git clone https://github.com/metaphysicser/HAlign-4.git
+cd HAlign-4
+make -j
+sudo install -m 0755 halign4 /usr/local/bin/
+
+# Test
+halign4 -h
+```
+
+
+
+After installation, both `halign3` and `halign4` will be available in your system `PATH` and can be used directly with FMAlign2.
+
+---
+
+#### 1) Clone and build
 
 ```bash
 git clone https://github.com/metaphysicser/FMAlign2
 cd FMAlign2
+
+# Build (default: optimized; Linux defaults to static linking if available)
 make -j
 ```
+
+Optional flags:
+
+* `DEBUG=1` → add `-O0 -g -DDEBUG`
+* `M64=1` → define `-DM64` (and on x86\_64 adds `-m64`)
+* `STATIC_LINK=0` → dynamic linking (recommended for most users)
+
+Examples:
+
+```bash
+make STATIC_LINK=0 M64=1
+make DEBUG=1
+```
+
+---
+
+#### 2) Install (optional)
+
+The Makefile provides `install`/`uninstall` targets:
+
+```bash
+# Install to /usr/local/bin (default PREFIX)
+sudo make install
+
+# Custom prefix (e.g., /opt/fmalign2)
+make install PREFIX=/opt/fmalign2
+
+# Uninstall (use the same PREFIX/DESTDIR you installed with)
+sudo make uninstall
+```
+
+This installs the `fmalign2` binary; you can then run `fmalign2 -h` anywhere on your system.
+
+---
+
+#### 3) Verify
+
+```bash
+./fmalign2 -h
+# or after install:
+fmalign2 -h
+```
+---
+
+#### 4) Choosing an MSA backend
+
+FMAlign2 can use:
+
+* **MAFFT** (`-p mafft`) — **writes to stdout** → FMAlign2 redirects to your `-o` file
+* **HAlign3/HAlign4** (`-p halign3`, `-p halign4`) — support `-o <file>` natively
+* **Custom command file** (`-p /path/to/cmd.txt`) — must include `{input}`, `{output}`, and optional `{thread}` placeholders
+
+
 
 
 ## Issue
