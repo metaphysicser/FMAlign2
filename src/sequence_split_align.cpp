@@ -94,10 +94,10 @@ std::string buildCommand(std::string cmdTemplate,
     }
 
     // 屏蔽错误输出
-#if defined(__linux__)
-    cmdTemplate.append(" 2> /dev/null");
+#if defined(_WIN32)
+    cmdTemplate.append(" > NUL 2>&1");      // Windows: 静音 stdout 和 stderr
 #else
-    cmdTemplate.append(" 2> NUL");
+    cmdTemplate.append(" > /dev/null 2>&1"); // Linux/macOS: 静音 stdout 和 stderr
 #endif
 
     return cmdTemplate;
