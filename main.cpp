@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
     parser.add_argument("o", true, "output.fmaligned2.fasta");
     parser.add_argument_help("o", "The path to the output file.");
     parser.add_argument("p", false, "mafft");
-    parser.add_argument_help("p", "MSA method (mafft, halign3) or Path to MSA commad file.");
+    parser.add_argument_help("p", "MSA method (mafft, halign3, halign4) or Path to MSA commad file.");
 
     parser.add_argument("t", false, "cpu_num");
     parser.add_argument_help("t", "The maximum number of threads that the program runs, the recommended setting is the number of CPUs.");
@@ -189,12 +189,15 @@ int main(int argc, char** argv) {
 			cmd_template = "mafft --thread {thread} {input} > {output}";
         }
         else if (cmd_path == "halign3") {
-			if (std::system("command -v halign >/dev/null 2>&1") == 0) {
-                cmd_template = "halign -t {thread} -o {output} {input}";
-            } else {
-                cmd_template = "java -jar HAlign-3.0.0_rc1.jar -t {thread} -o {output} {input}";
-            }
-		}
+            cmd_template = "halign -t {thread} -o {output} {input}";
+		} else if(cmd_path == "halign4"){
+            cmd_template = "halign4 {input} {output} -t {thread}";
+            #ifdef _WIN32
+            std::cout << "halign4 only supports linux" << std::endl;
+            exit(1);
+            #endif
+
+        }
         else {
             cmd_template = readFile(cmd_path);
         }

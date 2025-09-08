@@ -72,7 +72,10 @@ std::string buildCommand(std::string cmdTemplate,
             s.replace(pos, from.size(), to);
             pos += to.size();
         }
-        };
+    };
+    auto contains = [](const std::string& s, const std::string& tok) {
+        return s.find(tok) != std::string::npos;
+    };
 
     // 必须包含 {input} 和 {output}
     if (cmdTemplate.find("{input}") == std::string::npos) {
@@ -84,24 +87,35 @@ std::string buildCommand(std::string cmdTemplate,
         std::exit(1);
     }
 
-    // 替换必需占位符
-    replaceAll(cmdTemplate, "{input}", inputPath);
+    // 占位符替换
+    replaceAll(cmdTemplate, "{input}",  inputPath);
     replaceAll(cmdTemplate, "{output}", outputPath);
-
-    // 可选 {thread}
     if (cmdTemplate.find("{thread}") != std::string::npos && thread >= 0) {
         replaceAll(cmdTemplate, "{thread}", std::to_string(thread));
     }
 
-    // 屏蔽错误输出
-#if defined(__linux__)
-    cmdTemplate.append(" 2>/dev/null < /dev/null");
-#else
-    cmdTemplate.append(" > NUL 2>&1 < NUL");
+    // 如果模板里已经包含 stdout 重定向符号 '>'（例如 "mafft ... > {output}"）：
+    // 仅静音 stderr，并关闭 stdin；否则（如 "halign ... -o {output}"）静音 stdout+stderr，并关闭 stdin。
+    bool hasStdoutRedirect = (cmdTemplate.find('>') != std::string::npos);
+
+#ifdef _WIN32
+    if (hasStdoutRedirect) {
+        cmdTemplate.append(" 2> NUL");
+    } else {
+        cmdTemplate.append(" > NUL 2>&1");
+    }
+#else  // POSIX: Linux/macOS
+    if (hasStdoutRedirect) {
+        cmdTemplate.append(" 2> /dev/null");
+
+    } else {
+        cmdTemplate.append(" > /dev/null 2>&1");
+    }
 #endif
 
     return cmdTemplate;
 }
+
 /**
 * @brief Split and parallel align multiple sequences using a vector of chain pairs.
 * This function takes in three parameters: a vector of input sequences (data), a vector of sequence names (name),
