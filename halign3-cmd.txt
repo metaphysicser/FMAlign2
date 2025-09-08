@@ -1,1 +1,1 @@
-java -jar halign-stmsa.jar -t {thread} -o {output} {input}
+java -jar HAlign-3.0.0_rc1.jar -t {thread} -o {output} {input}

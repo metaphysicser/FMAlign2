@@ -189,7 +189,11 @@ int main(int argc, char** argv) {
 			cmd_template = "mafft --thread {thread} {input} > {output}";
         }
         else if (cmd_path == "halign3") {
-			cmd_template = "java -jar halign-stmsa.jar -t {thread} -o {output} {input}";
+			if (std::system("command -v halign >/dev/null 2>&1") == 0) {
+                cmd_template = "halign -t {thread} -o {output} {input}";
+            } else {
+                cmd_template = "java -jar HAlign-3.0.0_rc1.jar -t {thread} -o {output} {input}";
+            }
 		}
         else {
             cmd_template = readFile(cmd_path);

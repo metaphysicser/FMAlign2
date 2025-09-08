@@ -2,9 +2,17 @@
 CXX     = g++
 CC      = gcc
 
-# flags
-CXXFLAGS = -Wall -std=c++17 -Iinclude -static
+# toggle: 1 = static (default), 0 = dynamic
+STATIC_LINK ?= 1
+
+# detect OS
+UNAME_S := $(shell uname -s)
+
+# flags (编译期)
+CXXFLAGS = -Wall -std=c++17 -Iinclude
 CFLAGS   = -Iinclude
+
+# flags (链接期)
 LDFLAGS  =
 LDLIBS   =
 
@@ -15,12 +23,6 @@ SRCS = main.cpp \
        src/ssw.cpp \
        src/ssw_cpp.cpp
 
-ifeq ($(STATIC_LINK), 1)
-	LDFLAGS = -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
-else
-	LDFLAGS = -pthread
-endif
-
 # non-Windows extra sources
 ifeq ($(OS),Windows_NT)
     # OpenMP（按需）
@@ -29,15 +31,29 @@ else
     SRCS += src/thread_pool.cpp src/thread_condition.cpp
     # POSIX 线程
     CXXFLAGS += -pthread
-    LDFLAGS  += -pthread
     # Linux 专用的 rt 库（macOS 没有）
-    UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Linux)
         LDLIBS += -lrt
     endif
 endif
 
-# C 源单独对象（不要混进 SRCS 以免用错编译器）
+# 链接模式：默认静态
+ifeq ($(STATIC_LINK),1)
+  ifeq ($(UNAME_S),Linux)
+    # 静态链接（glibc 环境需要对应的静态库已安装）
+    LDFLAGS += -static -static-libstdc++ -static-libgcc
+    # pthread 静态：确保被完整吸入
+    LDLIBS  += -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
+  else
+    $(warning Static linking is not supported on $(UNAME_S); falling back to dynamic)
+    LDFLAGS += -pthread
+  endif
+else
+  # 动态链接
+  LDFLAGS += -pthread
+endif
+
+# C 源单独对象
 CSRCS = src/gsacak.c
 
 OBJS  = $(SRCS:.cpp=.o) $(CSRCS:.c=.o)
@@ -57,21 +73,19 @@ ifdef M64
     CFLAGS   += -DM64
 endif
 
+# default target
+all: fmalign2
+
 # final target
 fmalign2: $(OBJS)
 	$(CXX) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
-# generic rules（自动处理带路径的 .o）
+# generic rules
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
-
-# 依赖（可选：生成 .d 依赖）
-# CXXFLAGS += -MMD -MP
-# CFLAGS   += -MMD -MP
-# -include $(OBJS:.o=.d)
 
 # clean
 .PHONY: clean
