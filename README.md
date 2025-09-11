@@ -99,29 +99,58 @@ You can build FMAlign2 from source on Linux and Windows (MSYS2/MinGW). Below are
 
 Install examples:
 
-**Ubuntu/Debian**
+
+# Installation Guide
+
+## Ubuntu/Debian
 
 ```bash
 sudo apt update
-# Optional runtime:
+# Optional runtime dependency
 sudo apt install -y mafft
-# Or via conda:
+# Or via conda
 # conda install -c conda-forge -c bioconda mafft halign openjdk=11
 ```
+
 ---
-HAlign3 is distributed as a JAR file.
+
+## Install HAlign3 (JAR)
+
+### System-wide installation (with sudo)
 
 ```bash
-# Download and place the JAR
+# Download and move to /usr/local/bin
 wget https://github.com/malabz/HAlign-3/releases/download/v3.0.0-rc1/HAlign-3.0.0_rc1.jar
 sudo mv HAlign-3.0.0_rc1.jar /usr/local/bin/
 
 # Create a wrapper script
-sudo tee /usr/local/bin/halign >/dev/null <<'EOF'
+sudo tee /usr/local/bin/halign3 >/dev/null <<'EOF'
 #!/usr/bin/env bash
 exec java -jar /usr/local/bin/HAlign-3.0.0_rc1.jar "$@"
 EOF
-sudo chmod +x /usr/local/bin/halign
+sudo chmod +x /usr/local/bin/halign3
+
+# Test
+halign3 -h
+```
+
+### **User installation (no sudo)**
+
+```bash
+# Install under $HOME/bin
+mkdir -p $HOME/bin
+wget -O $HOME/bin/HAlign-3.0.0_rc1.jar \
+  https://github.com/malabz/HAlign-3/releases/download/v3.0.0-rc1/HAlign-3.0.0_rc1.jar
+
+# Create a wrapper script
+cat > $HOME/bin/halign3 <<'EOF'
+#!/usr/bin/env bash
+exec java -jar $HOME/bin/HAlign-3.0.0_rc1.jar "$@"
+EOF
+chmod +x $HOME/bin/halign3
+
+# Add $HOME/bin to PATH if not already
+export PATH=$HOME/bin:$PATH
 
 # Test
 halign3 -h
@@ -129,7 +158,9 @@ halign3 -h
 
 ---
 
-HAlign4 is a C++ project that needs to be built from source.
+## Install HAlign4 (C++)
+
+### System-wide installation (with sudo)
 
 ```bash
 git clone https://github.com/metaphysicser/HAlign-4.git
@@ -141,11 +172,35 @@ sudo install -m 0755 halign4 /usr/local/bin/
 halign4 -h
 ```
 
+### **User installation (no sudo)**
 
+```bash
+git clone https://github.com/metaphysicser/HAlign-4.git
+cd HAlign-4
+make -j
 
-After installation, both `halign3` and `halign4` will be available in your system `PATH` and can be used directly with FMAlign2.
+# Move to user bin directory
+mkdir -p $HOME/bin
+cp halign4 $HOME/bin/
+
+# Add $HOME/bin to PATH if not already
+export PATH=$HOME/bin:$PATH
+
+# Test
+halign4 -h
+```
 
 ---
+
+## Summary
+
+* **System-wide installation**: requires `sudo`, binaries are placed under `/usr/local/bin`.
+* **User installation**: no `sudo` required, binaries go under `$HOME/bin`, make sure `$HOME/bin` is added to your `PATH`.
+
+After installation, both `halign3` and `halign4` will be available in your system `PATH` and can be directly used with FMAlign2.
+
+---
+
 
 #### 1) Clone and build
 
