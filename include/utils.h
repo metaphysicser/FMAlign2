@@ -141,7 +141,8 @@ private:
  * @param data store sequence content
  * @param name store sequence name
  * @param verbose print status messages when true
- * @param sanitize_sequence normalize non-ACGTU characters to 'N' when true
+ * @param sanitize_sequence normalize non-ACGTU characters to N when true;
+ * otherwise retain IUPAC symbols and gaps, converting letters to uppercase
  * @return multiple sequence stored in vector
  */
 void read_data(const char* data_path, std::vector<std::string>& data, std::vector<std::string>& name, bool verbose, bool sanitize_sequence = true);
@@ -154,13 +155,22 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
 bool access_file(const char* data_path);
 
 /**
- * @brief Cleans the input sequence by removing any non-ATCG characters. 
- * This function removes any characters from the input sequence that are not A, T, C, or G (case-insensitive). 
- * The cleaned sequence is then returned as a new string.
+ * @brief Build the internal sequence representation, mapping ambiguity to N.
+ * Keep the original symbols separately for restoration after alignment.
  * @param sequence The input DNA sequence to be cleaned.
  * @return The cleaned DNA sequence as a new string.
 */
 std::string clean_sequence(std::string sequence);
+
+// Validate aligned rows before restoring the input symbols at non-gap positions.
+// Row order must already correspond to the input records.
+void restore_sequence_symbols(const std::vector<std::string>& original,
+                              std::vector<std::string>& aligned);
+
+// External aligners may reorder records; internal fragment IDs are unique.
+void order_alignment(const std::vector<std::string>& expected_names,
+                     const std::vector<std::string>& aligned_names,
+                     std::vector<std::string>& aligned);
 
 /**
 * @brief Print information about the FMAlign2 algorithm

@@ -243,16 +243,28 @@ int main(int argc, char** argv) {
 
     try {
         // Read data from the input file and store in data and name vectors
-        read_data(global_args.data_path.c_str(), data, name, true);
+        read_data(global_args.data_path.c_str(), data, name, true, false);
+        const std::vector<std::string> original_data = data;
+        if (data.empty()) throw std::runtime_error("Input contains no sequences.");
+        for (std::string& sequence : data) {
+            if (sequence.empty() || sequence.find_first_not_of("ACGTURYSWKMBDHVN") != std::string::npos) {
+                throw std::runtime_error("Input must contain nonempty, ungapped IUPAC nucleotide sequences.");
+            }
+            sequence = clean_sequence(sequence);
+        }
         // Find MEMs in the sequences and split the sequences into fragments for parallel alignment.
         std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence = find_mem(data);
-        split_and_parallel_align(data, name, split_points_on_sequence);
+        split_and_parallel_align(data, name, split_points_on_sequence, original_data);
     }
     catch (const std::bad_alloc& e) { // Catch any bad allocations and print an error message.
         print_table_bound();
         std::cerr << "Error: " << e.what() << std::endl;
         std::cout << "Program Exit!" << std::endl;
         exit(1);
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
     }
 
     double total_time = timer.elapsed_time();
