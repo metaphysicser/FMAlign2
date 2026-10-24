@@ -62,3 +62,26 @@ python tests/test_symbols_cli.py build/fmalign2
 
 These fixtures validate record, gap, content, and error handling. They do not
 validate MAFFT / HAlign integration or biological alignment quality.
+
+## Workspace, input, argument and MEM regression checks
+
+`mem_chains` checks both accurate and fast filtering with empty chains, zero-length
+candidates, a single anchor at index zero, disjoint anchors, and overlapping anchors
+whose best chain starts at either index zero or a later index. It also checks that
+anchors ending exactly at the sequence boundary survive, while overrun anchors do not.
+
+When Python is available, `cli_safety` tests the actual executable with synthetic
+FASTA/FASTQ inputs and the mock backend. It verifies that files already present in
+`-w` (including nested files and probe-like filenames) survive success, backend
+failure, missing output, and malformed command templates. Backend availability
+checks use a uniquely created child directory and clean only that child.
+
+Malformed FASTQ quality strings must fail with exit status 1 before alignment output
+is written; valid FASTQ must retain all records. Invalid modes, numeric overflow,
+nonpositive thread/MEM-length values, trailing numeric junk and missing values must
+produce handled errors. Use `-l default` for automatic MEM length. The suite also
+checks real MEM discovery and final output with identical sequences in both filter
+modes, so losing the sole anchor cannot pass merely because output remains intact.
+
+Custom command templates should quote `"{input}"` and `"{output}"` when paths can
+contain spaces. These tests use quoted placeholders and a workspace containing spaces.

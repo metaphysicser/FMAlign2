@@ -100,6 +100,13 @@ if(BUILD_TESTING)
         target_link_libraries(lcp_initialization_test pthread ${EXTRA_LIBS})
     endif()
     add_test(NAME lcp_initialization COMMAND lcp_initialization_test)
+    add_executable(mem_chains_test tests/mem_chains.cpp
+        src/mem_finder.cpp src/utils.cpp src/gsacak.c)
+    if(NOT WIN32)
+        target_sources(mem_chains_test PRIVATE src/thread_pool.cpp src/thread_condition.cpp)
+        target_link_libraries(mem_chains_test pthread ${EXTRA_LIBS})
+    endif()
+    add_test(NAME mem_chains COMMAND mem_chains_test)
 
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_Interpreter_FOUND)
@@ -110,6 +117,10 @@ if(BUILD_TESTING)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_symbols_cli.py
                     $<TARGET_FILE:fmalign2>)
         set_tests_properties(symbols_pipeline symbols_cli PROPERTIES TIMEOUT 180)
+        add_test(NAME cli_safety
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_cli_safety.py
+                    $<TARGET_FILE:fmalign2>)
+        set_tests_properties(cli_safety PROPERTIES TIMEOUT 180)
     endif()
 endif()
 

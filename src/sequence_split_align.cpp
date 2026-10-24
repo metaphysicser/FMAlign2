@@ -118,12 +118,10 @@ std::string buildCommand(std::string cmdTemplate,
 
     // 必须包含 {input} 和 {output}
     if (cmdTemplate.find("{input}") == std::string::npos) {
-        std::cerr << "Error: -p command template missing {input}\n";
-        std::exit(1);
+        throw std::invalid_argument("-p command template missing {input}");
     }
     if (cmdTemplate.find("{output}") == std::string::npos) {
-        std::cerr << "Error: -p command template missing {output}\n";
-        std::exit(1);
+        throw std::invalid_argument("-p command template missing {output}");
     }
 
     // 占位符替换

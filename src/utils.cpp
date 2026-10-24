@@ -75,14 +75,16 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
     
 
     FILE* f_pointer = fopen(data_path, "r");
+    if (!f_pointer) throw std::runtime_error("Cannot open input file: " + str_data_path);
     kseq_t* file_t = kseq_init(fileno(f_pointer));
     
     uint64_t merged_length = 0;
     int64_t tmp_length = 0; 
+    const size_t original_data_size = data.size(), original_name_size = name.size();
     // stop loop when tmp_length equals -1
     while ((tmp_length = kseq_read(file_t)) >= 0) // Read one sequence in each iteration of the loop
     {
-        std::string tmp_data = file_t->seq.s;
+        std::string tmp_data = file_t->seq.s ? file_t->seq.s : "";
         if (!sanitize_sequence) {
             for (char& c : tmp_data) {
                 c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
@@ -98,6 +100,12 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
     }
     kseq_destroy(file_t);
     fclose(f_pointer);
+    if (tmp_length < -1) {
+        data.resize(original_data_size);
+        name.resize(original_name_size);
+        throw std::runtime_error("Invalid FASTA/FASTQ input or read error: " + str_data_path +
+                                 " (parser status " + std::to_string(tmp_length) + ").");
+    }
 
     if(verbose&& global_args.verbose && merged_length + data.size() > UINT32_MAX && M64 == 0){
         print_table_bound();
@@ -281,15 +289,14 @@ void ArgParser::parse_args(int argc, char** argv) {
             if (a.value != "") {
                 throw std::invalid_argument("Duplicate argument: " + arg);
             }
-            if (i == argc - 1 || argv[i + 1][0] == '-') {
-                if (a.required) {
-                    throw std::invalid_argument("Missing value for argument: " + arg);
-                }
-                a.value = a.default_value;
+            std::string next = i + 1 < argc ? argv[i + 1] : "";
+            bool negative_number = (name == "t" || name == "l" || name == "v") &&
+                next.size() > 1 && next[0] == '-' &&
+                std::isdigit(static_cast<unsigned char>(next[1]));
+            if (next.empty() || (next[0] == '-' && !negative_number)) {
+                throw std::invalid_argument("Missing value for argument: " + arg);
             }
-            else {
-                a.value = argv[++i];
-            }
+            a.value = argv[++i];
         }
     }
     for (auto& p : args_) {

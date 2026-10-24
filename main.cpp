@@ -49,10 +49,46 @@ std::string readFile(const std::string& path) {
 #include <string>
 #include <stdexcept>
 
+// Only this newly created child belongs to the backend probe. Never clean -w itself.
+class ProbeDirectory {
+public:
+    fs::path path;
+    explicit ProbeDirectory(const fs::path& parent) {
+        fs::create_directories(parent);
+        for (int attempt = 0; attempt < 100; ++attempt) {
+            fs::path candidate = parent / ("probe-" + generateRandomString(10));
+            if (fs::create_directory(candidate)) {
+                path = candidate;
+                return;
+            }
+        }
+        throw std::runtime_error("Cannot create a unique backend probe directory.");
+    }
+    ~ProbeDirectory() {
+        std::error_code error;
+        fs::remove_all(path, error);
+        if (error) std::cerr << "Warning: cannot remove probe directory: " << error.message() << '\n';
+    }
+    ProbeDirectory(const ProbeDirectory&) = delete;
+    ProbeDirectory& operator=(const ProbeDirectory&) = delete;
+};
+
+static int parse_integer(const std::string& value, const char* option, int minimum, int maximum) {
+    try {
+        size_t consumed = 0;
+        int result = std::stoi(value, &consumed);
+        if (consumed == value.size() && result >= minimum && result <= maximum) return result;
+    } catch (const std::exception&) {
+        // Report the option as well as the accepted range, including on overflow.
+    }
+    throw std::invalid_argument(std::string("Invalid -") + option + ": expected an integer in [" +
+                                std::to_string(minimum) + ", " + std::to_string(maximum) + "].");
+}
 
 
 int test_cmd(const std::string& cmdTemplate, int thread = 1) {
-    const fs::path tempDir = global_args.temp_folder;
+    ProbeDirectory probe(global_args.temp_folder);
+    const fs::path tempDir = probe.path;
     const fs::path inPath = tempDir / "tiny.fasta";
     const fs::path outPath = tempDir / "aligned.fasta";
 
@@ -107,16 +143,10 @@ ACGTACGA
         }
         else {
             std::cout << "Output file not found: " << outPath << "\n";
+            rc = 1;
         }
 
     } while (false);
-
-    // 统一清理临时文件夹（无论上面成功或失败）
-    std::error_code delEc;
-    fs::remove_all(global_args.temp_folder, delEc);
-    if (delEc) {
-        std::cerr << "Warning: failed to remove " << global_args.temp_folder << ": " << delEc.message() << "\n";
-    }
 
     return rc;
 }
@@ -160,14 +190,14 @@ int main(int argc, char** argv) {
         global_args.data_path = parser.get("i");
         std::string tmp_thread = parser.get("t");
         if (tmp_thread == "max_cpu_num") {
-            global_args.thread = std::thread::hardware_concurrency();
+            global_args.thread = std::max(1u, std::thread::hardware_concurrency());
         }
         else {
-            global_args.thread = std::stoi(tmp_thread);
+            global_args.thread = parse_integer(tmp_thread, "t", 1, INT_MAX);
         }
         std::string tmp_len = parser.get("l");
         if (tmp_len != "default") {
-            global_args.min_mem_length = std::stoi(parser.get("l"));
+            global_args.min_mem_length = parse_integer(tmp_len, "l", 1, INT_MAX);
         }
         else {
             global_args.min_mem_length = -1;
@@ -181,13 +211,10 @@ int main(int argc, char** argv) {
             global_args.filter_mode = tmp_filter_mode;
         }
         else {
-            throw "filer mode --f parameter should be accurate or fast!";
+            throw std::invalid_argument("Invalid -f: expected accurate, fast, or default.");
         }
 
-        global_args.verbose = std::stoi(parser.get("v"));
-        if (global_args.verbose != 0 && global_args.verbose != 1) {
-            throw "verbose should be 1 or 0";
-        }
+        global_args.verbose = parse_integer(parser.get("v"), "v", 0, 1);
 
         global_args.temp_folder = parser.get("w");
 
@@ -215,8 +242,7 @@ int main(int argc, char** argv) {
 
         int return_code = test_cmd(cmd_template);
         if (return_code != 0) {
-            throw "The command template in " + cmd_path + " is invalid or the MSA software cannot be executed!";
-            exit(1);
+            throw std::runtime_error("The command template in " + cmd_path + " is invalid or the MSA software cannot be executed!");
         }
 
         global_args.package = cmd_template;
@@ -228,7 +254,7 @@ int main(int argc, char** argv) {
 
         global_args.output_path = parser.get("o");
     } // Catch any invalid arguments and print the help message.
-    catch (const std::invalid_argument& e) {
+    catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         std::cerr << "Program Exit!" << std::endl;
         parser.print_help();

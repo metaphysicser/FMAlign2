@@ -41,7 +41,7 @@ void* find_optimal_chain(void* arg) {
     }
     // Find the index of the last "mem" object in the longest non-conflicting sequence
     double max_size = 0;
-    int_t end_index = 0;
+    int_t end_index = -1;
     for (uint_t i = 0; i < chain_num; i++) {
         if (dp[i] > max_size) {
             max_size = dp[i];
@@ -50,7 +50,7 @@ void* find_optimal_chain(void* arg) {
     }
     // Retrieve the indices of all non-conflicting "mem" objects in the longest sequence
     std::vector<bool> selected_chain(chain_num, false);
-    while (end_index > 0) {
+    while (end_index >= 0) {
         selected_chain[end_index]=true;
         end_index = prev[end_index];
     }
@@ -190,7 +190,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem_fast(std::vector<me
     }
     // Find the index of the last "mem" object in the longest non-conflicting sequence
     double max_size = 0;
-    int_t end_index = 0;
+    int_t end_index = -1;
     for (uint_t i = 0; i < mem_num; i++) {
         if (dp[i] > max_size) {
             max_size = dp[i];
@@ -199,7 +199,7 @@ std::vector<std::vector<std::pair<int_t, int_t>>> filter_mem_fast(std::vector<me
     }
     // Retrieve the indices of all non-conflicting "mem" objects in the longest sequence
     std::vector<int_t> mems_without_conflict;
-    while (end_index > 0) {
+    while (end_index >= 0) {
         mems_without_conflict.push_back(end_index);
         end_index = prev[end_index];
     }
@@ -693,7 +693,7 @@ void compute_mem_avg_pos(mem& m) {
 void sort_mem(std::vector<mem> &mems, std::vector<std::string> data) {
     
     auto it = std::remove_if(mems.begin(), mems.end(), [&](const mem& m) {
-        if (m.substrings[0].position + m.mem_length < data[m.substrings[0].sequence_index].length()) {
+        if (m.substrings[0].position + m.mem_length <= data[m.substrings[0].sequence_index].length()) {
             return false;
         }
         else {
