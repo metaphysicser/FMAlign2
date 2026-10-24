@@ -1,5 +1,5 @@
 // Exercise the production split/align/output path with a supplied MEM result.
-// Deliberately avoids the independent, unresolved LCP initialization defect.
+// Keeps fragment/anchor handling independent of MEM discovery; see the LCP test.
 #include "sequence_split_align.h"
 #include <fstream>
 #include <iterator>

@@ -90,5 +90,26 @@ if(BUILD_TESTING)
     if(NOT WIN32)
         target_link_libraries(symbols_pipeline_test pthread ${EXTRA_LIBS})
     endif()
+
+    # This test includes mem_finder.cpp with a test-only allocation shim.
+    add_executable(lcp_initialization_test
+        tests/lcp_initialization.cpp src/utils.cpp src/gsacak.c)
+    if(NOT WIN32)
+        target_sources(lcp_initialization_test PRIVATE
+            src/thread_pool.cpp src/thread_condition.cpp)
+        target_link_libraries(lcp_initialization_test pthread ${EXTRA_LIBS})
+    endif()
+    add_test(NAME lcp_initialization COMMAND lcp_initialization_test)
+
+    find_package(Python3 COMPONENTS Interpreter QUIET)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME symbols_pipeline
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_symbols_cli.py
+                    $<TARGET_FILE:symbols_pipeline_test> --pipeline)
+        add_test(NAME symbols_cli
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_symbols_cli.py
+                    $<TARGET_FILE:fmalign2>)
+        set_tests_properties(symbols_pipeline symbols_cli PROPERTIES TIMEOUT 180)
+    endif()
 endif()
 

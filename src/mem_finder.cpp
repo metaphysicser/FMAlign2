@@ -346,7 +346,9 @@ std::vector<std::vector<std::pair<int_t, int_t>>> find_mem(std::vector<std::stri
     SA = (uint_t*) malloc(n*sizeof(uint_t));
     // LCP[0] = 0, LCP[i] = lcp(concat_data[SA[i]], concat_data[SA[i-1]])
     int_t *LCP = NULL;
-    LCP = (int_t*) malloc(n*sizeof(int_t));
+    // gSACA-K reads initial LCP entries as prefix-length lower bounds.
+    // Zero the whole array so sparse LCP construction cannot reuse heap garbage.
+    LCP = (int_t*) calloc(n, sizeof(int_t));
     int32_t *DA = NULL;
     DA = (int32_t*) malloc(n*sizeof(int32_t));
 #if DEBUG
