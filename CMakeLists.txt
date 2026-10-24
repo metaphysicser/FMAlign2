@@ -79,3 +79,16 @@ endif()
 # 安装配置
 install(TARGETS fmalign2 DESTINATION bin)
 
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(sequence_symbols_test tests/sequence_symbols.cpp src/utils.cpp)
+    add_test(NAME sequence_symbols
+             COMMAND sequence_symbols_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/symbols.fasta)
+    set(PIPELINE_SOURCES ${SOURCES})
+    list(REMOVE_ITEM PIPELINE_SOURCES main.cpp)
+    add_executable(symbols_pipeline_test tests/symbols_pipeline.cpp ${PIPELINE_SOURCES})
+    if(NOT WIN32)
+        target_link_libraries(symbols_pipeline_test pthread ${EXTRA_LIBS})
+    endif()
+endif()
+

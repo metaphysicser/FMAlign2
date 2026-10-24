@@ -85,7 +85,7 @@ std::string generateRandomString(int length);
 * @param chain A vector of chain pairs representing initial pairwise alignments between sequences
 * @return void
 */
-void split_and_parallel_align(std::vector<std::string> data, std::vector<std::string> name, std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence);
+void split_and_parallel_align(std::vector<std::string> data, std::vector<std::string> name, std::vector<std::vector<std::pair<int_t, int_t>>> split_points_on_sequence, const std::vector<std::string>& original_data);
 /**
 * @brief Selects columns from a sequence of split points to enable multi thread.
 * @param split_points_on_sequence A vector of vectors of pairs, where each pair represents the start and mem length
@@ -167,7 +167,7 @@ void delete_tmp_folder(uint_t task_count);
 * @param concat_string A 2D vector of strings containing the aligned sequences to concatenate.
 * @param name A vector of strings containing the names of the sequences.
 */
-void concat_alignment(std::vector<std::vector<std::string>>&concat_string, std::vector<std::string> &name);
+void concat_alignment(std::vector<std::vector<std::string>>&concat_string, std::vector<std::string> &name, const std::vector<std::string>& original_data);
 
 /**
 * @brief Convert sequence fragments into profile by aligning missing fragments with existing ones.

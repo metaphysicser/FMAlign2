@@ -168,7 +168,7 @@ std::string buildCommand(std::string cmdTemplate,
 */
 std::string random_file_end;
 
-void split_and_parallel_align(std::vector<std::string> data, std::vector<std::string> name, std::vector<std::vector<std::pair<int_t, int_t>>> chain){
+void split_and_parallel_align(std::vector<std::string> data, std::vector<std::string> name, std::vector<std::vector<std::pair<int_t, int_t>>> chain, const std::vector<std::string>& original_data){
     // Print status message
     if (global_args.verbose) {
         std::cout << "#                Parallel Aligning...                       #" << std::endl;
@@ -285,7 +285,7 @@ void split_and_parallel_align(std::vector<std::string> data, std::vector<std::st
     // seq2profile(concat_string, data, concat_range, fragment_len);
     double seq2profile_time = timer.elapsed_time();
 
-    concat_alignment(concat_string, name);
+    concat_alignment(concat_string, name, original_data);
 
     s.str("");
     s << std::fixed << std::setprecision(2) << seq2profile_time;
@@ -764,11 +764,20 @@ void* parallel_align(void* arg) {
 
     std::vector<std::string> aligned_seq;
     std::vector<std::string> aligned_name;
-    read_data(res_file_name.c_str(), aligned_seq, aligned_name, false);
+    read_data(res_file_name.c_str(), aligned_seq, aligned_name, false, true);
     std::vector<std::string> final_aligned_seq(seq_num, "");
-    // Map the aligned sequences back to their original indices in the input data vector
-    for (uint_t i = 0; i < aligned_seq_index.size(); i++) {
-        final_aligned_seq[aligned_seq_index[i]] = aligned_seq[i];
+    std::vector<std::string> expected_names, expected_sequences;
+    for (uint_t index : aligned_seq_index) {
+        expected_names.push_back("SEQENCE" + std::to_string(index));
+        expected_sequences.push_back(data[index].substr(parallel_range[index].first, parallel_range[index].second));
+    }
+    try {
+        order_alignment(expected_names, aligned_name, aligned_seq);
+        restore_sequence_symbols(expected_sequences, aligned_seq);
+    } catch (const std::exception& e) {
+        // This function runs inside a worker; do not let an exception escape it.
+        std::cerr << "Error: invalid external alignment: " << e.what() << std::endl;
+        std::exit(1);
     }
     for (uint_t i = 0; i < aligned_seq_index.size(); i++) {
         final_aligned_seq[aligned_seq_index[i]] = aligned_seq[i];
@@ -858,7 +867,7 @@ void delete_tmp_folder(uint_t task_count) {
 * @param concat_string A 2D vector of strings containing the aligned sequences to concatenate.
 * @param name A vector of strings containing the names of the sequences.
 */
-void concat_alignment(std::vector<std::vector<std::string>> &concat_string, std::vector<std::string> &name) {
+void concat_alignment(std::vector<std::vector<std::string>> &concat_string, std::vector<std::string> &name, const std::vector<std::string>& original_data) {
     std::string output_path = global_args.output_path;
     std::vector<std::string> concated_data(name.size(), "");
     // Concatenate the sequences
@@ -867,7 +876,8 @@ void concat_alignment(std::vector<std::vector<std::string>> &concat_string, std:
             concated_data[i] += concat_string[j][i];          
         }
     }
-    // Write the concatenated sequences to the output file
+    restore_sequence_symbols(original_data, concated_data);
+    // Write only after all rows pass content and shape validation.
     std::ofstream output_file;
     output_file.open(output_path);
     if (!output_file.is_open()) {
@@ -1084,7 +1094,7 @@ std::vector<std::vector<std::string>>::iterator seq2profile_align(uint_t seq_ind
     std::vector<std::string> align_res;
     std::vector<std::string> align_res_name;
     // Read data from a file and store it in the above vectors
-    read_data(profile_file_name.c_str(), align_res, align_res_name, false);
+    read_data(profile_file_name.c_str(), align_res, align_res_name, false, true);
 
     for (uint_t i = 0; i < selected_profile_seq_index.size(); i++) {
         concat_string[left_index][selected_profile_seq_index[i]] = align_res[i];

@@ -20,6 +20,7 @@
 
 
 #include "../include/utils.h"
+#include <cctype>
 
 KSEQ_INIT(int, read)
 
@@ -49,7 +50,7 @@ double Timer::elapsed_time() const {
  * @param name store sequence name
  * @return multiple sequence stored in vector 
 */
-void read_data(const char* data_path, std::vector<std::string>& data, std::vector<std::string>& name, bool verbose = true){
+void read_data(const char* data_path, std::vector<std::string>& data, std::vector<std::string>& name, bool verbose, bool preserve_symbols){
     if (verbose && global_args.verbose) {
         std::cout << "#                   Reading Data...                         #" << std::endl;
         print_table_divider();
@@ -81,9 +82,16 @@ void read_data(const char* data_path, std::vector<std::string>& data, std::vecto
     // stop loop when tmp_length equals -1
     while ((tmp_length = kseq_read(file_t)) >= 0) // Read one sequence in each iteration of the loop
     {
-        std::string tmp_data = clean_sequence(file_t -> seq.s);
+        std::string tmp_data = file_t->seq.s;
+        if (preserve_symbols) {
+            for (char& c : tmp_data) {
+                c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+            }
+        } else {
+            tmp_data = clean_sequence(tmp_data);
+        }
         std::string tmp_name = file_t -> name.s;
-        if(file_t->comment.s) tmp_name += file_t->comment.s;
+        if(file_t->comment.s && file_t->comment.l) tmp_name += " " + std::string(file_t->comment.s);
         data.push_back(tmp_data);
         name.push_back(tmp_name);
         merged_length += tmp_length;
@@ -137,24 +145,14 @@ bool access_file(const char* data_path){
 }
 
 /**
- * @brief Cleans the input sequence by removing any non-ATCG characters. 
- * This function removes any characters from the input sequence that are not A, T, C, or G (case-insensitive). 
- * The cleaned sequence is then returned as a new string.
+ * @brief Build the internal representation, mapping ambiguity symbols to N.
+ * Keep the original sequence separately for restoration after alignment.
  * @param sequence The input DNA sequence to be cleaned.
  * @return The cleaned DNA sequence as a new string.
 */
-#include <random>
-#include <string>
-
 std::string clean_sequence(std::string sequence) {
     std::string result;
     result.reserve(sequence.size());
-
-    // 随机数引擎 & 分布，只初始化一次
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    static std::uniform_int_distribution<> distrib(0, 3); // 0~4 对应 A/C/G/T/U
-    static const char bases[5] = {'A', 'C', 'G', 'T'};
 
     for (char& c : sequence) {
         if (c == 'a' || c == 'A') {
@@ -172,6 +170,64 @@ std::string clean_sequence(std::string sequence) {
         }
     }
     return result;
+}
+
+void restore_sequence_symbols(const std::vector<std::string>& original,
+                              std::vector<std::string>& aligned) {
+    if (original.size() != aligned.size()) {
+        throw std::runtime_error("Alignment record count does not match input.");
+    }
+    const size_t columns = aligned.empty() ? 0 : aligned.front().size();
+    // Validate all rows first: never restore symbols over a corrupt alignment.
+    for (size_t i = 0; i < original.size(); ++i) {
+        if (aligned[i].size() != columns) {
+            throw std::runtime_error("Alignment rows have different lengths.");
+        }
+        const std::string normalized = clean_sequence(original[i]);
+        size_t pos = 0;
+        for (char c : aligned[i]) {
+            if (c == '-') continue;
+            c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+            if (pos == normalized.size() ||
+                (c != normalized[pos] && !(normalized[pos] == 'U' && c == 'T'))) {
+                throw std::runtime_error("Alignment sequence content does not match input row " + std::to_string(i + 1) + ".");
+            }
+            ++pos;
+        }
+        if (pos != normalized.size()) {
+            throw std::runtime_error("Alignment lost input symbols in row " + std::to_string(i + 1) + ".");
+        }
+    }
+    for (size_t i = 0; i < original.size(); ++i) {
+        size_t pos = 0;
+        for (char& c : aligned[i]) {
+            if (c != '-') c = original[i][pos++];
+        }
+    }
+}
+
+void order_alignment(const std::vector<std::string>& expected_names,
+                     const std::vector<std::string>& aligned_names,
+                     std::vector<std::string>& aligned) {
+    if (aligned.size() != aligned_names.size() || aligned.size() != expected_names.size()) {
+        throw std::runtime_error("External alignment record count does not match input.");
+    }
+    std::map<std::string, size_t> indices;
+    for (size_t i = 0; i < aligned_names.size(); ++i) {
+        // Descriptions are not part of the stable internal fragment ID.
+        const std::string id = aligned_names[i].substr(0, aligned_names[i].find_first_of(" \t"));
+        if (!indices.emplace(id, i).second) {
+            throw std::runtime_error("External alignment contains duplicate IDs.");
+        }
+    }
+    std::vector<std::string> ordered;
+    for (const std::string& id : expected_names) {
+        const auto found = indices.find(id);
+        if (found == indices.end()) throw std::runtime_error("External alignment is missing ID " + id + ".");
+        ordered.push_back(aligned[found->second]);
+        indices.erase(found);
+    }
+    aligned.swap(ordered);
 }
 
 

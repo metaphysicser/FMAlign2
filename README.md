@@ -23,6 +23,16 @@ conda install -c malab fmalign2
 
 ### Parameter Details
 
+Input records must contain nonempty, ungapped IUPAC nucleotide sequences. Lowercase
+letters are accepted and output is uppercase. FMAlign2 uses `N` internally for
+ambiguity symbols and restores the original `R/Y/S/W/K/M/B/D/H/V/N` symbols at
+their non-gap positions after validating the alignment. Input `U` is also restored
+when a backend emits `T`. Gaps introduced by the backend are retained. Backends
+must preserve the internal FASTA IDs and sequence content; reordered rows are
+mapped by ID, while missing, duplicate, or altered records cause an error.
+
+Source regression checks are documented in [tests/README.md](tests/README.md).
+
 ```
 ./FMAlign2 -h
 ```
